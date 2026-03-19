@@ -10,7 +10,7 @@ namespace ETMS.DAL
     {
         // Thay Server=localhost bằng tên SQL Server instance của bạn (VD: .\SQLEXPRESS)
         private const string ConnStr =
-            "Server=localhost;Database=ETMS_DB;Integrated Security=True;TrustServerCertificate=True;";
+            "Server=HItas\MSSQLSERVER01;Database=ETMS_DB;Integrated Security=True;TrustServerCertificate=True;";
 
         /// <summary>Trả về SqlConnection mới (chưa Open).</summary>
         public static SqlConnection GetConnection() => new SqlConnection(ConnStr);

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "R+4x7UJAABo=",
+  "dgSpecHash": "Khb8LOoIvwU=",
   "success": true,
-  "projectFilePath": "e:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
+  "projectFilePath": "E:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Quoc Thai\\.nuget\\packages\\microsoft.bcl.cryptography\\9.0.13\\microsoft.bcl.cryptography.9.0.13.nupkg.sha512",
     "C:\\Users\\Quoc Thai\\.nuget\\packages\\microsoft.data.sqlclient\\7.0.0\\microsoft.data.sqlclient.7.0.0.nupkg.sha512",

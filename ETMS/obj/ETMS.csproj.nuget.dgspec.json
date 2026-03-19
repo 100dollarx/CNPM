@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "e:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj": {}
+    "E:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj": {}
   },
   "projects": {
-    "e:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj": {
+    "E:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "e:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
+        "projectUniqueName": "E:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
         "projectName": "ETMS",
-        "projectPath": "e:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
+        "projectPath": "E:\\Công nghệ phần mềm\\Final\\ETMS\\ETMS.csproj",
         "packagesPath": "C:\\Users\\Quoc Thai\\.nuget\\packages\\",
-        "outputPath": "e:\\Công nghệ phần mềm\\Final\\ETMS\\obj\\",
+        "outputPath": "E:\\Công nghệ phần mềm\\Final\\ETMS\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
