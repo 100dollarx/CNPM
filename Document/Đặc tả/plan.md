@@ -1,341 +1,244 @@
-# KẾ HOẠCH THỰC THI ĐỒ ÁN KỸ THUẬT PHẦN MỀM — v3.0
-## Đề tài 11: Hệ thống Quản lý Giải đấu Esports (ETMS)
-**Phiên bản:** 3.0 (Nâng cấp WPF/MVVM)
-**Mô hình Kiến trúc:** 3-Layer (View/ViewModel – BUS – DAL) + MVVM Pattern
-**Trường:** Đại học Tôn Đức Thắng – Khoa CNTT | **Môn:** Kỹ thuật Phần mềm (502045) – HK 2/2025-2026
+# KẾ HOẠCH THỰC THI ĐỒ ÁN KỸ THUẬT PHẦN MỀM
+## Hệ thống Quản lý Giải đấu Esports — ETMS
+**Phiên bản:** 4.0 | **Ngày:** 2026-03-31
+**Trường:** Đại học Tôn Đức Thắng – Khoa CNTT
+**Môn:** Kỹ thuật Phần mềm (502045) – HK 2 / 2025–2026
 
 ---
 
 ## 1. TỔNG QUAN DỰ ÁN
 
 ### 1.1 Mô tả hệ thống
-ETMS là nền tảng **WPF Desktop Application (C#)** quản lý toàn bộ vòng đời giải đấu Esports: đăng ký đội → tạo bracket tự động → check-in → ghi nhận kết quả → vinh danh. Tối ưu cho **Single Elimination** và hỗ trợ **Battle Royale**.
+ETMS là ứng dụng desktop đa nền tảng (Windows / macOS / Linux) để quản lý toàn bộ vòng đời giải đấu Esports: đăng ký đội → xét duyệt → tạo bracket → check-in → thi đấu → ghi nhận kết quả → vinh danh. Hỗ trợ 6 thể loại game (MOBA, FPS, BattleRoyale, Fighting, RTS, Sports) và 2 format thi đấu (Single Elimination, Battle Royale).
 
-### 1.2 Công nghệ sử dụng
+### 1.2 Stack Công nghệ
 
-| Thành phần | Công nghệ |
+| Tầng | Công nghệ |
 |---|---|
-| Ngôn ngữ | C# (.NET 8+) |
-| **Giao diện** | **WPF — XAML + MVVM Pattern** |
-| **UI Library** | **MaterialDesignThemes + MahApps.Metro** |
-| **Icon Pack** | **Material Design Icons (XAML vector)** |
-| Cơ sở dữ liệu | SQL Server 2019+ (16 bảng) |
-| Kiến trúc | 3-Layer: View/ViewModel / BUS / DAL |
-| **UI Pattern** | **MVVM (INotifyPropertyChanged + ICommand)** |
-| Password hashing | BCrypt.Net-Next (cost factor 12) |
-| Version Control | GitHub (Gitflow) |
-| Quản lý dự án | Trello / GitHub Projects |
-| Tài liệu | 14 file Markdown |
-| UML Tool | Mermaid.js trong Markdown |
+| **Desktop Shell** | Tauri v2 (native WebView, ~8MB) |
+| **Frontend** | React 18 + Vite + TypeScript + Tailwind + shadcn/ui |
+| **State / Form** | Zustand + React Hook Form + Zod |
+| **HTTP** | Axios (JWT interceptor) |
+| **Backend** | ASP.NET Core 8 Minimal API (BUS/DAL/DTO C#) |
+| **Database** | SQL Server 2019+ — 17 bảng |
+| **Auth** | SHA-256 hash + JWT Bearer |
 
-### 1.3 So sánh WPF vs WinForms (Lý do chuyển đổi)
+### 1.3 Cấu trúc project
 
-| Tiêu chí | WinForms (cũ) | WPF (mới) |
-|---|---|---|
-| Rendering | GDI+ pixel-based | DirectX vector-based |
-| UI Design | Kéo thả giới hạn | XAML — dark theme, gradient, animation |
-| Data Binding | Thủ công, code-behind | Two-way binding tự động |
-| Architecture | Event-driven | **MVVM** — testable, tách biệt rõ |
-| Custom Controls | GDI+ phức tạp | ControlTemplate/DataTemplate |
-| Libraries | Ít, cũ | MaterialDesign, MahApps, LiveCharts |
-| Unit Test UI | Rất khó | ViewModel testable dễ dàng |
+```
+Final/
+├── ETMS.Core/             Class Library — BUS (10) / DAL (10) / DTO (9)
+│   ├── BUS/               Nghiệp vụ
+│   ├── DAL/               Truy cập DB
+│   └── DTO/               Data Transfer Objects
+├── ETMS.Api/              ASP.NET Core Minimal API
+│   ├── Handlers/          Auth | Tournament | Team | Match | Result | Dispute | Notification | AuditLog | Overview
+│   ├── Database/
+│   │   └── ETMS_DB.sql    Script 17 bảng + indexes + stored procs + sample data
+│   ├── Program.cs
+│   └── appsettings.json
+├── ETMS.Desktop/          Tauri v2 Shell (cần tạo)
+│   ├── src-tauri/         Rust entry + sidecar config
+│   └── src/               React app (copy từ DesignUI/ETMSUI)
+├── DesignUI/ETMSUI/       Figma reference — 15 React pages (shadcn/ui + Tailwind)
+└── Document/Đặc tả/       Tài liệu dự án
+```
 
 ---
 
-## 2. TÀI LIỆU ĐẶC TẢ ĐÃ HOÀN THÀNH (Specification Phase ✅)
+## 2. DANH SÁCH TÀI LIỆU ĐẶC TẢ
 
-> **Tất cả nằm trong thư mục:** `Document/Đặc tả/`
+> Thư mục: `Document/Đặc tả/`
 
-| # | File | Nội dung | Vai trò |
+| File | Nội dung | Trạng thái |
+|---|---|---|
+| `SRS_v2.md` | Đặc tả yêu cầu — 14 FR, 5 NFR, 38 API, DB 17 bảng | ✅ v4.0 |
+| `09_ArchitectureDesign.md` | Kiến trúc 3-tier, diagram, security, sidecar | ✅ v4.0 |
+| `plan.md` | Kế hoạch thực thi — sprint, phân công, DoD | ✅ v4.0 |
+| `00_MASTER_INDEX.md` | Mục lục toàn bộ tài liệu | ✅ v4.0 |
+| `01_UseCaseDiagram.md` | 25+ Use Cases | ✅ v3.0 |
+| `02_ClassDiagram_v2.md` | BUS / DAL class diagram | ✅ v3.0 |
+| `03_ERD.md` | ERD + Data Dictionary (17 bảng) | ✅ v3.0 |
+| `04_SequenceDiagrams.md` | 8 Sequence Diagrams | ✅ v3.0 |
+| `05_StateDiagrams.md` | 6 State Diagrams | ✅ v3.0 |
+| `06_ActivityDiagrams.md` | 7 Activity Diagrams | ✅ v3.0 |
+| `08_SecurityThreatModel.md` | STRIDE + OWASP — 18 threats | ✅ v3.0 |
+| `10_TraceabilityMatrix.md` | RTM: FR → UC → BUS/DAL → Test | ✅ v3.0 |
+| `11_RiskRegister.md` | FMEA — 22 rủi ro | ✅ v3.0 |
+| `12_PCL_TestWorkbook.md` | 87 Test Cases (87 = Normal + Boundary + Security) | ✅ v3.0 |
+| `ETMS.Api/Database/ETMS_DB.sql` | Script SQL v4.0 đầy đủ | ✅ v4.0 |
+
+---
+
+## 3. DANH SÁCH 15 PAGES (React)
+
+| # | Page | Chức năng | Actor |
 |---|---|---|---|
-| — | `00_MASTER_INDEX.md` | Master index + checklist | Đọc trước tiên |
-| — | `SRS_v2.md` | **Đặc tả chính v3.0** — 11 FR, 19 NFR, 16 bảng SQL | **THAM CHIẾU CHÍNH** |
-| 01 | `01_UseCaseDiagram.md` | 25+ Use Cases | Phân tích nghiệp vụ |
-| 02 | `02_ClassDiagram_v2.md` | 14 BUS + 15 DAL + 15 Views + 15 ViewModels | Thiết kế class |
-| 03 | `03_ERD.md` | ERD + Data Dictionary | Database design |
-| 04 | `04_SequenceDiagrams.md` | 8 Sequence Diagrams | Hành vi hệ thống |
-| 05 | `05_StateDiagrams.md` | 6 State Diagrams | Trạng thái thực thể |
-| 06 | `06_ActivityDiagrams.md` | 7 Activity Diagrams | Luồng nghiệp vụ |
-| 08 | `08_SecurityThreatModel.md` | STRIDE + OWASP | Phân tích bảo mật |
-| 09 | `09_ArchitectureDesign.md` | Component/DFD/Deployment | Kiến trúc chi tiết |
-| 10 | `10_TraceabilityMatrix.md` | RTM: FR→UC→BUS/DAL→TC | Truy vết yêu cầu |
-| 11 | `11_RiskRegister.md` | FMEA — 22 rủi ro | Quản lý rủi ro |
-| 12 | `12_PCL_TestWorkbook.md` | 67 Test Cases | Kế hoạch kiểm thử |
+| 1 | `LoginPage.tsx` | Đăng nhập | Tất cả |
+| 2 | `DashboardPage.tsx` | Tổng quan thống kê | Admin |
+| 3 | `TournamentSetupPage.tsx` | Tạo/sửa giải đấu + GameConfig | Admin |
+| 4 | `TeamManagementPage.tsx` | Đăng ký đội + quản lý thành viên + xét duyệt | Captain, Admin |
+| 5 | `BracketViewPage.tsx` | Hiển thị bracket cây | Tất cả |
+| 6 | `MatchSchedulePage.tsx` | Lịch thi đấu | Tất cả |
+| 7 | `CheckInPage.tsx` | Check-in trước trận | Captain |
+| 8 | `MapVetoPage.tsx` | Veto bản đồ (FPS) | Captain |
+| 9 | `SideSelectPage.tsx` | Chọn phe Blue/Red (MOBA) | Captain |
+| 10 | `ResultSubmitPage.tsx` | Nộp + xác nhận kết quả | Captain, Admin |
+| 11 | `LeaderboardPage.tsx` | Bảng xếp hạng | Tất cả |
+| 12 | `DisputeManagePage.tsx` | Khiếu nại + giải quyết | Captain, Admin |
+| 13 | `NotificationsPage.tsx` | Thông báo in-app | Auth users |
+| 14 | `AuditLogPage.tsx` | Nhật ký kiểm toán | Admin |
+| 15 | `UserManagementPage.tsx` | Quản lý tài khoản | Admin |
 
 ---
 
-## 3. KIẾN TRÚC HỆ THỐNG
+## 4. KẾ HOẠCH SPRINT
 
-### 3.1 Sơ đồ 3 lớp + MVVM
+### Sprint 0 — Đặc tả & Thiết kế ✅ DONE
+**Thời gian:** Tuần 1–2 | **Kết quả:** Toàn bộ tài liệu đặc tả hoàn chỉnh
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  PRESENTATION LAYER — 15 WPF Views (XAML) + 15 ViewModels        │
-│  LoginView | DashboardView | TournamentSetupView | TeamMgmtView  │
-│  BracketView | MatchScheduleView | CheckInView | MapVetoView     │
-│  SideSelectView | ResultSubmitView | LeaderboardView              │
-│  DisputeManageView | NotificationView | AuditLogView | UserMgmt  │
-│  ────────────────────────────────────────────────────────────     │
-│  MVVM Infrastructure: ViewModelBase | RelayCommand |              │
-│  NavigationService | DialogService | AppTheme                      │
-└───────────────────────┬─────────────────────────────────────────┘
-                        │ DTO objects (via ViewModel → BUS calls)
-┌───────────────────────▼─────────────────────────────────────────┐
-│  BUS Layer — 14 Classes (KHÔNG THAY ĐỔI)                         │
-│  AuthBUS | TournamentBUS | TeamBUS | BracketBUS | MatchBUS        │
-│  CheckInBUS | MapVetoBUS | SideSelectBUS | ResultBUS              │
-│  LeaderboardBUS | DisputeBUS | NotificationBUS | AuditLogBUS      │
-│  SessionManager (Singleton)                                      │
-└───────────────────────┬─────────────────────────────────────────┘
-                        │ SQL Parameterized Queries
-┌───────────────────────▼─────────────────────────────────────────┐
-│  DAL Layer — 15 Classes  (KHÔNG THAY ĐỔI)                        │
-│  DBConnection (Singleton) | UserDAL | TournamentDAL | etc.        │
-└───────────────────────┬─────────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────────┐
-│  SQL Server Database — 14 Tables (KHÔNG THAY ĐỔI)                │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 3.2 Database — 16 Bảng (Schema trong `Database/ETMS_DB.sql`)
-
-> **Cập nhật v3.0:** Bổ sung `tblNotification` (thông báo in-app) và `tblGameConfig` (cấu hình game).
-> 16 bảng + 13 indexes + 1 computed column + 5 UNIQUE constraints.
-> Connection string đọc từ `appsettings.json` bằng `IConfiguration` (không dùng ConfigurationManager).
+| Hạng mục | Trạng thái |
+|---|---|
+| SRS v4.0 (14 FR, 5 NFR, 38 APIs) | ✅ |
+| Architecture Design v4.0 | ✅ |
+| ERD — 17 bảng | ✅ |
+| ETMS_DB.sql v4.0 (17 bảng + indexes + SPs + data) | ✅ |
+| Use Case / Class / Sequence / State / Activity Diagrams | ✅ |
+| Security Threat Model, Risk Register, Test Workbook | ✅ |
+| React UI Design (15 pages, DesignUI/ETMSUI) | ✅ |
 
 ---
 
-## 4. CẤU TRÚC PROJECT C# — v3.0
+### Sprint 1 — Backend API Core
+**Thời gian:** Tuần 3–4
 
-```
-ETMS.Wpf/                                  # WPF Application Project
-├── App.xaml / App.xaml.cs                  # Entry point, Theme resources
-├── appsettings.json                       # Connection string
-│
-├── Views/                                 # XAML UI
-│   ├── LoginView.xaml                     # Đăng nhập
-│   ├── DashboardView.xaml                 # Sidebar + Content host
-│   ├── TournamentSetupView.xaml           # Tạo/sửa Tournament + GameConfig
-│   ├── TeamManagementView.xaml            # Đăng ký, xét duyệt
-│   ├── BracketView.xaml                   # Render cây nhánh đấu (Canvas)
-│   ├── MatchScheduleView.xaml             # Lên lịch + conflict
-│   ├── CheckInView.xaml                   # Countdown, walkover
-│   ├── MapVetoView.xaml                   # Ban/pick + timer 60s
-│   ├── SideSelectView.xaml                # Blue/Red side
-│   ├── ResultSubmitView.xaml              # Upload + validate
-│   ├── LeaderboardView.xaml               # Bảng xếp hạng
-│   ├── DisputeManageView.xaml             # Khiếu nại
-│   ├── NotificationView.xaml              # Thông báo
-│   ├── AuditLogView.xaml                  # Lịch sử Admin
-│   └── UserManagementView.xaml            # Quản lý tài khoản
-│
-├── ViewModels/                            # MVVM ViewModels
-│   ├── ViewModelBase.cs                   # INotifyPropertyChanged
-│   ├── RelayCommand.cs                    # ICommand implementation
-│   ├── LoginViewModel.cs
-│   ├── DashboardViewModel.cs              # Navigation, badge
-│   ├── TournamentSetupViewModel.cs
-│   ├── TeamManagementViewModel.cs
-│   ├── BracketViewModel.cs
-│   ├── MatchScheduleViewModel.cs
-│   ├── CheckInViewModel.cs
-│   ├── MapVetoViewModel.cs
-│   ├── SideSelectViewModel.cs
-│   ├── ResultSubmitViewModel.cs
-│   ├── LeaderboardViewModel.cs
-│   ├── DisputeManageViewModel.cs
-│   ├── NotificationViewModel.cs
-│   ├── AuditLogViewModel.cs
-│   └── UserManagementViewModel.cs
-│
-├── Services/                              # MVVM Services
-│   ├── NavigationService.cs               # Page navigation
-│   ├── DialogService.cs                   # MessageBox wrapper
-│   └── ThemeService.cs                    # Dark/Light toggle
-│
-├── Themes/                                # WPF Resources
-│   ├── DarkTheme.xaml                     # Color palette, brushes
-│   ├── ControlStyles.xaml                 # Button, TextBox, DataGrid styles
-│   └── Fonts.xaml                         # Typography
-│
-├── Converters/                            # WPF Value Converters
-│   ├── BoolToVisibilityConverter.cs
-│   ├── StatusToColorConverter.cs
-│   └── RoleToMenuConverter.cs
-│
-├── Controls/                              # Custom WPF Controls
-│   ├── StatCard.xaml                      # Dashboard stat card
-│   ├── BracketTreeControl.xaml            # Bracket tree renderer
-│   └── CountdownTimer.xaml                # Check-in/Veto timer
-│
-├── BUS/                                   # (Giữ nguyên 14 class)
-├── DAL/                                   # (Giữ nguyên 15 class)
-├── DTO/                                   # (Giữ nguyên 12 class)
-├── Enums/                                 # (Giữ nguyên 12 enum)
-├── Helpers/                               # (Giữ nguyên)
-│
-├── Database/
-│   ├── ETMS_DB.sql                        # 16 bảng
-│   └── ETMS_InsertSample.sql              # Dữ liệu mẫu
-│
-└── ETMS.Wpf.csproj                        # .NET 8 WPF project
-```
+#### Việc đã làm ✅
+- [x] ETMS.Core (net8.0) — 8 BUS + 10 DAL + 9 DTO (Build OK)
+- [x] ETMS.Api project — Swagger, CORS, Program.cs
+- [x] DBConnection.Configure() từ appsettings.json
+- [x] AuthHandler — `POST /api/auth/login`, `POST /api/auth/logout`
+- [x] OverviewHandler — `GET /api/overview/stats`, `GET /api/game-types`
+- [x] TournamentHandler — `GET/POST /api/tournaments`
+- [x] TeamHandler — `GET/POST /api/teams`, `PATCH approve/reject`
+
+#### Còn lại ⏳
+- [ ] JWT Middleware thật (hiện dùng placeholder token)
+- [ ] MatchHandler — `GET /api/matches`, `POST checkin/veto/side-select/result`
+- [ ] ResultHandler — `PATCH verify/reject`
+- [ ] DisputeHandler — `GET/POST /api/disputes`, `PATCH resolve`
+- [ ] BRHandler — `POST /api/br/rounds`, `POST /api/br/scores`, `GET leaderboard`
+- [ ] NotificationHandler — `GET`, `PATCH read/read-all`
+- [ ] AuditLogHandler — `GET /api/audit-log`
+- [ ] UserHandler — `GET/POST/PATCH /api/users`
+- [ ] Error handling middleware (ErrorHandlingMiddleware.cs)
+
+**Deliverable:** API đầy đủ 38 endpoints, test qua Swagger tại `http://localhost:5000/swagger`
 
 ---
 
-## 5. PHÂN CÔNG NHIỆM VỤ — v3.0
+### Sprint 2 — Frontend React + Tauri Integration
+**Thời gian:** Tuần 5–6
 
-| Thành viên | Layer / Nhiệm vụ | Ưu tiên |
+- [ ] Copy `DesignUI/ETMSUI` → `ETMS.Desktop/src`
+- [ ] Cài đặt dependencies: `npm install`
+- [ ] Viết `lib/api.ts` — Axios wrapper với JWT interceptor tự động
+- [ ] Cập nhật `AuthContext.tsx` → gọi `POST /api/auth/login` thật
+- [ ] Kết nối từng Page với API tương ứng:
+  - DashboardPage → `/api/overview/stats`
+  - TournamentSetupPage → `/api/tournaments` + `/api/game-types`
+  - TeamManagementPage → `/api/teams`
+  - BracketViewPage → `/api/tournaments/{id}/bracket`
+  - MatchSchedulePage → `/api/matches?tournamentId=`
+  - CheckInPage → `/api/matches/{id}/checkin`
+  - MapVetoPage → `/api/matches/{id}/veto`
+  - SideSelectPage → `/api/matches/{id}/side-select`
+  - ResultSubmitPage → `/api/matches/{id}/result`
+  - LeaderboardPage → `/api/tournaments/{id}/leaderboard` + `/api/br/{id}/leaderboard`
+  - DisputeManagePage → `/api/disputes`
+  - NotificationsPage → `/api/notifications`
+  - AuditLogPage → `/api/audit-log`
+  - UserManagementPage → `/api/users`
+- [ ] Setup Tauri v2 — `npx create-tauri-app` trong `ETMS.Desktop/`
+- [ ] Cấu hình `tauri.conf.json`:
+  - Window: title, size (1280×800), icon
+  - Sidecar: `ETMS.Api.exe` khởi động cùng app
+  - CSP: chỉ cho phép `http://localhost:5000`
+- [ ] Cấu hình `vite.config.ts` — proxy `/api` → `http://localhost:5000`
+
+**Deliverable:** App mở trong Tauri shell; luồng login → dashboard hoạt động end-to-end
+
+---
+
+### Sprint 3 — Integration, Test & Polish
+**Thời gian:** Tuần 7
+
+- [ ] End-to-end test luồng Single Elimination:
+  - Tạo giải → Đăng ký đội → Duyệt đội → Tạo bracket → Check-in → Thi đấu → Kết quả → Leaderboard
+- [ ] End-to-end test Battle Royale:
+  - Tạo giải BR → Đăng ký → Nhập điểm mỗi vòng → Tổng kết
+- [ ] Test Map Veto (FPS) và Side Selection (MOBA)
+- [ ] Test Disputes + Notifications
+- [ ] Error handling: loading states, toast, retry
+- [ ] Notification polling (mỗi 30 giây tự động refresh bell icon)
+- [ ] Responsive test trên 1280×800 và 1920×1080
+
+**Deliverable:** App ổn định, không còn lỗi nghiêm trọng
+
+---
+
+### Sprint 4 — Build & Tài liệu cuối
+**Thời gian:** Tuần 8
+
+- [ ] Build production: `npm run tauri build`
+- [ ] Tạo file cài đặt: `ETMS_Setup.msi` (Windows)
+- [ ] Unit test BUS layer (xUnit) — tối thiểu 60% coverage
+- [ ] Cập nhật README.md — hướng dẫn cài đặt, cấu hình DB
+- [ ] Kiểm tra lại toàn bộ 87 Test Cases trong TestWorkbook
+- [ ] Hoàn thiện báo cáo đồ án
+
+**Deliverable:** File build hoạt động trên máy tính khác; báo cáo hoàn chỉnh
+
+---
+
+## 5. PHÂN CÔNG CÔNG VIỆC
+
+| Module | Backend (C#) | Frontend (React) |
 |---|---|---|
-| **SV A** | **Views (XAML) + ViewModels** — 15 Views, MVVM infrastructure, Themes, Custom Controls, Navigation, Dark Theme | Sprint 2 |
-| **SV B** | **BUS** — 14 classes; BracketBUS (thuật toán cốt lõi); BCrypt; MapVetoBUS/SideSelectBUS; NotificationBUS | Sprint 2 |
-| **SV C** | **DAL** — 15 classes; SQL schema 16 bảng; Indexes; Serializable Transaction; GameConfigDAL | Sprint 2 |
-
-> **Quy tắc:** View chỉ bind vào ViewModel (không gọi BUS trực tiếp); ViewModel gọi BUS; BUS gọi DAL.
-
----
-
-## 6. LỘ TRÌNH THỰC THI — v3.0
-
-### ✅ Sprint 0: Specification (ĐÃ HOÀN THÀNH — 2026-03-24)
-*(12 deliverables — xem Mục 2)*
+| Auth & User | AuthBUS, UserDAL, AuthHandler, UserHandler | LoginPage, UserManagementPage |
+| Tournament | TournamentBUS, TournamentDAL, TournamentHandler | TournamentSetupPage, BracketViewPage |
+| Team | TeamBUS, TeamDAL, TeamHandler | TeamManagementPage |
+| Match | MatchBUS, MatchDAL, MatchHandler | MatchSchedulePage, CheckInPage |
+| Veto & Side | Map/SideDAL, MatchHandler routes | MapVetoPage, SideSelectPage |
+| Result | ResultBUS, ResultDAL, ResultHandler | ResultSubmitPage |
+| Leaderboard | LeaderboardBUS, BRHandler | LeaderboardPage |
+| Dispute | DisputeBUS, DisputeDAL, DisputeHandler | DisputeManagePage |
+| System | NotificationBUS, AuditLogBUS, các handler | NotificationsPage, AuditLogPage, DashboardPage |
 
 ---
 
-### 🔵 Sprint 1: Thiết kế chi tiết & Chuẩn bị (Tuần 1–4)
+## 6. TIÊU CHÍ HOÀN THÀNH (Definition of Done)
 
-#### Tuần 1–2: Setup & Database
-- [ ] **SV C:** Tạo GitHub repo, Gitflow branches
-- [ ] **SV C:** Chạy `ETMS_DB.sql` → tạo 16 bảng + 8 indexes
-- [ ] **SV C:** `ETMS_InsertSample.sql` → dữ liệu mẫu
-- [ ] **SV A:** Tạo VS solution `ETMS.Wpf.sln` với cấu trúc WPF project
-- [ ] **SV A:** Setup NuGet: `MaterialDesignThemes`, `MahApps.Metro`, `MaterialDesignColors`
-- [ ] **SV B:** Setup NuGet: `BCrypt.Net-Next`
-
-#### Tuần 3–4: MVVM Foundation & Figma→XAML
-- [ ] **SV A:** `ViewModelBase.cs` — INotifyPropertyChanged + SetProperty
-- [ ] **SV A:** `RelayCommand.cs` — ICommand thay event handlers
-- [ ] **SV A:** `NavigationService.cs` — điều hướng Views
-- [ ] **SV A:** `DarkTheme.xaml` — dark esports palette (#121212, #1E1E2E, accent #3B82F6)
-- [ ] **SV A:** `ControlStyles.xaml` — custom styles cho Button, TextBox, DataGrid
-- [ ] **SV A:** Thiết kế `LoginView.xaml` và `DashboardView.xaml` (sidebar + content)
-- [ ] **All:** Review `08_SecurityThreatModel.md`
+| Tiêu chí | Mô tả |
+|---|---|
+| ✅ Functional | Tất cả 14 FR hoạt động đúng yêu cầu trong SRS |
+| ✅ API | Tất cả 38 endpoints trả response đúng cấu trúc |
+| ✅ Cross-Platform | Build và chạy được trên Windows 10+ |
+| ✅ Database | 17 bảng, đúng constraints, indexes, dữ liệu mẫu |
+| ✅ Security | JWT auth, SHA-256 hash, parameterized query |
+| ✅ Performance | Dashboard load < 2s; API < 500ms |
+| ✅ UI/UX | Dark theme, responsive 1280×800+, tiếng Việt |
+| ✅ Documentation | SRS, Architecture, ERD, Diagrams hoàn chỉnh |
+| ✅ Test | ≥ 60% coverage BUS layer; pass 80%+ test cases |
 
 ---
 
-### 🟡 Sprint 2: Lập trình (Tuần 5–10)
+## 7. RỦI RO & PHÒNG NGỪA
 
-#### Phase 2A: Core Infrastructure (Tuần 5–6)
-- [ ] **SV C:** `DBConnection.cs` — Singleton + connection string từ appsettings.json
-- [ ] **SV C:** `UserDAL.cs` — đầy đủ với FailedLoginAttempts
-- [ ] **SV C:** `TournamentDAL.cs`, `GameConfigDAL.cs`
-- [ ] **SV B:** `SessionManager.cs` — Singleton + 30' timeout
-- [ ] **SV B:** `AuthBUS.cs` — bcrypt verify, Login(), lock logic
-- [ ] **SV A:** `LoginView.xaml` + `LoginViewModel.cs` — bind AuthBUS
-- [ ] **SV A:** `DashboardView.xaml` + `DashboardViewModel.cs` — sidebar, badge, RBAC menu
-
-#### Phase 2B: Team & Enrollment (Tuần 6–7)
-- [ ] **SV C:** `TeamDAL.cs`, `BracketDAL.cs` (SaveBracket Transaction)
-- [ ] **SV B:** `TeamBUS.cs` — ValidateTeamName, Disqualify
-- [ ] **SV B:** `TournamentBUS.cs` — Create, SaveConfig
-- [ ] **SV A:** `TeamManagementView.xaml` — LiveSearch (ICollectionView) + Approve/Reject
-- [ ] **SV A:** `TournamentSetupView.xaml` — với tab GameConfig
-
-#### Phase 2C: ★ Bracket Engine (Tuần 7–8)
-- [ ] **SV B:** `BracketBUS.cs` — FisherYatesShuffle, Bye Logic, Strategy Pattern
-- [ ] **SV A:** `BracketView.xaml` — **Canvas + DrawingVisual** render cây bracket
-  - Line/polyline connectors giữa match nodes
-  - DataTemplate cho mỗi match card
-  - Zoom/pan support
-
-#### Phase 2D: Match & Check-in (Tuần 8–9)
-- [ ] **SV C:** `MatchDAL.cs`, `CheckInDAL.cs` — Serializable Transaction
-- [ ] **SV B:** `MatchBUS.cs`, `CheckInBUS.cs` — WalkoverPending cases
-- [ ] **SV A:** `MatchScheduleView.xaml` — lên lịch + conflict warning
-- [ ] **SV A:** `CheckInView.xaml` — **DispatcherTimer** countdown
-- [ ] **SV A:** `MapVetoView.xaml` — ban/pick grid + circular countdown 60s
-- [ ] **SV A:** `SideSelectView.xaml` — coin flip animation + side buttons
-
-#### Phase 2E: Result & Post-Tournament (Tuần 9–10)
-- [ ] **SV C:** `ResultDAL.cs`, `LeaderboardDAL.cs`, `DisputeDAL.cs`, `NotificationDAL.cs`, `AuditLogDAL.cs`
-- [ ] **SV B:** `ResultBUS.cs` — magic bytes, approve, override
-- [ ] **SV B:** `LeaderboardBUS.cs`, `DisputeBUS.cs`, `NotificationBUS.cs`, `AuditLogBUS.cs`
-- [ ] **SV A:** Remaining Views: `ResultSubmitView`, `LeaderboardView`, `DisputeManageView`, `NotificationView`, `AuditLogView`, `UserManagementView`
-
-#### Integration (Tuần 10)
-- [ ] **All:** Tích hợp 3 layer, test end-to-end
-- [ ] **All:** Code Review qua Pull Request
-
----
-
-### 🔴 Sprint 3: Kiểm thử & Hoàn thiện (Tuần 11–14)
-
-*(Giữ nguyên nội dung Sprint 3 từ v2.0 — 67 TCs, 7 modules, fix bugs, demo)*
-
-#### Tuần 11–12: Structured Testing
-- [ ] Module 1–7: 67 Test Cases theo `12_PCL_TestWorkbook.md`
-
-#### Tuần 13: Fix bugs & Optimize
-- [ ] Sửa TCs fail, performance check
-
-#### Tuần 14: Documentation & Demo
-- [ ] AI Audit Log, Video Demo, Slide thuyết trình, Merge `main`
-
----
-
-## 7. NuGet PACKAGES — v3.0
-
-| Package | Version | Mục đích |
-|---|---|---|
-| `MaterialDesignThemes` | latest | Dark theme, UI components (Button, Card, Dialog) |
-| `MaterialDesignColors` | latest | Color palette |
-| `MahApps.Metro` | latest | Modern window chrome, Flyouts, HamburgerMenu |
-| `BCrypt.Net-Next` | 4.0.3 | Password hashing (cost=12) |
-| `Microsoft.Data.SqlClient` | 6.0+ | SQL Server connection |
-| `CommunityToolkit.Mvvm` | latest | ViewModelBase, RelayCommand, ObservableObject |
-| `LiveChartsCore.SkiaSharpView.WPF` | latest | (Optional) Charts cho dashboard |
-
----
-
-## 8. TIÊU CHÍ NGHIỆM THU
-
-### ✅ Kỹ thuật bắt buộc
-- [ ] 3-Layer + MVVM triệt để
-- [ ] Parameterized Query 100%
-- [ ] bcrypt cost ≥ 10
-- [ ] SQL Transaction Serializable (check-in)
-- [ ] Bye Logic + Fisher-Yates Shuffle
-
-### ✅ Kỹ thuật nâng cao
-- [ ] **Dark theme Esports** (MaterialDesign)
-- [ ] **XAML animations** (page transitions, countdown)
-- [ ] **Magic Bytes** file validation
-- [ ] **Session Timeout** 30' idle
-- [ ] **Strategy Pattern** (IBracketStrategy)
-- [ ] **WalkoverPending** case C
-- [ ] **Notification System** + **Audit Log**
-- [ ] **Map Veto** + **Side Selection** với countdown
-
-### ✅ Quy trình & Tài liệu
-- [ ] Gitflow + Pull Request
-- [ ] PCL Workbook 67 TCs
-- [ ] Video Demo + Slide
-
----
-
-## 9. QUY TRÌNH GITFLOW
-
-```
-main ──────────────────────────────────── (production)
-  ↑
-develop ────────────────────────────────── (tích hợp)
-  ↑        ↑         ↑        ↑
-feature/  feature/  feature/ feature/
-auth-vm   bracket   checkin  result
-(SV A+B)  (SV B)    (SV C)   (SV B/C)
-```
-
----
-
-**© 2026 – FIT TDTU | Môn Kỹ thuật Phần mềm (502045) | ETMS v3.0**
+| Rủi ro | Xác suất | Tác động | Phòng ngừa |
+|---|---|---|---|
+| SQL Server không kết nối | Trung | Cao | `DBConnection.TestConnection()` khi startup; thông báo rõ ràng |
+| JWT token sai/hết hạn | Thấp | Cao | Axios interceptor tự redirect Login khi 401 |
+| Tauri sidecar không khởi động | Thấp | Rất cao | Log khởi động; hiển thị dialog lỗi cụ thể |
+| Số đội đăng ký < 2 khi tạo bracket | Thấp | Trung | BUS kiểm tra; UI disable nút nếu < 2 đội |
+| Build Tauri thất bại trên OS khác | Trung | Trung | Test trên cả Windows; dùng GitHub Actions CI nếu có |
+| Admin bấm nhầm duyệt/từ chối | Thấp | Trung | Confirmation dialog bắt buộc trước mọi thao tác irreversible |

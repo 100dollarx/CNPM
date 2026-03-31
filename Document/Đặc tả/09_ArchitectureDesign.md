@@ -1,6 +1,6 @@
-# KIẾN TRÚC HỆ THỐNG — ETMS v3.0
+# KIẾN TRÚC HỆ THỐNG — ETMS v4.0
 ## Architecture Design Document (ADD)
-**Phiên bản:** 3.0 (WPF/MVVM) | **Ngày:** 2026-03-29
+**Phiên bản:** 4.0 (Tauri v2 + React + .NET API) | **Ngày:** 2026-03-31
 
 ---
 
@@ -8,124 +8,112 @@
 
 ```mermaid
 graph TB
-    subgraph CLIENT["💻 Client Machine (Windows)"]
-        subgraph APP["ETMS.Wpf.exe — WPF Application"]
-            VIEW["🖥️ View Layer\n15 XAML Views"]
-            VM["🔗 ViewModel Layer\n15 ViewModels + MVVM Infra"]
-            BUS["⚙️ BUS Layer\n14 Classes + IBracketStrategy"]
-            DAL["🗄️ DAL Layer\n15 Classes"]
-            CFG["appsettings.json\n(connection string)"]
+    subgraph CLIENT["💻 Client Machine (Win/Mac/Linux)"]
+        subgraph TAURI["Tauri v2 Native Shell (~8MB)"]
+            REACT["⚛️ React 18 + Vite\nUI Layer (15 Pages)\nTailwind + shadcn/ui"]
+            IPC["🔒 Tauri IPC\n(whitelist only)"]
         end
-        VIEW -->|"Data Binding\nINotifyPropertyChanged"| VM
-        VM -->|"Method calls"| BUS
-        BUS --> DAL --> CFG
+        subgraph SIDECAR["🔄 .NET Sidecar Process"]
+            API["⚙️ ASP.NET Core 8\nMinimal API\nBUS + DAL Layer"]
+        end
     end
 
     subgraph SERVER["🖥️ SQL Server Machine"]
-        DB["ETMS_DB\n14 Tables"]
+        DB[("ETMS_DB\n16 Tables")]
     end
 
-    DAL -->|"TCP/IP Port 1433\nSQL Server Protocol"| DB
+    REACT -->|"HTTP/JSON\nlocalhost:5000"| API
+    REACT -->|"Tauri IPC\n(file dialogs, etc.)"| IPC
+    API -->|"TCP/IP 1433\nSQL Server Protocol"| DB
 ```
 
-> **Loại kiến trúc:** Thick Client / 2-Tier (Client-Server)
-> - Client: WPF App với **MVVM Pattern** + 3-Layer Architecture nội bộ
-> - Server: SQL Server 2019+
-> - UI Pattern: **MVVM** (Model-View-ViewModel)
+> **Loại kiến trúc:** 3-Tier (Presentation – Business – Data)
+> - **Tier 1:** React UI trong Tauri shell (OS WebView, không cần Chromium)
+> - **Tier 2:** ASP.NET Core API (BUS/DAL/DTO) chạy như sidecar process
+> - **Tier 3:** SQL Server 2019+
+> - **IPC:** React giao tiếp API qua `fetch(localhost:5000)` — Tauri IPC dùng cho OS features
 
 ---
 
-## 2. MVVM PATTERN DIAGRAM
+## 2. KIẾN TRÚC COMPONENT CHI TIẾT
 
 ```mermaid
 graph LR
-    subgraph VIEW["View (XAML)"]
-        XAML["LoginView.xaml\nDashboardView.xaml\n...15 Views"]
+    subgraph FRONTEND["Frontend — React (TypeScript)"]
+        PAGES["15 Pages\nLoginPage | DashboardPage\nTournamentSetupPage | TeamManagementPage\nBracketViewPage | MatchSchedulePage\nCheckInPage | MapVetoPage | SideSelectPage\nResultSubmitPage | LeaderboardPage\nDisputeManagePage | NotificationsPage\nAuditLogPage | UserManagementPage"]
+        COMPONENTS["Components\nDashboardLayout | Sidebar\nStatCard | MatchTable | BracketTree\nNotificationBell | ..."]
+        STATE["State (Zustand)\nAuthStore | TournamentStore\nNotificationStore"]
+        HTTP["HTTP Client (Axios)\napi.ts — typed endpoints"]
     end
 
-    subgraph VIEWMODEL["ViewModel (C#)"]
-        VM_BASE["ViewModelBase\n- INotifyPropertyChanged\n- SetProperty()"]
-        CMD["RelayCommand\n- ICommand\n- CanExecute logic"]
-        VM_IMPL["LoginViewModel\nDashboardViewModel\n...15 ViewModels"]
+    subgraph BACKEND["Backend — .NET 8 (C#)"]
+        HANDLERS["API Handlers\nAuthHandler | OverviewHandler\nTournamentHandler | TeamHandler\nMatchHandler | ResultHandler\nDisputeHandler | NotificationHandler\nAuditHandler | UserHandler"]
+        BUS_LAYER["BUS Layer (14 classes)\nAuthBUS | TournamentBUS | TeamBUS\nBracketBUS | MatchBUS | CheckInBUS\nMapVetoBUS | SideSelectBUS\nResultBUS | LeaderboardBUS\nDisputeBUS | NotificationBUS\nAuditLogBUS | SessionManager"]
+        DAL_LAYER["DAL Layer (15 classes)\nDBConnection | UserDAL | TournamentDAL\nGameConfigDAL | TeamDAL | PlayerDAL\nMatchDAL | MatchResultDAL | MapVetoDAL\nSideSelectDAL | BRRoundDAL | BRScoreDAL\nDisputeDAL | NotificationDAL | AuditLogDAL"]
     end
 
-    subgraph MODEL["Model (BUS + DAL)"]
-        BUS_LYR["AuthBUS\nTeamBUS\n...14 BUS Classes"]
-        DAL_LYR["UserDAL\nTeamDAL\n...15 DAL Classes"]
-        DTO_LYR["UserDTO\nTeamDTO\n...12 DTOs"]
-    end
-
-    XAML -->|"{Binding Property}\n{Binding Command}"| VM_IMPL
-    VM_IMPL -->|"inherits"| VM_BASE
-    VM_IMPL -->|"uses"| CMD
-    VM_IMPL -->|"calls methods"| BUS_LYR
-    BUS_LYR -->|"returns DTOs"| VM_IMPL
-    BUS_LYR --> DAL_LYR
-    DAL_LYR -->|"SQL Parameterized"| DB[(SQL Server)]
+    PAGES --> STATE
+    PAGES --> HTTP
+    HTTP -->|"REST/JSON"| HANDLERS
+    HANDLERS --> BUS_LAYER --> DAL_LAYER --> DB[(SQL Server)]
 ```
-
-### MVVM Infrastructure Classes
-
-| Class | Mục đích |
-|---|---|
-| `ViewModelBase` | Abstract base — `INotifyPropertyChanged`, `SetProperty<T>()` helper |
-| `RelayCommand` | Thay thế event `Button_Click` — `ICommand.Execute()` + `CanExecute()` |
-| `RelayCommand<T>` | Generic version cho commands có parameter |
-| `NavigationService` | Singleton — điều hướng Views thay `this.Hide(); form.Show()` |
-| `DialogService` | Wrapper cho `MaterialDesignThemes.DialogHost` — testable |
-| `ThemeService` | Toggle dark/light, load resource dictionaries |
 
 ---
 
-## 3. COMPONENT DIAGRAM
+## 3. PROJECT STRUCTURE
 
-```mermaid
-graph LR
-    subgraph VIEW_COMP["View Components (XAML)"]
-        AUTH_VIEW["Auth Views\nLoginView\nUserMgmtView"]
-        TOURNAMENT_VIEW["Tournament Views\nSetupView\nBracketView"]
-        TEAM_VIEW["Team Views\nTeamMgmtView"]
-        MATCH_VIEW["Match Views\nScheduleView\nCheckInView\nMapVetoView\nSideSelectView"]
-        RESULT_VIEW["Result Views\nResultSubmitView"]
-        REPORT_VIEW["Report Views\nLeaderboardView"]
-        ADMIN_VIEW["Admin Views\nDisputeView\nNotifView\nAuditView"]
-    end
-
-    subgraph VM_COMP["ViewModel Components"]
-        AUTH_VM["Auth VMs\nLoginVM\nUserMgmtVM"]
-        TOURNAMENT_VM["Tournament VMs\nSetupVM\nBracketVM"]
-        TEAM_VM["Team VM\nTeamMgmtVM"]
-        MATCH_VM["Match VMs\nScheduleVM\nCheckInVM\nMapVetoVM\nSideSelectVM"]
-        RESULT_VM["Result VM\nResultSubmitVM"]
-        REPORT_VM["Report VM\nLeaderboardVM"]
-        ADMIN_VM["Admin VMs\nDisputeVM\nNotifVM\nAuditVM"]
-    end
-
-    subgraph BUS_COMP["BUS Components"]
-        AUTH_BUS["Auth Module\nAuthBUS\nSessionManager"]
-        TOURNAMENT_BUS["Tournament Module\nTournamentBUS\nBracketBUS"]
-        TEAM_BUS["Team Module\nTeamBUS"]
-        MATCH_BUS["Match Module\nMatchBUS\nCheckInBUS\nMapVetoBUS\nSideSelectBUS"]
-        RESULT_BUS["Result Module\nResultBUS"]
-        REPORT_BUS["Report Module\nLeaderboardBUS"]
-        SYSTEM_BUS["System Module\nNotificationBUS\nAuditLogBUS\nDisputeBUS"]
-    end
-
-    subgraph DAL_COMP["DAL Components"]
-        CORE_DAL["Core DAL\nDBConnection\nUserDAL\nTournamentDAL\nGameConfigDAL"]
-        TEAM_DAL["Team DAL\nTeamDAL"]
-        MATCH_DAL["Match DAL\nMatchDAL\nCheckInDAL\nMapVetoDAL\nSideSelectDAL\nBracketDAL"]
-        RESULT_DAL["Result DAL\nResultDAL\nLeaderboardDAL"]
-        SYSTEM_DAL["System DAL\nDisputeDAL\nNotificationDAL\nAuditLogDAL"]
-    end
-
-    AUTH_VIEW -->|"Binding"| AUTH_VM --> AUTH_BUS --> CORE_DAL
-    TOURNAMENT_VIEW --> TOURNAMENT_VM --> TOURNAMENT_BUS --> CORE_DAL & MATCH_DAL
-    TEAM_VIEW --> TEAM_VM --> TEAM_BUS --> TEAM_DAL
-    MATCH_VIEW --> MATCH_VM --> MATCH_BUS --> MATCH_DAL
-    RESULT_VIEW --> RESULT_VM --> RESULT_BUS --> RESULT_DAL
-    REPORT_VIEW --> REPORT_VM --> REPORT_BUS --> RESULT_DAL
-    ADMIN_VIEW --> ADMIN_VM --> SYSTEM_BUS --> SYSTEM_DAL
+```
+E:/Final/
+├── ETMS.Core/                    ★ Class Library — shared BUS/DAL/DTO
+│   ├── BUS/                      14 BUS classes
+│   ├── DAL/                      15 DAL classes
+│   ├── DTO/                      12 DTO classes
+│   ├── Enums/                    LoginResult, UserRole, etc.
+│   ├── Helpers/                  AdminPasswordSeeder
+│   └── ETMS.Core.csproj          net8.0, BCrypt, SqlClient
+│
+├── ETMS.Api/                     ★ ASP.NET Core Web API
+│   ├── Program.cs                Minimal API, Electron bootstrap
+│   ├── appsettings.json          Connection string, JWT secret
+│   ├── Handlers/
+│   │   ├── AuthHandler.cs
+│   │   ├── OverviewHandler.cs
+│   │   ├── TournamentHandler.cs
+│   │   ├── TeamHandler.cs
+│   │   ├── MatchHandler.cs
+│   │   ├── ResultHandler.cs
+│   │   ├── DisputeHandler.cs
+│   │   ├── NotificationHandler.cs
+│   │   └── AuditHandler.cs
+│   ├── Middleware/
+│   │   ├── JwtMiddleware.cs
+│   │   └── ErrorHandlingMiddleware.cs
+│   ├── Database/
+│   │   └── ETMS_DB.sql           ★ 16 Tables + Indexes + Sample Data
+│   └── ETMS.Api.csproj           references ETMS.Core
+│
+├── ETMS.Desktop/                 ★ Tauri v2 Desktop Shell
+│   ├── src-tauri/
+│   │   ├── src/main.rs           Tauri entry, sidecar spawn
+│   │   ├── tauri.conf.json       Window config, sidecar whitelist
+│   │   └── Cargo.toml            Tauri dependencies
+│   ├── src/                      (React app — DesignUI/ETMSUI)
+│   │   ├── app/
+│   │   │   ├── pages/            15 pages (tsx)
+│   │   │   ├── components/       Shared components
+│   │   │   ├── contexts/         AuthContext, ThemeContext
+│   │   │   ├── lib/api.ts        ★ Axios wrapper gọi localhost:5000
+│   │   │   └── routes.tsx        React Router v7
+│   │   └── main.tsx
+│   ├── package.json
+│   └── vite.config.ts            proxy /api → localhost:5000
+│
+├── DesignUI/                     Figma reference (giữ nguyên)
+│   └── ETMSUI/                   React design source
+│
+└── Document/                     Documentation
+    ├── Đặc tả/                   SRS, Architecture, Plan...
+    └── Sơ đồ/                    Diagrams PNG
 ```
 
 ---
@@ -134,195 +122,98 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph NODE1["💻 Máy tính Ban tổ chức (Admin Machine)"]
-        APP1["ETMS.Wpf.exe\nWPF Application\n.NET 8+"]
-        CFG1["appsettings.json"]
-        APP1 --- CFG1
+    subgraph MACHINE1["💻 Admin / Captain Machine"]
+        TAURI_APP["ETMS.Desktop\n(.msi / .dmg / .AppImage)\nTauri v2 Shell"]
+        DOTNET_SRV["ETMS.Api.exe\n(self-contained .NET 8)\nchạy localhost:5000"]
+        TAURI_APP -->|"spawn"| DOTNET_SRV
     end
 
-    subgraph NODE2["💻 Máy tính Đội trưởng (Captain Machine)"]
-        APP2["ETMS.Wpf.exe\nWPF Application\n.NET 8+"]
+    subgraph MACHINE2["🖥️ SQL Server (Shared)"]
+        SQLSRV["SQL Server 2019\nETMS_DB"]
     end
 
-    subgraph NODE3["🖥️ SQL Server Machine"]
-        SQLSRV["SQL Server 2019+\nETMS_DB"]
-        BACKUP["Backup Job\nDaily / Weekly"]
-        SQLSRV --- BACKUP
-    end
-
-    APP1 -->|"TCP 1433"| SQLSRV
-    APP2 -->|"TCP 1433"| SQLSRV
-
-    subgraph STORAGE["📁 File Storage (Shared)"]
-        EVID["Evidence Folder\nScreenshots\n*.jpg/*.png"]
-    end
-
-    APP1 & APP2 -->|"Network Share\nUNC Path"| EVID
+    DOTNET_SRV -->|"TCP 1433"| SQLSRV
 ```
 
-**Yêu cầu môi trường:**
-- OS: Windows 10/11 (64-bit)
-- Runtime: .NET 8.0+ Desktop Runtime
-- SQL Server: 2019 Express (free) hoặc Standard
-- RAM tối thiểu: 4GB (server), 2GB (client)
-- Network: LAN 100Mbps
+**Môi trường:**
+- Windows 10/11, macOS 12+, Ubuntu 22.04+
+- SQL Server 2019 Express (miễn phí) hoặc Standard
+- Không cần cài đặt Node.js hay .NET Runtime trên máy người dùng
+- File cài đặt: `ETMS_Setup.msi` (~15MB) / `ETMS.dmg` / `ETMS.AppImage`
 
 ---
 
-## 5. DATA FLOW DIAGRAM — Level 0 (Context)
+## 5. SECURITY ARCHITECTURE
 
 ```mermaid
 graph LR
-    Admin((Admin))
-    Captain((Đội trưởng))
-    Player((Tuyển thủ))
-    Guest((Khách))
+    REACT -->|"1. POST /api/auth/login"| API
+    API -->|"2. BCrypt.Verify()"| DB
+    API -->|"3. JWT token (30min exp)"| REACT
+    REACT -->|"4. Authorization: Bearer token"| API
+    API -->|"5. JWT validate middleware"| HANDLERS["Protected Handlers"]
 
-    ETMS[/"🎮 ETMS\nSystem"/]
-
-    Admin -->|"Cấu hình, xét duyệt,\nxác nhận kết quả"| ETMS
-    ETMS -->|"Báo cáo, thông báo,\naudit log"| Admin
-
-    Captain -->|"Đăng ký đội, check-in,\nnộp kết quả, khiếu nại"| ETMS
-    ETMS -->|"Thông báo, lịch thi đấu,\nkết quả"| Captain
-
-    Player -->|"Xem lịch, xem bracket"| ETMS
-    ETMS -->|"Thông tin thi đấu"| Player
-
-    Guest -->|"Xem leaderboard"| ETMS
-    ETMS -->|"Bảng xếp hạng"| Guest
+    subgraph TAURI_SANDBOX["Tauri Sandbox"]
+        REACT
+        note["IPC Whitelist:\nfile dialogs only\nNo Node.js access"]
+    end
 ```
+
+**Các lớp bảo mật:**
+
+| Lớp | Biện pháp |
+|---|---|
+| **Transport** | Localhost-only API (không expose internet) |
+| **Auth** | JWT Bearer Token, 30 phút expire |
+| **Password** | BCrypt cost=12 |
+| **SQL** | Parameterized queries (SqlParameter) |
+| **Input** | Zod (client) + manual validation (server) |
+| **File** | Chỉ nhận URL evidence, không upload file |
+| **Tauri** | CSP headers, IPC whitelist, no eval() |
+| **Audit** | Mọi Admin action ghi `tblAuditLog` |
 
 ---
 
-## 6. ERROR HANDLING STRATEGY
-
-### Phân loại lỗi theo tầng
+## 6. ERROR HANDLING
 
 | Tầng | Loại lỗi | Xử lý |
 |---|---|---|
-| **View** | Validation input | `MaterialDesignThemes.DialogHost` hoặc inline error message |
-| **ViewModel** | Logic validation | Set `ErrorMessage` property → View binding hiển thị |
-| **BUS** | Logic violation | Throw `BusinessException(code, message)` |
-| **DAL** | SQL error | Catch `SqlException`, log vào `tblAuditLog`, throw `DataException` |
-| **DAL** | Connection fail | Retry 3 lần (delay 500ms), throw `ConnectionException` |
-| **System** | Unhandled | `Application.DispatcherUnhandledException` → log + dialog |
-
-### Error Code Convention
-
-```csharp
-public enum ErrorCode {
-    // Auth (1xxx)
-    ERR_INVALID_CREDENTIALS = 1001,
-    ERR_ACCOUNT_LOCKED = 1002,
-    ERR_SESSION_EXPIRED = 1003,
-
-    // Team (2xxx)
-    ERR_TEAM_NAME_DUPLICATE = 2001,
-    ERR_PLAYER_ALREADY_IN_TEAM = 2002,
-    ERR_INSUFFICIENT_PLAYERS = 2003,
-    ERR_CAPTAIN_ALREADY_HAS_TEAM = 2004,
-    ERR_REGISTRATION_DEADLINE_PASSED = 2005,
-
-    // Bracket (3xxx)
-    ERR_INSUFFICIENT_TEAMS = 3001,
-    ERR_BRACKET_ALREADY_EXISTS = 3002,
-
-    // Check-in (4xxx)
-    ERR_CHECKIN_WINDOW_CLOSED = 4001,
-    ERR_ALREADY_CHECKEDIN = 4002,
-
-    // File (5xxx)
-    ERR_FILE_INVALID_EXTENSION = 5001,
-    ERR_FILE_INVALID_MAGIC_BYTES = 5002,
-    ERR_FILE_TOO_LARGE = 5003,
-
-    // Result (6xxx)
-    ERR_RESULT_ALREADY_SUBMITTED = 6001,
-    ERR_MATCH_NOT_LIVE = 6002,
-
-    // Dispute (7xxx)
-    ERR_DISPUTE_LIMIT_REACHED = 7001,
-
-    // DB (9xxx)
-    ERR_DB_CONNECTION = 9001,
-    ERR_DB_TRANSACTION = 9002,
-}
-```
+| **React** | Network error | Toast notification, retry button |
+| **React** | Validation | Inline error (React Hook Form + Zod) |
+| **API** | 401/403 | Redirect về Login, clear token |
+| **API** | 500 | Log + return `{ error: message }` |
+| **BUS** | Logic violation | Throw `BusinessException(code, msg)` → API 400 |
+| **DAL** | SqlException | Log → throw `DataException` → API 500 |
+| **DAL** | Connection fail | Retry 3 lần (500ms delay) |
 
 ---
 
-## 7. CODING STANDARDS & CONVENTIONS
-
-### Naming Convention
-
-| Element | Convention | Ví dụ |
-|---|---|---|
-| **View** | `[Name]View` | `LoginView`, `BracketView` |
-| **ViewModel** | `[Name]ViewModel` | `LoginViewModel`, `BracketViewModel` |
-| BUS Class | `[Name]BUS` | `AuthBUS`, `TeamBUS` |
-| DAL Class | `[Name]DAL` | `UserDAL`, `BracketDAL` |
-| DTO Class | `[Name]DTO` | `UserDTO`, `MatchDTO` |
-| Interface | `I` prefix | `IBracketStrategy`, `INavigationService` |
-| Command | `[Action]Command` | `LoginCommand`, `ApproveTeamCommand` |
-| XAML Resource | `[Type].[Name]` | `PrimaryBrush`, `CardStyle` |
-| Method | PascalCase | `GenerateBracket()` |
-| Variable | camelCase | `teamList`, `matchId` |
-| Constant | UPPER_SNAKE | `MAX_FILE_SIZE_BYTES` |
-| DB Table | `tbl` prefix | `tblUser`, `tblMatch` |
-
-### Code Quality Requirements
-- **View** chỉ bind vào ViewModel — **KHÔNG gọi BUS trực tiếp**
-- **ViewModel** gọi BUS, set properties → View tự cập nhật qua binding
-- **Mọi SQL** phải dùng `SqlParameter`
-- **Mọi connection** phải trong `using` block
-- **Mọi transaction** phải có `try-catch-rollback`
-- **Mọi BUS method** kiểm tra `session.IsSessionValid()`
-- **Mọi Admin action** gọi `auditBUS.Log()`
-
-### WPF-Specific Guidelines
-- Sử dụng `ObservableCollection<T>` thay vì `List<T>` cho danh sách hiển thị
-- Sử dụng `ICollectionView` cho filter/sort thay vì tạo list mới
-- Command parameter dùng `CommandParameter` binding, KHÔNG dùng Tag
-- Sử dụng `DispatcherTimer` cho countdown thay vì `System.Windows.Forms.Timer`
-- Static resources tập trung trong `Themes/` — không inline màu sắc
-
----
-
-## 8. DATABASE CONNECTION STRATEGY — v3.0
-
-### 8.1 Chuẩn WPF: IConfiguration (KHÔNG dùng ConfigurationManager)
+## 7. DATABASE CONNECTION STRATEGY — v4.0
 
 ```
-appsettings.json  ──►  ConfigurationBuilder  ──►  DBConnection (Singleton)  ──►  SqlConnection × N
+appsettings.json
+    └─► DBConnection.Configure(connStr)    [Program.cs startup]
+            └─► GetInstance()              [DAL classes]
+                    └─► new SqlConnection(_connStr)
+                            └─► using { ... } ExecuteReader/Scalar
 ```
 
-```csharp
-// DAL/DBConnection.cs — cách đọc chuẩn WPF
-private DBConnection()
-{
-    var config = new ConfigurationBuilder()
-        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .Build();
-
-    _connectionString = config.GetConnectionString("ETMSConnection")
-        ?? throw new InvalidOperationException("Connection string không tìm thấy.");
-}
-```
-
-### 8.2 appsettings.json
-
+**appsettings.json:**
 ```json
 {
   "ConnectionStrings": {
-    "ETMSConnection": "Server=<host>\\<instance>;Database=ETMS_DB;Trusted_Connection=True;TrustServerCertificate=True;Max Pool Size=100;Min Pool Size=5;"
+    "ETMSConnection": "Server=<host>\\<instance>;Database=ETMS_DB;Integrated Security=True;TrustServerCertificate=True;"
+  },
+  "JwtSettings": {
+    "Secret": "ETMS_JWT_Secret_Key_256bit_minimum_length_here",
+    "ExpiresMinutes": 30,
+    "Issuer": "ETMS.Api",
+    "Audience": "ETMS.Desktop"
   },
   "AppSettings": {
     "SessionTimeoutMinutes": 30,
     "MaxFailedLoginAttempts": 5,
     "BcryptWorkFactor": 12,
-    "MaxFileUploadSizeMB": 5,
     "DisputeSLAHours": 48,
     "MaxDisputesPerTournament": 2,
     "VetoTimeoutSeconds": 60,
@@ -331,15 +222,25 @@ private DBConnection()
 }
 ```
 
-### 8.3 Tóm tắt 16 Bảng Database
+---
 
-| Nhóm | Bảng |
-|---|---|
-| Auth | `tblUser` |
-| Tournament | `tblTournament`, **`tblGameConfig`** *(BỔ SUNG v3.0)* |
-| Team | `tblTeam`, `tblPlayer` |
-| Match | `tblMatch`, `tblMatchResult`, `tblMapVeto`, `tblSideSelect` |
-| Battle Royale | `tblBRRound`, `tblBRScore` |
-| System | `tblDispute`, **`tblNotification`** *(BỔ SUNG v3.0)*, `tblAuditLog` |
+## 8. CODING STANDARDS
 
-Script: `ETMS.Wpf/Database/ETMS_DB.sql` — 16 bảng, 13 indexes, 1 computed column, 5 UNIQUE constraints.
+### API Layer (C#)
+| Element | Convention | Ví dụ |
+|---|---|---|
+| Handler | `[Name]Handler` | `AuthHandler`, `TeamHandler` |
+| Record (request) | `[Name]Request` | `LoginRequest`, `CreateTeamRequest` |
+| BUS Class | `[Name]BUS` | `AuthBUS`, `TournamentBUS` |
+| DAL Class | `[Name]DAL` | `UserDAL`, `MatchDAL` |
+| DTO | `[Name]DTO` | `UserDTO`, `MatchDTO` |
+
+### Frontend (TypeScript/React)
+| Element | Convention | Ví dụ |
+|---|---|---|
+| Page | `[Name]Page.tsx` | `LoginPage.tsx` |
+| Component | PascalCase | `StatCard.tsx`, `MatchTable.tsx` |
+| Hook | `use[Name]` | `useAuth`, `useTournaments` |
+| Store | `[name]Store` | `authStore`, `tournamentStore` |
+| API function | camelCase | `api.login()`, `api.getTeams()` |
+| Type | PascalCase | `UserDTO`, `MatchDTO` |

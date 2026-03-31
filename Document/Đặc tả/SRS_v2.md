@@ -1,506 +1,639 @@
-# TÀI LIỆU ĐẶC TẢ YÊU CẦU PHẦN MỀM (SRS) — PHIÊN BẢN 3.0
-## Hệ thống Quản lý Giải đấu Esports — ETMS v3.0
+# TÀI LIỆU ĐẶC TẢ YÊU CẦU PHẦN MỀM (SRS)
+## Hệ thống Quản lý Giải đấu Esports — ETMS
 **Software Requirements Specification (IEEE 830)**
-**Phiên bản:** 3.0 | **Ngày:** 2026-03-29 | **Trường:** FIT TDTU | **Môn:** SE 502045
-
-> ⚠️ **Phiên bản 3.0: Nâng cấp công nghệ giao diện từ Windows Forms sang WPF (MVVM).**
-> Toàn bộ business logic (BUS/DAL) giữ nguyên — chỉ thay đổi tầng Presentation.
+**Phiên bản:** 4.0 | **Ngày:** 2026-03-31
+**Trường:** Đại học Tôn Đức Thắng – Khoa CNTT | **Môn:** Kỹ thuật Phần mềm (502045)
 
 ---
 
 ## 1. GIỚI THIỆU
 
-### 1.1 Phạm vi hệ thống
-- **Tên:** ETMS – Esports Tournament Management System
-- **Loại:** Windows Desktop Application (C# .NET / **WPF — MVVM Pattern**)
-- **Kiến trúc:** 3-Layer (View/ViewModel – BUS – DAL) kết hợp MVVM
-- **Trong phạm vi:** Quản lý toàn bộ vòng đời giải đấu: Pre → In → Post Tournament
-- **Ngoài phạm vi:** Streaming, thanh toán trực tuyến, ứng dụng mobile
+### 1.1 Mục đích
+Tài liệu này đặc tả đầy đủ yêu cầu chức năng và phi chức năng của hệ thống ETMS — phục vụ nhóm phát triển, giảng viên hướng dẫn và các bên liên quan.
 
-### 1.2 Lý do chuyển sang WPF
-
-| Tiêu chí | Windows Forms | **WPF (Đề xuất)** |
-|---|---|---|
-| Công nghệ giao diện | GDI+, pixel-based | Vector-based (XAML), resolution-independent |
-| Thiết kế UI | Kéo thả đơn giản, giới hạn | XAML — dark theme, gradient, animation, custom controls |
-| Data Binding | Thủ công, code-behind | Two-way binding tự động (INotifyPropertyChanged) |
-| Kiến trúc UI | Event-driven (code-behind) | **MVVM** — tách biệt View / ViewModel / Model |
-| Thư viện UI | Ít, cũ | MaterialDesignThemes, MahApps.Metro, LiveCharts |
-| Unit Test UI | Rất khó | Dễ — ViewModel test được mà không cần UI |
-| Responsive | Không | Yes — Grid, StackPanel, adaptive layout |
-| Custom Control | GDI+ phức tạp | UserControl/ControlTemplate dễ tùy chỉnh |
+### 1.2 Phạm vi hệ thống
+- **Tên hệ thống:** ETMS – Esports Tournament Management System
+- **Loại:** Cross-Platform Desktop Application (Windows / macOS / Linux)
+- **Kiến trúc:** 3-Tier — React UI ↔ ASP.NET Core API ↔ SQL Server
+- **Desktop Shell:** Tauri v2 — đóng gói native WebView, không cần browser
+- **Trong phạm vi:**
+  - Quản lý vòng đời giải đấu: đăng ký → duyệt → bracket → thi đấu → kết quả → vinh danh
+  - Hỗ trợ 2 format: Single Elimination và Battle Royale
+  - Hỗ trợ 6 thể loại game: MOBA, FPS, BattleRoyale, Fighting, RTS, Sports
+- **Ngoài phạm vi:** Livestream, thanh toán online, ứng dụng mobile riêng
 
 ### 1.3 Đối tượng sử dụng
 
-| Vai trò | Mô tả | Quyền hạn |
+| Vai trò | Mô tả | Quyền hạn chính |
 |---|---|---|
-| **Admin** | Ban tổ chức | Toàn quyền hệ thống |
-| **Captain** | Đội trưởng | Quản lý đội, check-in, nộp kết quả, khiếu nại |
-| **Player** | Tuyển thủ | Xem lịch, xem bracket |
-| **Guest** | Khách | Chỉ xem leaderboard và lịch sử |
+| **Admin** | Ban tổ chức giải đấu | Toàn quyền hệ thống — quản lý user, giải đấu, xét duyệt, kết quả, khiếu nại, audit |
+| **Captain** | Đội trưởng | Đăng ký đội, quản lý thành viên, check-in, nộp kết quả, khiếu nại (tối đa 2 lần/giải) |
+| **Player** | Tuyển thủ | Xem lịch thi đấu, xem bracket, xem kết quả, xem thông báo |
+| **Guest** | Khán giả/khách | Chỉ xem leaderboard và lịch sử giải công khai |
 
-### 1.4 Thuật ngữ bổ sung v3.0
+### 1.4 Thuật ngữ & Định nghĩa
 
 | Thuật ngữ | Giải nghĩa |
 |---|---|
-| **MVVM** | Model-View-ViewModel — pattern tách biệt UI logic ra khỏi View |
-| **XAML** | Extensible Application Markup Language — ngôn ngữ khai báo giao diện WPF |
-| **ViewModel** | Lớp trung gian giữa View (XAML) và BUS — chứa Commands, Properties |
-| **ICommand** | Interface chuẩn WPF — thay thế event Button_Click |
-| **DataTemplate** | Template hiển thị dữ liệu trong WPF (thay cho DataGridView) |
-| **Magic Bytes** | Bytes đầu tiên của file xác định loại thực sự |
-| **Session Timeout** | Phiên tự động hết hạn sau thời gian không hoạt động |
-| **WalkoverPending** | Trạng thái mới: Cả 2 đội không check-in, chờ Admin quyết định |
-| **Disqualified** | Đội bị loại do vi phạm nghiêm trọng |
+| **Tauri v2** | Desktop framework dựa trên Rust, đóng gói React app thành native desktop app dùng OS WebView |
+| **Sidecar** | Tiến trình con ETMS.Api (.NET) được Tauri khởi động và quản lý vòng đời |
+| **JWT** | JSON Web Token — token xác thực stateless, expire sau 30 phút |
+| **BCrypt** | Thuật toán hash mật khẩu có salt, cost factor = 12 |
+| **Single Elimination** | Thể thức loại trực tiếp: thua 1 trận = bị loại |
+| **Battle Royale** | Thể thức nhiều vòng tích lũy điểm: PlacementRank + KillPoints |
+| **BYE** | Trận giả khi số đội không phải lũy thừa 2 — đội được đi thẳng vòng sau |
+| **Walkover** | Trận thắng mặc định do đối thủ không check-in |
+| **WalkoverPending** | Trạng thái khi cả 2 đội đều không check-in, chờ Admin xử lý |
+| **Map Veto** | Quá trình Ban/Pick bản đồ theo lượt trước trận (FPS) |
+| **Side Selection** | Chọn phe Blue/Red đầu trận (MOBA) |
+| **Evidence URL** | Đường link ảnh chụp màn hình kết quả để xác minh |
+| **SLA** | Service Level Agreement — thời hạn xử lý khiếu nại: 48 giờ |
 
 ---
 
-## 2. YÊU CẦU CHỨC NĂNG (Functional Requirements) — v3.0
+## 2. YÊU CẦU CHỨC NĂNG
 
-> **Lưu ý:** Toàn bộ logic nghiệp vụ (BUS/DAL) **KHÔNG THAY ĐỔI** so với v2.0.
-> Chỉ thay đổi cách hiển thị: `frmXxx.cs` → `XxxView.xaml` + `XxxViewModel.cs`.
-
-### FR-1: Quản lý Tài khoản & Đăng nhập
+### FR-1: Quản lý Tài khoản & Xác thực
 
 #### UC-1.1: Đăng nhập hệ thống
 - **Actor:** Admin, Captain, Player, Guest
-- **Precondition:** Ứng dụng đang chạy, tài khoản tồn tại và chưa khóa
+- **Precondition:** Ứng dụng đang chạy; tài khoản đã tồn tại trong hệ thống
 - **Luồng chính:**
-  1. Nhập Username + Password → Click Đăng nhập
-  2. `AuthBUS.Login(username, password)`
-  3. DAL lấy `PasswordHash`, `IsLocked`, `FailedLoginAttempts` bằng Parameterized Query
-  4. Nếu `IsLocked = 1` → thông báo "Tài khoản bị khóa, liên hệ Admin", dừng
-  5. So sánh hash: không khớp → tăng `FailedLoginAttempts += 1`
-  6. Nếu `FailedLoginAttempts >= 5` → set `IsLocked = 1`, kết thúc
-  7. Khớp → reset `FailedLoginAttempts = 0`, tạo Session, chuyển Dashboard theo Role
-- **Ràng buộc:**
-  - Thông báo lỗi KHÔNG tiết lộ field nào sai: "Thông tin đăng nhập không chính xác"
-  - Mật khẩu hash bằng **bcrypt** (salt tự động) — KHÔNG dùng SHA-256 thuần
-  - Session có **LastActivityTime**; auto-expire sau **30 phút** không thao tác
-- **Giao diện:** `LoginView.xaml` + `LoginViewModel.cs`
+  1. Người dùng nhập Username và Password
+  2. Hệ thống gọi `POST /api/auth/login`
+  3. `AuthBUS.Login()` kiểm tra tài khoản trong DB
+  4. Kiểm tra `IsLocked`: nếu bị khóa → trả 403, hiển thị thông báo
+  5. Xác minh mật khẩu qua SHA-256 (hoặc BCrypt nếu nâng cấp)
+  6. Nếu sai: tăng `FailedLoginAttempts`; nếu ≥ 5 lần → khóa tài khoản
+  7. Nếu đúng: reset `FailedLoginAttempts`, tạo JWT token, trả `UserDTO + token`
+  8. React lưu token vào `sessionStorage`, điều hướng sang Dashboard theo Role
+- **Luồng ngoại lệ:**
+  - Tài khoản bị khóa → thông báo liên hệ Admin
+  - Sai mật khẩu ≥ 5 lần → tài khoản tự động khóa, gửi thông báo cho Admin
+  - Mạng/server lỗi → toast lỗi "Không thể kết nối server"
+- **Postcondition:** Token hợp lệ 30 phút lưu trong session; người dùng ở đúng Dashboard
+- **Ràng buộc:** Thông báo lỗi KHÔNG tiết lộ field nào sai
+- **API:** `POST /api/auth/login` → `{ token, user: { userID, username, fullName, role } }`
+- **Page:** `LoginPage.tsx`
 
-#### UC-1.2: Quản lý tài khoản (Admin)
-- **Actor:** Admin
-- **Chức năng:**
-  - Tạo tài khoản: Username unique, mật khẩu tạm thời bcrypt hash ngay
-  - Reset mật khẩu: tạo mật khẩu tạm thời → ghi vào `tblNotification`
-  - Khóa/Mở khóa: set `IsLocked`, reset `FailedLoginAttempts = 0` khi mở
-  - Xem danh sách tất cả tài khoản, lọc theo Role
-- **Giao diện:** `UserManagementView.xaml` + `UserManagementViewModel.cs`
+#### UC-1.2: Đăng xuất
+- **Actor:** Admin, Captain, Player
+- **Luồng chính:** Bấm Đăng xuất → xóa token khỏi `sessionStorage` → về `LoginPage.tsx`
+- **API:** `POST /api/auth/logout`
 
 #### UC-1.3: Đổi mật khẩu cá nhân
-- **Actor:** Captain, Player
-- **Luồng:** Nhập mật khẩu cũ → xác minh → nhập mật khẩu mới (≥ 8 ký tự, có chữ hoa + số) → bcrypt hash → UPDATE
+- **Actor:** Admin, Captain, Player
+- **Luồng chính:** Nhập mật khẩu cũ → nhập mật khẩu mới (≥ 8 ký tự, có chữ hoa và số) → xác nhận → hash và lưu
+- **Ràng buộc:** Mật khẩu mới ≠ mật khẩu cũ
+- **API:** `PATCH /api/auth/change-password`
+
+#### UC-1.4: Admin quản lý tài khoản
+- **Actor:** Admin
+- **Chức năng:** Tạo/xóa tài khoản; Khóa/mở khóa; Reset mật khẩu; Phân vai (Admin/Captain/Player/Guest)
+- **Ràng buộc:** Không thể xóa tài khoản Admin duy nhất của hệ thống
+- **API:** `GET /api/users` | `POST /api/users` | `PATCH /api/users/{id}/lock` | `PATCH /api/users/{id}/reset-password`
+- **Page:** `UserManagementPage.tsx`
 
 ---
 
-### FR-2: Đăng ký & Xét duyệt Đội tuyển
+### FR-2: Cấu hình & Tạo Giải đấu
 
-#### UC-2.1: Captain tạo hồ sơ đội
-- **Actor:** Captain
-- **Precondition:** Captain đăng nhập. Tournament Status = `Registration`.
-- **Ràng buộc BUS:**
-  1. `TeamBUS.ValidateTeamName(name, tournamentId)` — tên đội UNIQUE trong Tournament
-  2. `TeamBUS.ValidatePlayerNotInOtherTeam(userId, tournamentId)` — kiểm tra từng thành viên
-  3. Số thành viên **≥ MinPlayersPerTeam** (lấy từ `tblTournament`)
-  4. Captain chỉ được tạo **1 đội** trong cùng Tournament
-  5. Deadline đăng ký: Tournament.RegistrationDeadline — sau deadline không được nộp
-
-#### UC-2.2: Admin xét duyệt hồ sơ
-- Approve → `Status = 'Approved'` → `NotificationBUS.Notify(captainId, "Đội đã được duyệt")`
-- Reject → nhập lý do → `Status = 'Rejected'` → `NotificationBUS.Notify(captainId, reason)`
-- Admin có thể **Disqualify** đội đang thi đấu (vi phạm nghiêm trọng):
-  - Team `Status = 'Disqualified'`
-  - Các trận hiện tại/tương lai → đối thủ thắng Walkover
-  - Ghi vào `tblAuditLog`
-
----
-
-### FR-3: Quản lý Tournament
-
-#### UC-3.0: Admin tạo & cấu hình Tournament
-- **Thông tin cơ bản:** Name, GameType, Format, StartDate, EndDate, MaxTeams, MinPlayersPerTeam
-- `RegistrationDeadline`: hạn chót đăng ký đội
-- Sau khi tạo Tournament, Admin cấu hình `tblGameConfig`:
+#### UC-2.1: Admin tạo giải đấu
+- **Actor:** Admin
+- **Precondition:** Đã đăng nhập với Role = Admin
+- **Thông tin tạo:**
+  - Tên giải; Thể loại game (MOBA/FPS/BattleRoyale/Fighting/RTS/Sports)
+  - Format (SingleElimination / BattleRoyale)
+  - Ngày bắt đầu; Ngày hết hạn đăng ký; Số đội tối đa; Số thành viên tối thiểu/tối đa
+  - Mô tả giải
+- **GameConfig (tự động gợi ý theo GameType):**
   - `BestOf`: 1 / 3 / 5
-  - `MapPool`: JSON — cho FPS
-  - `VetoSequence`: JSON — thứ tự ban/pick
-  - `KillPointPerKill`: điểm mỗi kill — cho Battle Royale
-  - `RankingPointTable`: JSON điểm theo thứ hạng
-- **Status transitions:** `Draft → Registration → Active → Completed / Cancelled`
+  - `MapPool` (FPS/RTS): danh sách tên bản đồ JSON
+  - `VetoSequence` (FPS): ["Ban","Ban","Pick","Pick","Ban","Ban","Pick"]
+  - `KillPointPerKill` (BR): điểm cho mỗi kill
+  - `RankingPointTable` (BR): bảng điểm theo vị trí {"1":25,"2":18,...}
+- **Postcondition:** Tournament có Status = "Draft"
+- **API:** `POST /api/tournaments`
+- **Page:** `TournamentSetupPage.tsx` (UI thay đổi theo GameType được chọn)
 
-#### UC-3.1: Tạo Bracket tự động ★ TRỌNG TÂM
-- **Precondition:** ≥ 2 đội Approved, Tournament Status = `Registration`
-- Nếu `BracketGenerated = 1` → dialog xác nhận "Tạo lại sẽ xóa bracket cũ"
-- **Nếu xác nhận tạo lại:** `BracketDAL.DeleteBracket(tournamentId)` trong SQL Transaction
-- **Thuật toán:**
-  ```
-  1. GetApprovedTeams(tournamentId) → N đội
-  2. FisherYatesShuffle(teams)
-  3. slots = NextPowerOf2(N); byeCount = slots - N
-  4. Đội seed 1..byeCount → Bye (auto-win, IsBye=1, Status='Completed')
-  5. Đội còn lại → cặp đấu vòng 1
-  6. Xây vòng 2,3...Final với NextMatchID Linked List
-  7. SaveBracket() trong 1 SQL Transaction
-  8. UPDATE tblTournament SET Status='Active', BracketGenerated=1
-  ```
+#### UC-2.2: Admin chỉnh sửa giải đấu
+- **Actor:** Admin
+- **Ràng buộc:** Chỉ chỉnh sửa khi Status ∈ {Draft, Registration}
+- **API:** `PATCH /api/tournaments/{id}`
+
+#### UC-2.3: Admin chuyển trạng thái giải đấu
+- **Trạng thái hợp lệ:** Draft → Registration → Active → Completed
+- **Hủy bất cứ lúc nào:** → Cancelled
+- **Ràng buộc:** Chỉ Admin mới thay đổi được trạng thái
+- **API:** `PATCH /api/tournaments/{id}/status`
 
 ---
 
-### FR-4: Lên lịch & Check-in
+### FR-3: Đăng ký & Xét duyệt Đội tuyển
 
-#### UC-4.1: Admin lên lịch thi đấu
-- Đặt `ScheduledTime` cho mỗi trận
-- `CheckInOpenTime = ScheduledTime - 15 phút`
-- Scheduling Conflict Check: `MatchBUS.HasSchedulingConflict(teamId, scheduledTime)` — warn Admin
-- Admin có thể **hoãn trận** (`Status = 'Postponed'`)
+#### UC-3.1: Captain đăng ký đội
+- **Actor:** Captain
+- **Precondition:** Tournament đang ở Status = "Registration"; trong thời hạn đăng ký
+- **Thông tin:** Tên đội (unique/giải); Logo URL; Danh sách thành viên (InGameID, FullName)
+- **Ràng buộc:**
+  - Số thành viên ≥ MinPlayersPerTeam (theo GameType)
+  - Mỗi Captain chỉ đăng ký 1 đội/giải
+  - 1 Player chỉ thuộc 1 đội/giải
+- **Postcondition:** Team có Status = "Pending"
+- **API:** `POST /api/teams`; `POST /api/teams/{id}/players`
+- **Page:** `TeamManagementPage.tsx`
 
-#### UC-4.2: Captain Check-in
-- Timer kích hoạt mở cổng lúc `CheckInOpenTime`
-- Captain bấm "Xác nhận tham dự" trong 15 phút
-- DAL: `IsolationLevel.Serializable` để tránh race condition
-- Cả 2 đội check-in → `Status = 'Live'`, `ActualStartTime = NOW()`
+#### UC-3.2: Admin xét duyệt đội
+- **Actor:** Admin
+- **Precondition:** Đội có Status = "Pending"
+- **Luồng Approve:** Kiểm tra đủ thành viên → cập nhật Status = "Approved" → gửi Notification cho Captain
+- **Luồng Reject:** Điền lý do → Status = "Rejected" → gửi Notification cho Captain
+- **Postcondition:** Captain nhận thông báo kết quả
+- **API:** `PATCH /api/teams/{id}/approve` | `PATCH /api/teams/{id}/reject`
 
-#### UC-4.3: Xử lý Walkover
-- **Case A:** Chỉ đội 1 check-in → Đội 1 thắng Walkover
-- **Case B:** Chỉ đội 2 check-in → Đội 2 thắng Walkover
-- **Case C:** Cả 2 không check-in → `Status = 'WalkoverPending'`
-  - Admin quyết định: chọn winner thủ công HOẶC hủy trận
-  - `NotificationBUS.Notify()` cho cả 2 Captain
-
----
-
-### FR-5: Game-Specific Workflow
-
-#### UC-5.1: Map Veto (FPS — Valorant, CS:GO)
-- **Precondition:** GameType = `FPS`, cả 2 đã check-in
-- **Thứ tự veto** lấy từ `tblGameConfig.VetoSequence`
-- **Ai ban trước:** Đội có `MatchOrder` nhỏ hơn (Team1)
-- **Timeout mỗi lượt:** 60 giây → hệ thống tự random ban 1 map
-- Lưu vào `tblMapVeto`; sau khi hoàn thành → Match Status = `Live`
-
-#### UC-5.2: Side Selection (MOBA — LoL, Dota 2)
-- **Precondition:** GameType = `MOBA`, cả 2 đã check-in
-- Random → Captain được chọn chọn Blue Side hoặc Red Side trong 60 giây
-- Quá giờ → hệ thống tự random gán
-- Lưu vào `tblSideSelect`
+#### UC-3.3: Admin loại đội (thi đấu)
+- **Actor:** Admin (trong quá trình giải diễn ra)
+- **Lý do:** Vi phạm quy tắc, sử dụng cheat
+- **Postcondition:** Status = "Disqualified"; các trận tiếp theo → Walkover cho đội còn lại
+- **API:** `PATCH /api/teams/{id}/disqualify`
 
 ---
 
-### FR-6: Báo cáo & Xác thực Kết quả
+### FR-4: Tạo Bracket Tự Động
 
-#### UC-6.1: Captain nộp kết quả
-- **Conflict Resolution Rules:**
-  - Mỗi trận chỉ có **1 bản ghi** `tblMatchResult` (UNIQUE constraint)
-  - Nếu đã có submission → Captain đội kia có thể **phản đối** (trigger Dispute)
-- **Validation BUS:**
-  1. `ValidateFileExtension()`: chỉ `.jpg`, `.png`
-  2. `ValidateFileMagicBytes()`: đọc 4 bytes đầu (JPG: `FF D8 FF`, PNG: `89 50 4E 47`)
-  3. `ValidateFileSize()`: < 5MB
-- Nếu trận Status = `Disputed` hơn 24h → Auto-notify Admin
+#### UC-4.1: Admin tạo bracket (Single Elimination)
+- **Actor:** Admin
+- **Precondition:** Tournament Status = "Registration" đã đóng; ≥ 2 đội được duyệt
+- **Luồng:**
+  1. Admin bấm "Tạo Bracket"
+  2. Hệ thống lấy danh sách đội Approved
+  3. Xáo trộn ngẫu nhiên (hoặc theo seed thứ hạng)
+  4. Nếu số đội không phải lũy thừa 2 → tạo BYE matches (đội đi thẳng)
+  5. Tạo `tblMatch` đầy đủ (Round, MatchOrder, NextMatchID linked list)
+  6. Status Tournament → "Active"
+- **Postcondition:** Bracket hiển thị đầy đủ trên BracketViewPage
+- **API:** `POST /api/tournaments/{id}/generate-bracket`
+- **Page:** `BracketViewPage.tsx`
 
-#### UC-6.2: Admin xác thực kết quả
-- Phê duyệt → UPDATE match + advance bracket, INSERT AuditLog (trong SQL Transaction)
-- Từ chối → `Status = 'Disputed'` + Notify Captain
-- Admin có thể **nhập kết quả trực tiếp** (bypass)
-
----
-
-### FR-7: Thống kê & Hall of Fame
-
-#### UC-7.1: Leaderboard
-- **Single Elimination:** Bracket tree + Top 3
-- **Battle Royale — Tie-breaker:** `ORDER BY TotalPoints DESC, DirectH2H DESC, TotalKillPoints DESC`
-- Lọc theo Tournament, xem lịch sử
-- Guest xem không cần đăng nhập
-
-#### UC-7.2: Hall of Fame
-- Lưu trữ: TournamentName, Champion, Runner-up, Third Place
-- Xuất dữ liệu ra file `.csv`
+#### UC-4.2: Xem bracket
+- **Actor:** Tất cả
+- **Mô tả:** Hiển thị cây bracket dạng visual, cập nhật realtime sau mỗi kết quả
+- **API:** `GET /api/tournaments/{id}/bracket`
 
 ---
 
-### FR-8: Hệ thống Khiếu nại
+### FR-5: Check-in Trận đấu
 
-#### UC-8.1: Gửi khiếu nại
-- Mỗi đội tối đa **2 khiếu nại** mỗi Tournament
-- Nội dung: loại vi phạm + mô tả + bằng chứng (≤ 10MB, .jpg/.png/.mp4)
-- Phân loại: `Hack/Cheat`, `Sai điểm số`, `Người ngoài danh sách`, `Khác`
+#### UC-5.1: System mở cửa sổ check-in
+- **Trigger:** Trước giờ thi đấu `DefaultCheckInMinutes` phút (theo GameType)
+  - MOBA/FPS/RTS/Sports: 15 phút | BR: 30 phút | Fighting: 10 phút
+- **Hành động:** Status trận đổi thành "CheckInOpen"; gửi Notification cho 2 Captain
 
-#### UC-8.2: Giải quyết khiếu nại
-- **SLA: 48 giờ** từ khi tạo
-- Quá SLA → auto-notify Admin lần 2
-- Resolve → `AdminNote`, `ResolvedAt`, `ResolvedBy`
+#### UC-5.2: Captain check-in
+- **Actor:** Captain (của Team1 hoặc Team2)
+- **Luồng:** Bấm Check-in → set `CheckIn_TeamX = 1` trong `tblMatch`
+- **API:** `POST /api/matches/{id}/checkin`
+- **Page:** `CheckInPage.tsx`
 
----
-
-### FR-9: Cấu hình Game Metadata
-- Admin cấu hình `tblGameConfig` cho mỗi Tournament
-- Không thể sửa sau Tournament Status = `Active`
-
----
-
-### FR-10: Hệ thống Thông báo In-App
-- Các sự kiện kích hoạt thông báo:
-
-| Sự kiện | Người nhận | Nội dung |
-|---|---|---|
-| Đội được Approve | Captain | "Đội [tên] đã được duyệt!" |
-| Đội bị Reject | Captain | "Đội [tên] bị từ chối: [lý do]" |
-| Check-in mở | Cả 2 Captain | "Check-in mở cho trận [X]" |
-| Walkover | Cả 2 Captain | "Trận [X]: [đội] thắng Walkover" |
-| Kết quả chờ xác nhận | Admin | "Có kết quả mới chờ xác nhận" |
-| Khiếu nại mới | Admin | "Khiếu nại mới từ đội [X]" |
-| Reset mật khẩu | User | "Mật khẩu tạm thời mới: [pwd]" |
-
-- Badge số trên Dashboard, mark as read khi click
+#### UC-5.3: Xử lý kết quả check-in
+- **Cả 2 check-in:** Status → "Live"
+- **Chỉ 1 check-in:** Khi hết giờ → Status → "Walkover" (đội check-in thắng)
+- **0 check-in:** Status → "WalkoverPending" → Admin quyết định
+- **Ràng buộc:** Không thể check-in sau khi hết cửa sổ
 
 ---
 
-### FR-11: Audit Log
-- Mọi action quan trọng của Admin ghi vào `tblAuditLog`
-- Cấu trúc: `UserID, Action, Timestamp, Detail, AffectedEntity, AffectedEntityID`
+### FR-6: Map Veto (FPS)
+
+#### UC-6.1: Tiến hành veto bản đồ
+- **Actor:** Captain (của đội đang đến lượt)
+- **Precondition:** Match Status = "Live"; GameType = FPS; đến lượt đội này
+- **Luồng:**
+  1. Hệ thống hiển thị MapPool theo VetoSequence
+  2. Đến lượt: Captain chọn Ban hoặc Pick 1 map trong 60 giây
+  3. Timeout → hệ thống tự động chọn ngẫu nhiên
+  4. Lưu vào `tblMapVeto` (MatchID, TeamID, MapName, Action, VetoOrder)
+  5. Khi hoàn thành — chuyển sang Side Selection (MOBA) hoặc bắt đầu trận
+- **Postcondition:** Danh sách map đã chọn (Pick) xác định; các map bị loại (Ban) không dùng
+- **API:** `POST /api/matches/{id}/veto`
+- **Page:** `MapVetoPage.tsx`
 
 ---
 
-## 3. YÊU CẦU PHI CHỨC NĂNG (NFR) — v3.0
+### FR-7: Side Selection (MOBA)
 
-### NFR-1: Bảo mật
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| NFR-1.1 | Mật khẩu hash bcrypt | BCrypt.Net-Next (cost factor ≥ 10) |
-| NFR-1.2 | Chống SQL Injection | `SqlCommand` với `Parameters` bắt buộc toàn DAL |
-| NFR-1.3 | RBAC | `SessionManager.HasRole()` kiểm tra trước mỗi action |
-| NFR-1.4 | Chặn truy cập trái phép | **ViewModel** kiểm tra quyền; Navigation Service chặn route |
-| NFR-1.5 | File upload MIME check | Magic bytes: JPG=`FFD8FF`, PNG=`89504E47` |
-| NFR-1.6 | Session timeout | `LastActivityTime` + DispatcherTimer 1 phút; logout sau 30' idle |
-| NFR-1.7 | Connection string bảo mật | `appsettings.json` (DPAPI encrypt hoặc User Secrets) |
-
-### NFR-2: Toàn vẹn Dữ liệu
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| NFR-2.1 | Race condition check-in | `IsolationLevel.Serializable` |
-| NFR-2.2 | Bracket atomic | INSERT bracket trong 1 Transaction |
-| NFR-2.3 | File upload validation | Extension + Magic Bytes + Size |
-| NFR-2.4 | Referential Integrity | FK constraints trong SQL Server |
-| NFR-2.5 | Scheduling conflict | `MatchBUS.HasSchedulingConflict()` warn Admin |
-| NFR-2.6 | Result uniqueness | `UNIQUE(MatchID)` trên `tblMatchResult` |
-| NFR-2.7 | Computed TotalPoints | `TotalPoints AS (RankingPoints + KillPoints) PERSISTED` |
-
-### NFR-3: Hiệu năng
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| NFR-3.1 | Live search không lag | **WPF CollectionViewSource** + ICollectionView filter |
-| NFR-3.2 | Index DB | Index trên `TournamentID`, `TeamID`, `MatchID`, `Status` |
-| NFR-3.3 | Connection pooling | `Max Pool Size=100; Min Pool Size=5` |
-
-### NFR-4: Khả năng mở rộng
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| NFR-4.1 | Nhiều loại game | `GameType` + `tblGameConfig` |
-| NFR-4.2 | Strategy Pattern | `IBracketStrategy` interface |
-
-### NFR-5: Độ tin cậy
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| NFR-5.1 | Đồng thời nhiều Check-in | Serializable Transaction + connection pool |
-| NFR-5.2 | DB error không crash app | Try-catch toàn DAL, thông báo lỗi thân thiện |
-| NFR-5.3 | Dispute SLA | Cảnh báo tự động sau 48h chưa resolve |
-
-### NFR-6: Giao diện người dùng (MỚI v3.0)
-
-| ID | Yêu cầu | Giải pháp |
-|---|---|---|
-| **NFR-6.1** | Dark theme Esports | MaterialDesignThemes — dark palette tùy chỉnh |
-| **NFR-6.2** | Responsive layout | WPF Grid/DockPanel — adaptive khi resize |
-| **NFR-6.3** | Smooth transitions | WPF Storyboard animations — page transition |
-| **NFR-6.4** | Icon system | Material Design Icons (XAML vector icons) |
+#### UC-7.1: Chọn phe thi đấu
+- **Actor:** Captain (đội thắng flip coin)
+- **Precondition:** Match Status = "Live"; GameType = MOBA
+- **Luồng:** Đội thắng coin toss chọn Blue hoặc Red → lưu vào `tblSideSelect`
+- **API:** `POST /api/matches/{id}/side-select`
+- **Page:** `SideSelectPage.tsx`
 
 ---
 
-## 4. ĐẶC TẢ DỮ LIỆU — v3.0 (Database Schema — 16 bảng)
+### FR-8: Nộp & Xác nhận Kết quả
 
-> Schema database **đã cập nhật v3.0** — bổ sung `tblNotification` (ERD-07) và `tblGameConfig` (ERD-02).
-> Tổng: **16 bảng, 13 indexes, 1 computed column, 5 UNIQUE constraints**.
-> Script đầy đủ: `Database/ETMS_DB.sql`
+#### UC-8.1: Captain nộp kết quả
+- **Actor:** Captain (của đội thắng — hoặc bất kỳ Captain nào trong trận)
+- **Precondition:** Match Status = "Live" hoặc đang thi đấu
+- **Thông tin nộp:**
+  - Score1, Score2 (số game thắng trong BestOf)
+  - Evidence URL (link screenshot bắt buộc)
+- **Postcondition:** `tblMatchResult` với Status = "PendingVerification"
+- **API:** `POST /api/matches/{id}/result`
+- **Page:** `ResultSubmitPage.tsx`
 
-### 4.1 Danh sách 16 bảng
+#### UC-8.2: Admin xác nhận kết quả
+- **Actor:** Admin
+- **Luồng Verify:**
+  1. Xem evidence URL, kiểm tra score
+  2. Bấm "Xác nhận" → Status = "Verified"
+  3. Cập nhật `tblMatch.WinnerID`, `LoserID`
+  4. Đẩy Winner lên trận tiếp theo (NextMatchID) trong bracket
+  5. Gửi Notification cho cả 2 Captain
+- **Luồng Reject:** Admin từ chối → Status = "Rejected" → yêu cầu nộp lại
+- **Ràng buộc:** Chỉ Admin mới xác nhận được
+- **API:** `PATCH /api/results/{id}/verify` | `PATCH /api/results/{id}/reject`
 
-| # | Bảng | Mô tả | Ghi chú |
-|---|---|---|---|
-| 1 | `tblUser` | Tài khoản người dùng | `FailedLoginAttempts`, `Email` |
-| 2 | `tblTournament` | Giải đấu | `RegistrationDeadline`, `BracketGenerated` |
-| 3 | `tblGameConfig` | Cấu hình game/tournament | **BỔ SUNG v3.0** — MapPool, BestOf, VetoSequence |
-| 4 | `tblTeam` | Đội tuyển | `UQ(TournamentID, Name)`, `UQ(TournamentID, CaptainID)` |
-| 5 | `tblPlayer` | Tuyển thủ | FK cascade từ Team |
-| 6 | `tblMatch` | Trận đấu (★ Linked List) | Self-FK `NextMatchID`, 9 trạng thái |
-| 7 | `tblMatchResult` | Kết quả trận đấu | `UNIQUE(MatchID)` — mỗi trận 1 result |
-| 8 | `tblMapVeto` | Cấm/chọn bản đồ (FPS) | Cascade từ Match |
-| 9 | `tblSideSelect` | Chọn phe (MOBA) | Cascade từ Match |
-| 10 | `tblBRRound` | Vòng Battle Royale | `UQ(TournamentID, RoundNumber)` |
-| 11 | `tblBRScore` | Điểm BR | `TotalPoints` computed column PERSISTED |
-| 12 | `tblDispute` | Khiếu nại | Category: HackCheat/WrongScore/Other |
-| 13 | `tblNotification` | Thông báo In-App | **BỔ SUNG v3.0** — Type, IsRead, RelatedEntity |
-| 14 | `tblAuditLog` | Nhật ký kiểm toán | AffectedEntity + AffectedEntityID |
+---
 
-### 4.2 Indexes (Performance NFR-3.2)
+### FR-9: Khiếu nại Kết quả
 
-| Index | Bảng | Cột | Mục đích |
-|---|---|---|---|
-| IX_User_Username | tblUser | Username | Login lookup |
-| IX_User_Role | tblUser | Role | Filter by role |
-| IX_Tournament_Status | tblTournament | Status | Dashboard filter |
-| IX_Team_TournamentID | tblTeam | TournamentID | Team listing |
-| IX_Team_Status | tblTeam | Status | Pending approval |
-| IX_Match_TournamentID | tblMatch | TournamentID | Match listing |
-| IX_Match_Status | tblMatch | Status | Live matches |
-| IX_Match_ScheduledTime | tblMatch | ScheduledTime | Schedule view |
-| IX_Notification_Recipient | tblNotification | RecipientID, IsRead | Badge count |
-| IX_AuditLog_Timestamp | tblAuditLog | Timestamp DESC | Recent actions |
+#### UC-9.1: Captain nộp khiếu nại
+- **Actor:** Captain
+- **Precondition:** Kết quả trận đã được xác nhận; trong vòng 24 giờ sau trận
+- **Giới hạn:** Tối đa 2 khiếu nại/Captain/giải đấu
+- **Thông tin:**
+  - Danh mục: HackCheat | WrongScore | UnauthorizedPlayer | Other
+  - Mô tả (bắt buộc, tối đa 1000 ký tự)
+  - Evidence URL (khuyến nghị)
+- **Postcondition:** `tblDispute` với Status = "Open"; Admin nhận Notification
+- **API:** `POST /api/disputes`
+- **Page:** `DisputeManagePage.tsx`
 
-### 4.3 Connection String
+#### UC-9.2: Admin giải quyết khiếu nại
+- **Actor:** Admin
+- **SLA:** Xử lý trong vòng 48 giờ kể từ khi nhận
+- **Luồng Upheld (chấp nhận):** Lật ngược kết quả trận → cập nhật bracket → thông báo
+- **Luồng Dismissed (bác bỏ):** Ghi lý do → đóng khiếu nại → thông báo
+- **API:** `PATCH /api/disputes/{id}/resolve`
 
-```json
-{
-  "ConnectionStrings": {
-    "ETMSConnection": "Server=<hostname>\\<instance>;Database=ETMS_DB;Trusted_Connection=True;TrustServerCertificate=True;Max Pool Size=100;Min Pool Size=5;"
-  }
-}
+---
+
+### FR-10: Xếp hạng & Thống kê
+
+#### UC-10.1: Bảng xếp hạng Single Elimination
+- Hiển thị thứ tự các đội theo kết quả thi đấu (Vô địch → Á quân → ...)
+- **API:** `GET /api/tournaments/{id}/leaderboard`
+- **Page:** `LeaderboardPage.tsx`
+
+#### UC-10.2: Battle Royale Scoring
+- **Actor:** Admin
+- **Precondition:** Tournament Format = BattleRoyale
+- **Luồng mỗi vòng:**
+  1. Admin nhập PlacementRank và KillPoints cho từng đội
+  2. `TotalPoints = RankingPoints (lookup RankingPointTable) + KillPoints × KillPointPerKill` (Computed Column DB)
+  3. Cộng dồn theo các vòng
+- **Bảng tổng kết:** Xếp hạng theo TotalPoints tích lũy toàn giải
+- **API:** `POST /api/br/scores` | `GET /api/br/{tournamentId}/leaderboard`
+
+#### UC-10.3: Thống kê tổng quan (Dashboard)
+- **Actor:** Admin
+- **Hiển thị:** Số giải Active/Registration; đội chờ duyệt; trận hôm nay; khiếu nại mở
+- **API:** `GET /api/overview/stats`
+- **Page:** `DashboardPage.tsx`
+
+---
+
+### FR-11: Lịch thi đấu
+
+#### UC-11.1: Xem lịch thi đấu
+- **Actor:** Tất cả
+- **Nội dung:** Trận, Đội, Giờ thi đấu, Trạng thái, Map (FPS), Vòng
+- **Lọc:** Theo Tournament; Theo ngày; Theo trạng thái
+- **API:** `GET /api/matches?tournamentId={id}`
+- **Page:** `MatchSchedulePage.tsx`
+
+---
+
+### FR-12: Thông báo In-App
+
+#### UC-12.1: Gửi thông báo tự động
+- **Trigger và nội dung:**
+  | Sự kiện | Người nhận | Loại |
+  |---|---|---|
+  | Team được duyệt | Captain | Success |
+  | Team bị từ chối | Captain | Warning |
+  | Nhắc check-in (T-15min) | Captain | Action |
+  | Walkover xảy ra | Captain bị thua | Warning |
+  | Kết quả được xác nhận | Cả 2 Captain | Info |
+  | Khiếu nại mới | Admin | Action |
+  | Khiếu nại được giải quyết | Captain nộp | Info |
+  | Hồ sơ đội mới chờ duyệt | Admin | Action |
+
+#### UC-12.2: Quản lý thông báo
+- **Actor:** Tất cả
+- Bell icon hiển thị số thông báo chưa đọc
+- Bấm → đánh dấu đã đọc
+- **API:** `GET /api/notifications` | `PATCH /api/notifications/{id}/read` | `PATCH /api/notifications/read-all`
+- **Page:** `NotificationsPage.tsx`
+
+---
+
+### FR-13: Audit Log
+
+#### UC-13.1: Ghi nhật ký tự động
+- **Trigger:** Mọi hành động Admin (CREATE, UPDATE, DELETE, APPROVE, REJECT, VERIFY, RESOLVE, LOCK...)
+- **Thông tin ghi:** UserID, Action, Detail, Timestamp, AffectedEntity, AffectedEntityID, Result
+- Không thể chỉnh sửa hoặc xóa AuditLog
+
+#### UC-13.2: Admin xem nhật ký
+- **Lọc:** Theo user; theo action; theo ngày; theo kết quả (Success/Failed)
+- **API:** `GET /api/audit-log?userId=&action=&from=&to=`
+- **Page:** `AuditLogPage.tsx`
+
+---
+
+### FR-14: Hỗ Trợ Đa Thể Loại Game
+
+#### UC-14.1: Danh mục GameType & cơ chế
+
+| GameType | Ví dụ | Format | Map Veto | Side Select | BR Scoring | MinPlayers | CheckIn |
+|---|---|---|---|---|---|---|---|
+| **MOBA** | LoL, DOTA 2, Liên Quân | SingleElimination | ❌ | ✅ | ❌ | 5 | 15 phút |
+| **FPS** | VALORANT, CS2 | SingleElimination | ✅ | ❌ | ❌ | 5 | 15 phút |
+| **BattleRoyale** | PUBG Mobile, Apex | BattleRoyale | ❌ | ❌ | ✅ | 4 | 30 phút |
+| **Fighting** | Tekken 8, SF6 | SingleElimination | ❌ | ❌ | ❌ | 1 | 10 phút |
+| **RTS** | StarCraft II, AoE IV | SingleElimination | ❌ (Map Pool) | ❌ | ❌ | 1 | 15 phút |
+| **Sports** | EA FC 25, NBA 2K | SingleElimination | ❌ | ❌ | ❌ | 1 | 15 phút |
+
+#### UC-14.2: Logic tự động theo GameType
+```
+Khi Admin chọn GameType → UI và API tự động điều chỉnh:
+  MOBA         → hiện Side Selection UI; ẩn MapVeto; ẩn BR Scoring
+  FPS          → hiện MapVeto UI; ẩn SideSelection; ẩn BR Scoring
+  BattleRoyale → hiện BR Scoring UI; ẩn MapVeto; ẩn SideSelection
+  Fighting     → ẩn tất cả UI đặc biệt; Best-of đơn giản
+  RTS          → hiện MapPool (chọn map, không veto); ẩn các phần khác
+  Sports       → ẩn tất cả; chỉ nhập Score
 ```
 
-Đọc bằng `IConfiguration` (WPF) từ `appsettings.json` — **KHÔNG dùng `ConfigurationManager`**.
+#### UC-14.3: Format thi đấu
 
-
-
-## 5. DANH SÁCH MÀN HÌNH & CLASS — v3.0
-
-### 5.1 Views (WPF XAML) — thay thế Windows Forms
-
-| View | File XAML | File ViewModel | Chức năng |
-|---|---|---|---|
-| Đăng nhập | `LoginView.xaml` | `LoginViewModel.cs` | Đăng nhập, session |
-| Dashboard | `DashboardView.xaml` | `DashboardViewModel.cs` | Navigation, badge thông báo, RBAC |
-| Cấu hình giải đấu | `TournamentSetupView.xaml` | `TournamentSetupViewModel.cs` | Tạo/sửa Tournament + GameConfig |
-| Quản lý đội | `TeamManagementView.xaml` | `TeamManagementViewModel.cs` | Đăng ký, xét duyệt, disqualify |
-| Xem Bracket | `BracketView.xaml` | `BracketViewModel.cs` | Render cây nhánh đấu (Canvas/DrawingVisual) |
-| Lịch thi đấu | `MatchScheduleView.xaml` | `MatchScheduleViewModel.cs` | Lên lịch, hoãn, conflict warning |
-| Check-in | `CheckInView.xaml` | `CheckInViewModel.cs` | Countdown, xác nhận, walkover |
-| Map Veto | `MapVetoView.xaml` | `MapVetoViewModel.cs` | Ban/pick UI + countdown 60s |
-| Side Selection | `SideSelectView.xaml` | `SideSelectViewModel.cs` | Blue/Red side |
-| Nộp kết quả | `ResultSubmitView.xaml` | `ResultSubmitViewModel.cs` | Upload, validate, submit |
-| Leaderboard | `LeaderboardView.xaml` | `LeaderboardViewModel.cs` | Bảng xếp hạng, Hall of Fame, export |
-| Khiếu nại | `DisputeManageView.xaml` | `DisputeManageViewModel.cs` | Gửi & giải quyết tranh chấp |
-| Thông báo | `NotificationView.xaml` | `NotificationViewModel.cs` | Danh sách thông báo |
-| Audit Log | `AuditLogView.xaml` | `AuditLogViewModel.cs` | Xem lịch sử Admin |
-| Quản lý user | `UserManagementView.xaml` | `UserManagementViewModel.cs` | Tạo/khóa/reset tài khoản |
-
-### 5.2 MVVM Infrastructure (MỚI v3.0)
-
-| Class | Trách nhiệm |
-|---|---|
-| `ViewModelBase` | Abstract — INotifyPropertyChanged, SetProperty helper |
-| `RelayCommand` | ICommand implementation — thay thế event handlers |
-| `NavigationService` | Điều hướng giữa các View — thay thế `this.Hide(); form.Show()` |
-| `DialogService` | MessageBox/Confirm dialog wrapper — dễ unit test |
-| `AppTheme` | Dark theme resources, color palette, font settings |
-
-### 5.3 BUS Classes (KHÔNG THAY ĐỔI — 14 class)
-
-| Class | Trách nhiệm |
-|---|---|
-| `AuthBUS` | Login, logout, hash password, session, timeout |
-| `TournamentBUS` | Tạo/cập nhật tournament, GameConfig |
-| `TeamBUS` | Validation, CRUD team, approve/reject/disqualify |
-| `BracketBUS` | Generate bracket, bye logic, walkover, Strategy Pattern |
-| `MatchBUS` | Schedule, conflict check, postpone |
-| `CheckInBUS` | Check-in timer, walkover cases A/B/C |
-| `MapVetoBUS` | Điều phối veto sequence, timeout |
-| `SideSelectBUS` | Random coin toss, lưu kết quả |
-| `ResultBUS` | Submit, validate magic bytes, approve, override |
-| `LeaderboardBUS` | Standings, tie-breaker, export CSV |
-| `DisputeBUS` | File dispute, limit check, SLA, resolve |
-| `NotificationBUS` | Gửi/lấy thông báo in-app |
-| `AuditLogBUS` | Ghi audit log tất cả actions |
-| `SessionManager` | **Singleton** — quản lý session + timeout |
-
-### 5.4 DAL Classes (KHÔNG THAY ĐỔI — 15 class)
-
-| Class | Trách nhiệm |
-|---|---|
-| `DBConnection` | **Singleton** — connection pooling |
-| `UserDAL` | CRUD user, lock, failed attempts |
-| `TournamentDAL` | CRUD tournament, status |
-| `GameConfigDAL` | CRUD game config |
-| `TeamDAL` | CRUD team, player, status |
-| `BracketDAL` | Save/delete bracket (Transaction) |
-| `MatchDAL` | Schedule, status, winner, postpone |
-| `CheckInDAL` | Check-in (Serializable), walkover |
-| `MapVetoDAL` | CRUD map veto records |
-| `SideSelectDAL` | CRUD side selection |
-| `ResultDAL` | Submit result, update status |
-| `LeaderboardDAL` | Standings query, BR scores |
-| `DisputeDAL` | CRUD dispute, count per team |
-| `NotificationDAL` | Insert/get/mark-read |
-| `AuditLogDAL` | Insert audit records |
+| Format | Mô tả | Dùng cho |
+|---|---|---|
+| **SingleElimination** | Thua 1 = bị loại; bracket cây; BYE nếu số đội lẻ | MOBA, FPS, Fighting, RTS, Sports |
+| **BattleRoyale** | Nhiều round; tích lũy điểm; Top N thắng | PUBG, Apex, BR games |
 
 ---
 
-## 6. TEST CASES — v3.0
+## 3. YÊU CẦU PHI CHỨC NĂNG (NFR)
 
-> Test cases **giữ nguyên logic** so với v2.0.
-> Thay đổi duy nhất: GUI tests thực hiện trên WPF Views thay vì WinForms.
+### NFR-1: Bảo mật
+| ID | Yêu cầu |
+|---|---|
+| NFR-1.1 | Mọi API endpoint (trừ `/api/auth/login`, `/api/health`, `/api/game-types`) phải có JWT Bearer token hợp lệ |
+| NFR-1.2 | Mật khẩu hash bằng SHA-256 (hiện tại) hoặc BCrypt cost=12 (nâng cấp) — KHÔNG lưu plain text |
+| NFR-1.3 | Mọi câu SQL dùng Parameterized Query — KHÔNG dùng string concatenation |
+| NFR-1.4 | Validation input tại cả client (Zod schema) và server |
+| NFR-1.5 | Evidence chỉ nhận URL — KHÔNG upload file lên server |
+| NFR-1.6 | API chạy trên `localhost:5000` — không expose ra internet |
+| NFR-1.7 | CORS chỉ cho phép origin từ Tauri WebView và localhost dev |
+| NFR-1.8 | Khóa tài khoản sau 5 lần đăng nhập sai liên tiếp |
+| NFR-1.9 | Session/JWT expire sau 30 phút không hoạt động |
+| NFR-1.10 | Mọi Admin action được ghi vào `tblAuditLog` với Result = Success/Failed |
 
-| ID | Loại | Input | Kết quả kỳ vọng |
-|---|---|---|---|
-| TC-01 | Normal | 8 đội → Generate Bracket | 7 trận, 0 Bye, Linked List đúng |
-| TC-02 | Boundary | 7 đội → Generate Bracket | 1 Bye, 6 trận thực |
-| TC-03 | Normal | Check-in đúng hạn cả 2 | Status = Live |
-| TC-04 | Abnormal | 1 đội không check-in | Walkover |
-| TC-05 | Abnormal | Cả 2 không check-in | WalkoverPending |
-| TC-06 | Concurrency | 2 request check-in cùng lúc | Serializable, chỉ 1 thành công |
-| TC-07 | Security | SQL Injection vào tên đội | Xử lý như text thường |
-| TC-08 | Boundary | Upload PNG 4.9MB | Chấp nhận |
-| TC-09 | Boundary | Upload PNG 5.1MB | Từ chối |
-| TC-10 | Security | Upload .exe đổi tên .jpg | Từ chối — magic bytes sai |
-| TC-11 | Normal | Admin approve kết quả | WinnerID set, NextMatch điền đội |
-| TC-12 | Boundary | 2 đội đồng điểm BR | Tie-breaker |
-| TC-13 | Security | Đăng nhập sai 5 lần | Tài khoản khóa |
-| TC-14 | Normal | Guest xem Leaderboard | Hiển thị không cần login |
-| TC-15 | Abnormal | Thêm player đã trong đội khác | BUS từ chối |
-| TC-16 | Normal | Captain nộp kết quả lần 2 | Từ chối — đã có submission |
-| TC-17 | Security | Session idle 31 phút | Auto logout |
-| TC-18 | Normal | MapVeto timeout 60s | Auto-ban random |
-| TC-19 | Normal | Captain gửi khiếu nại lần 3 | Từ chối — đạt giới hạn |
-| TC-20 | Normal | Admin Generate lại Bracket | Confirm, xóa cũ, tạo mới |
-| TC-21 | Normal | Generate Bracket 5 đội | 3 bye, 5 đội sắp xếp đúng |
-| TC-22 | Normal | Admin Disqualify đội | Đối thủ thắng Walkover |
-| TC-23 | Normal | Audit Log ghi action | Bản ghi tblAuditLog đúng |
+### NFR-2: Hiệu năng
+| ID | Yêu cầu |
+|---|---|
+| NFR-2.1 | Dashboard load < 2 giây trên máy phần cứng từ 2015 trở lên |
+| NFR-2.2 | Danh sách ≤ 200 hàng: API response < 500ms |
+| NFR-2.3 | App khởi động (Tauri + .NET API warm-up) < 5 giây |
+| NFR-2.4 | React bundle build < 500KB gzipped |
+| NFR-2.5 | API không blocking — xử lý bất đồng bộ nơi cần thiết |
+
+### NFR-3: Khả năng sử dụng
+| ID | Yêu cầu |
+|---|---|
+| NFR-3.1 | Toàn bộ giao diện bằng tiếng Việt |
+| NFR-3.2 | Dark theme mặc định theo thiết kế Figma |
+| NFR-3.3 | Responsive cho màn hình tối thiểu 1280×800 |
+| NFR-3.4 | Mỗi hành động quan trọng có confirmation dialog |
+| NFR-3.5 | Loading spinner hiển thị khi API đang xử lý |
+| NFR-3.6 | Toast notification cho mọi kết quả thao tác (Success/Error) |
+
+### NFR-4: Tính tương thích & Khả năng mở rộng
+| ID | Yêu cầu |
+|---|---|
+| NFR-4.1 | Chạy trên Windows 10+, macOS 12+, Ubuntu 22.04+ |
+| NFR-4.2 | Đóng gói: `.msi` (Win) / `.dmg` (Mac) / `.deb`, `.AppImage` (Linux) |
+| NFR-4.3 | Không yêu cầu cài .NET Runtime trên máy người dùng (self-contained) |
+| NFR-4.4 | Dễ thêm GameType mới qua `tblGameTypeConfig` mà không cần sửa core |
+
+### NFR-5: Độ tin cậy
+| ID | Yêu cầu |
+|---|---|
+| NFR-5.1 | Mọi DB transaction có rollback khi lỗi |
+| NFR-5.2 | API tự động retry 3 lần (delay 500ms) khi connection timeout |
+| NFR-5.3 | AuditLog không được phép xóa hoặc sửa |
+| NFR-5.4 | App hiển thị thông báo lỗi thân thiện; không lộ stack trace ra UI |
 
 ---
 
-## 7. PHÂN TÍCH RỦI RO — v3.0
+## 4. STACK CÔNG NGHỆ
 
-| Rủi ro | Xác suất | Tác động | Giải pháp |
-|---|---|---|---|
-| Race Condition Check-in | Cao | Cao | Serializable Transaction |
-| Bypass file validation | Thấp | Cao | Magic bytes check |
-| Session không timeout | Thấp | Cao | 30' idle auto-logout |
-| Bracket Math sai | Trung bình | Cao | Unit test Bye Logic |
-| Dispute spam | Thấp | Thấp | Giới hạn 2 lần/tournament |
-| Scheduling conflict | Trung bình | Trung bình | Conflict check + warning |
-| Cả 2 không check-in | Thấp | Cao | WalkoverPending + Admin notify |
-| 2 Captain nộp kết quả khác nhau | Trung bình | Cao | UNIQUE constraint + conflict logic |
-| DB connection fail | Thấp | Cao | Try-catch + thông báo thân thiện |
-| Connection pool cạn | Thấp | Cao | Max Pool Size cấu hình |
+| Thành phần | Công nghệ | Phiên bản |
+|---|---|---|
+| **Desktop Shell** | Tauri v2 | 2.x |
+| **Frontend** | React + Vite + TypeScript | React 18, Vite 5, TS 5 |
+| **UI** | shadcn/ui + Tailwind CSS | Tailwind 3.4 |
+| **State** | Zustand | 4.x |
+| **Form & Validate** | React Hook Form + Zod | — |
+| **HTTP Client** | Axios | 1.x |
+| **Router** | React Router | v7 |
+| **Backend** | ASP.NET Core Minimal API | .NET 8 |
+| **Data Access** | ADO.NET (SqlClient, raw SQL) | — |
+| **Auth** | JWT Bearer | — |
+| **Password** | SHA-256 / BCrypt.Net-Next | — |
+| **Database** | SQL Server 2019+ | — |
+| **Ngôn ngữ FE** | TypeScript | 5.x |
+| **Ngôn ngữ BE** | C# | 12 |
 
 ---
 
-*Phiên bản 3.0 — Nâng cấp công nghệ giao diện WPF/MVVM. Logic nghiệp vụ giữ nguyên 100%.
-Tổng cộng: 14 bảng DB, 14 BUS classes, 15 DAL classes, 15 WPF Views + 15 ViewModels, 23 test cases.*
+## 5. KIẾN TRÚC HỆ THỐNG
 
-**© 2026 – FIT TDTU | Môn Kỹ thuật Phần mềm (502045)**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  PRESENTATION TIER — React 18 (TypeScript) trong Tauri Shell │
+│  15 Pages: Login | Dashboard | TournamentSetup | Team        │
+│            BracketView | MatchSchedule | CheckIn | MapVeto   │
+│            SideSelect | ResultSubmit | Leaderboard | Dispute  │
+│            Notifications | AuditLog | UserManagement         │
+│  Stack: shadcn/ui · Tailwind · Zustand · React Router 7       │
+└────────────────────────┬─────────────────────────────────────┘
+                         │ HTTP REST (Axios, JWT Bearer, JSON)
+┌────────────────────────▼─────────────────────────────────────┐
+│  BUSINESS TIER — ASP.NET Core 8 Minimal API (localhost:5000) │
+│  Handlers: Auth | Tournament | Team | Match | Result         │
+│            Dispute | Notification | AuditLog | Overview      │
+│  BUS: AuthBUS | TournamentBUS | TeamBUS | BracketBUS         │
+│       MatchBUS | ResultBUS | DisputeBUS | NotificationBUS     │
+│       LeaderboardBUS | AuditLogBUS                           │
+│  Middleware: JWT · CORS · Error Handling                      │
+└────────────────────────┬─────────────────────────────────────┘
+                         │ ADO.NET SqlClient (Parameterized)
+┌────────────────────────▼─────────────────────────────────────┐
+│  DATA TIER — SQL Server 2019+  (ETMS_DB)                     │
+│  17 Bảng | 14 Indexes | 1 Computed Column | 2 Stored Procs   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. API ENDPOINTS ĐẦY ĐỦ
+
+### Auth & Users
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| POST | `/api/auth/login` | Tất cả | Đăng nhập, trả JWT |
+| POST | `/api/auth/logout` | Auth | Đăng xuất |
+| PATCH | `/api/auth/change-password` | Auth | Đổi mật khẩu |
+| GET | `/api/health` | Public | Kiểm tra server |
+| GET | `/api/users` | Admin | Danh sách user |
+| POST | `/api/users` | Admin | Tạo user mới |
+| PATCH | `/api/users/{id}/lock` | Admin | Khóa/mở tài khoản |
+| PATCH | `/api/users/{id}/reset-password` | Admin | Reset mật khẩu |
+
+### Tournaments
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| GET | `/api/tournaments` | Auth | Danh sách giải đấu |
+| POST | `/api/tournaments` | Admin | Tạo giải đấu |
+| GET | `/api/tournaments/{id}` | Auth | Chi tiết giải |
+| PATCH | `/api/tournaments/{id}` | Admin | Cập nhật thông tin |
+| PATCH | `/api/tournaments/{id}/status` | Admin | Chuyển trạng thái |
+| POST | `/api/tournaments/{id}/generate-bracket` | Admin | Tạo bracket |
+| GET | `/api/tournaments/{id}/bracket` | Auth | Lấy bracket |
+| GET | `/api/tournaments/{id}/leaderboard` | Auth | Bảng xếp hạng |
+| GET | `/api/tournaments/{id}/game-config` | Auth | Lấy GameConfig |
+| GET | `/api/game-types` | Public | Danh sách GameType |
+
+### Teams & Players
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| GET | `/api/teams?tournamentId=` | Auth | Danh sách đội |
+| POST | `/api/teams` | Captain | Đăng ký đội |
+| GET | `/api/teams/{id}` | Auth | Chi tiết đội |
+| POST | `/api/teams/{id}/players` | Captain | Thêm thành viên |
+| DELETE | `/api/teams/{id}/players/{playerId}` | Captain | Xóa thành viên |
+| PATCH | `/api/teams/{id}/approve` | Admin | Duyệt đội |
+| PATCH | `/api/teams/{id}/reject` | Admin | Từ chối đội |
+| PATCH | `/api/teams/{id}/disqualify` | Admin | Loại đội |
+
+### Matches
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| GET | `/api/matches?tournamentId=` | Auth | Lịch thi đấu |
+| GET | `/api/matches/{id}` | Auth | Chi tiết trận |
+| POST | `/api/matches/{id}/checkin` | Captain | Check-in |
+| POST | `/api/matches/{id}/veto` | Captain | Map veto (FPS) |
+| POST | `/api/matches/{id}/side-select` | Captain | Chọn phe (MOBA) |
+| POST | `/api/matches/{id}/result` | Captain | Nộp kết quả |
+| PATCH | `/api/results/{id}/verify` | Admin | Xác nhận kết quả |
+| PATCH | `/api/results/{id}/reject` | Admin | Từ chối kết quả |
+
+### Battle Royale
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| POST | `/api/br/rounds` | Admin | Tạo vòng BR |
+| POST | `/api/br/scores` | Admin | Nhập điểm vòng BR |
+| GET | `/api/br/{tournamentId}/leaderboard` | Auth | Bảng tổng điểm BR |
+
+### Disputes, Notifications, Audit
+| Method | Endpoint | Role | Mô tả |
+|---|---|---|---|
+| GET | `/api/disputes?tournamentId=` | Auth | Danh sách khiếu nại |
+| POST | `/api/disputes` | Captain | Nộp khiếu nại |
+| PATCH | `/api/disputes/{id}/resolve` | Admin | Giải quyết |
+| GET | `/api/notifications` | Auth | Thông báo cá nhân |
+| PATCH | `/api/notifications/{id}/read` | Auth | Đánh dấu đọc |
+| PATCH | `/api/notifications/read-all` | Auth | Đọc tất cả |
+| GET | `/api/audit-log` | Admin | Nhật ký kiểm toán |
+| GET | `/api/overview/stats` | Admin | Thống kê Dashboard |
+
+---
+
+## 7. DATABASE — 17 BẢNG
+
+> Script SQL đầy đủ: `ETMS.Api/Database/ETMS_DB.sql`
+
+| # | Bảng | Mô tả | Quan hệ chính |
+|---|---|---|---|
+| 1 | `tblUser` | Tài khoản hệ thống | — |
+| 2 | `tblGameTypeConfig` | Cấu hình cơ chế theo GameType (ref) | — |
+| 3 | `tblTournament` | Giải đấu | FK: tblUser (CreatedBy), tblGameTypeConfig |
+| 4 | `tblGameConfig` | Config game 1:1 với Tournament | FK: tblTournament |
+| 5 | `tblTeam` | Đội tuyển | FK: tblTournament, tblUser (Captain) |
+| 6 | `tblPlayer` | Thành viên đội | FK: tblTeam, tblUser |
+| 7 | `tblMatch` | Trận đấu | FK: tblTournament, tblTeam (×4), tblMatch (NextMatchID) |
+| 8 | `tblMatchResult` | Kết quả trận | FK: tblMatch, tblUser (Submitted/Verified) |
+| 9 | `tblMapVeto` | Veto bản đồ (FPS) | FK: tblMatch, tblTeam |
+| 10 | `tblSideSelect` | Chọn phe (MOBA) | FK: tblMatch, tblTeam |
+| 11 | `tblBRRound` | Vòng Battle Royale | FK: tblTournament |
+| 12 | `tblBRScore` | Điểm BR mỗi vòng | FK: tblBRRound, tblTeam; TotalPoints COMPUTED |
+| 13 | `tblDispute` | Khiếu nại | FK: tblMatch, tblTeam, tblUser |
+| 14 | `tblNotification` | Thông báo in-app | FK: tblUser |
+| 15 | `tblAuditLog` | Nhật ký Admin | FK: tblUser |
+
+**Trạng thái hợp lệ:**
+- `tblTournament.Status`: Draft → Registration → Active → Completed | Cancelled
+- `tblTeam.Status`: Pending → Approved | Rejected | Disqualified
+- `tblMatch.Status`: Scheduled → CheckInOpen → Live → Completed | Walkover | WalkoverPending | Disputed | Postponed | Cancelled
+- `tblMatchResult.Status`: PendingVerification → Verified | Disputed | Rejected
+- `tblDispute.Status`: Open → Resolved | Dismissed
+
+**Kết nối DB:**
+```
+appsettings.json (ConnectionStrings.ETMSConnection)
+  → DBConnection.Configure(connStr) tại Program.cs startup
+    → DBConnection.GetConnection() trong mỗi DAL method
+      → using SqlConnection { ... } với Parameterized Query
+```
+
+---
+
+## 8. XỬ LÝ LỖI
+
+| Tầng | Lỗi | Xử lý |
+|---|---|---|
+| React (Client) | Network error | Toast "Không thể kết nối server" + nút Thử lại |
+| React (Client) | 401 Unauthorized | Xóa token → redirect LoginPage |
+| React (Client) | 403 Forbidden | Toast "Bạn không có quyền thực hiện" |
+| React (Client) | Validation (Zod) | Hiển thị lỗi inline dưới field |
+| API (Handler) | Business logic fail | HTTP 400 + `{ error: "message tiếng Việt" }` |
+| API (Handler) | 500 Internal | Log lỗi + HTTP 500 + `{ error: "Lỗi hệ thống" }` (không lộ stack trace) |
+| BUS | Vi phạm nghiệp vụ | Throw với message rõ ràng → Handler bắt → trả 400 |
+| DAL | SqlException | Retry 3 lần → nếu vẫn fail → throw → Handler trả 500 |
+| DAL | Connection fail | Log + trả 503 kèm message "DB không khả dụng" |
+
+---
+
+## 9. TIÊU CHÍ KIỂM THỬ
+
+| Module | Loại test | Số lượng TC |
+|---|---|---|
+| Auth & User | Unit, Integration | 12 |
+| Tournament | Unit, Integration | 10 |
+| Team | Unit, Integration | 12 |
+| Match + CheckIn | Unit, Integration | 8 |
+| MapVeto + SideSelect | Unit | 6 |
+| Result + Verify | Unit, Integration | 8 |
+| Dispute | Unit, Integration | 6 |
+| BR Scoring | Unit | 5 |
+| Notification | Integration | 4 |
+| AuditLog | Integration | 4 |
+| Security | Penetration | 12 |
+| **Tổng** | | **87 TCs** |
+
+> Chi tiết trong `Document/Đặc tả/12_PCL_TestWorkbook.md`
