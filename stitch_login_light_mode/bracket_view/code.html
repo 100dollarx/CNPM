@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETMS - Bracket View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#93000a",
+                        "primary-container": "#fc536d",
+                        "surface-variant": "#31353c",
+                        "on-secondary-fixed": "#001b3c",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#67001c",
+                        "on-surface": "#dfe2eb",
+                        "on-tertiary": "#003921",
+                        "tertiary-fixed-dim": "#67dc9f",
+                        "surface-container": "#1c2026",
+                        "inverse-on-surface": "#2d3137",
+                        "on-primary-fixed": "#40000e",
+                        "on-secondary-container": "#9bbaee",
+                        "secondary-fixed": "#d5e3ff",
+                        "tertiary-container": "#25a46d",
+                        "surface-tint": "#ffb2b7",
+                        "secondary-container": "#294a77",
+                        "on-secondary": "#09305c",
+                        "surface-container-low": "#181c22",
+                        "tertiary": "#67dc9f",
+                        "tertiary-fixed": "#84f9ba",
+                        "surface-container-high": "#262a31",
+                        "on-tertiary-fixed": "#002111",
+                        "on-tertiary-container": "#00311c",
+                        "background": "#10141a",
+                        "surface": "#10141a",
+                        "secondary-fixed-dim": "#a9c8fc",
+                        "on-tertiary-fixed-variant": "#005232",
+                        "secondary": "#a9c8fc",
+                        "on-secondary-fixed-variant": "#274774",
+                        "outline": "#a9898a",
+                        "surface-dim": "#10141a",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#5a4042",
+                        "on-primary-container": "#5b0017",
+                        "on-surface-variant": "#e2bebf",
+                        "primary-fixed": "#ffdadb",
+                        "primary-fixed-dim": "#ffb2b7",
+                        "primary": "#ffb2b7",
+                        "on-primary-fixed-variant": "#91002b",
+                        "on-error": "#690005",
+                        "on-background": "#dfe2eb",
+                        "surface-bright": "#353940",
+                        "inverse-surface": "#dfe2eb",
+                        "inverse-primary": "#b71d3f",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-error-container": "#ffdad6"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0D1117; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bracket-connector {
+            stroke: rgba(90, 64, 66, 0.15);
+            fill: none;
+            stroke-width: 2;
+        }
+        .bracket-connector-active {
+            stroke: #ffb2b7;
+            filter: drop-shadow(0 0 4px rgba(255, 178, 183, 0.4));
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #10141a; }
+        ::-webkit-scrollbar-thumb { background: #5a4042; border-radius: 2px; }
+    </style>
+</head>
+<body class="font-body text-on-surface overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-[#5a4042]/15 bg-[#0D1117]">
+<div class="p-6">
+<h1 class="text-xl font-black text-[#ffb2b7] tracking-tighter font-headline uppercase">ETMS</h1>
+<p class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold text-[#5a4042]">TACTICAL COMMAND</p>
+</div>
+<nav class="flex-1 overflow-y-auto mt-4">
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+                    Tournaments
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                    Teams
+                </a>
+<!-- Active Item: Bracket -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#1c2026] text-[#ffb2b7] border-r-2 border-[#E94560] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                    Bracket
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                    Schedule
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span>
+                    Results
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+                    Leaderboard
+                </a>
+<div class="px-4 py-6 mt-4 border-t border-[#5a4042]/10">
+<p class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6rem] font-bold text-[#5a4042]/60 mb-4">Administration</p>
+<a class="flex items-center gap-3 px-4 py-2 text-[#5a4042] hover:text-[#ffb2b7] font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="gavel">gavel</span>
+                        Disputes
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#5a4042] hover:text-[#ffb2b7] font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="manage_accounts">manage_accounts</span>
+                        User Management
+                    </a>
+</div>
+</div>
+</nav>
+<div class="p-4 bg-[#181c22] m-4 rounded-lg flex items-center gap-3">
+<img alt="User Avatar" class="w-8 h-8 rounded bg-surface-container" data-alt="close up headshot of a professional gamer wearing a high tech headset with neon lighting and serious expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs5aKf_Xc_-PboZaaGR_AECBz0UKvfF5UBLiVkFZIoI_LikkLpncpHs_H5yigVYgCfFFhE6PQHUnThq_8UoYgFWMfGc8sHxa6lYQNcU1LqZd2sRE-d6ijh07SXbIqOspnuHl_qa5Zso73JRjowlwNUe3sZTyjnbeYKWc36esUaTY_N5befbdCk_gPpt6D6rShtlTxEomxidrb6p-OvrBgnWE1gH8WPSgLzgOe5dpct8Mz6FbcYPi7ZnSXOgFatENlHakPVc5hxrsA"/>
+<div>
+<p class="text-[0.6875rem] font-bold font-headline text-on-surface">COMMANDER_01</p>
+<p class="text-[0.6rem] text-[#5a4042]">OPERATIONAL</p>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-[#5a4042]/15">
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#5a4042]" data-icon="search">search</span>
+<input class="bg-[#0a0e14] border-none border-b-2 border-[#5a4042]/20 focus:border-[#ffb2b7] text-xs font-headline tracking-widest pl-10 pr-4 py-2 w-64 focus:ring-0 transition-colors" placeholder="SEARCH OPERATIONS..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#ffb2b7] font-bold font-['Space_Grotesk'] text-sm tracking-widest uppercase" href="#">BRACKET HUB</a>
+<a class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors font-['Space_Grotesk'] text-sm tracking-widest uppercase" href="#">STREAM FEED</a>
+<a class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors font-['Space_Grotesk'] text-sm tracking-widest uppercase" href="#">STATS</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+<button class="flex items-center gap-2 bg-primary-container text-on-primary-fixed px-4 py-1.5 rounded-lg text-xs font-bold font-headline uppercase shadow-[0_0_15px_rgba(252,83,109,0.3)] hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span>
+                Live Mode
+            </button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 p-8 h-screen overflow-hidden flex flex-col">
+<!-- Dashboard Header -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<p class="font-headline text-[0.6875rem] font-bold tracking-[0.2em] text-primary">LIVE TOURNAMENT COMMAND</p>
+</div>
+<h2 class="font-headline text-3xl font-black tracking-tighter text-on-surface uppercase">Apex Protocol: Season IX</h2>
+<p class="font-body text-sm text-[#5a4042] mt-1 max-w-lg">Global Finals | Double Elimination Bracket | Prize Pool: $250,000</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg flex flex-col items-end">
+<span class="font-headline text-[0.6rem] font-bold text-[#5a4042] tracking-widest">CURRENT ROUND</span>
+<span class="font-headline text-xl font-black text-on-surface">QUARTER FINALS</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex flex-col items-end">
+<span class="font-headline text-[0.6rem] font-bold text-[#5a4042] tracking-widest">ACTIVE MATCHES</span>
+<span class="font-headline text-xl font-black text-primary">02</span>
+</div>
+</div>
+</div>
+<!-- Bracket Canvas -->
+<div class="flex-1 overflow-auto relative rounded-xl border border-[#5a4042]/10 bg-[#0a0e14] p-12">
+<!-- SVG Connectors Layer -->
+<svg class="absolute inset-0 w-[1500px] h-[800px] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<!-- R1 to R2 Connectors -->
+<path class="bracket-connector bracket-connector-active" d="M 320 180 C 400 180, 400 240, 480 240"></path>
+<path class="bracket-connector" d="M 320 300 C 400 300, 400 240, 480 240"></path>
+<path class="bracket-connector" d="M 320 480 C 400 480, 400 540, 480 540"></path>
+<path class="bracket-connector" d="M 320 600 C 400 600, 400 540, 480 540"></path>
+<!-- R2 to Finals -->
+<path class="bracket-connector bracket-connector-active" d="M 720 240 C 800 240, 800 390, 880 390"></path>
+<path class="bracket-connector" d="M 720 540 C 800 540, 800 390, 880 390"></path>
+</svg>
+<!-- Bracket Columns -->
+<div class="flex gap-32 relative z-10 min-w-max">
+<!-- ROUND 1 -->
+<div class="flex flex-col gap-12 w-64">
+<div class="mb-4">
+<span class="font-headline text-[0.6875rem] font-bold tracking-widest text-[#5a4042] block mb-2 border-b border-[#5a4042]/20 pb-2">ROUND OF 8</span>
+</div>
+<!-- Match 1 -->
+<div class="space-y-4">
+<div class="bg-surface-container-low border-r-2 border-primary shadow-[0_0_10px_rgba(252,83,109,0.1)] rounded-lg overflow-hidden transition-all hover:bg-surface-container">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #701</span>
+<span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-error/10 text-error text-[0.6rem] font-black uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                                    Live
+                                </span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Team Alpha" class="w-6 h-6 rounded" data-alt="minimalist esports team logo featuring a stylized white wolf on a deep navy background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkDRtovZLeGp6DX-0l_UbISgsV78DVSh5pFqVKxQbMwQnfJMG6rrJ_wkA3P13WruyKFBjXNx5HYtC909IWdXmfDuNd2fF2xLARfC35d1ROX1IdTzf0-VBQ6Y0AmMsgKj1sWLn9ztahyDPz64JYESnMRJ_BGxPcYFqTFPSY5_YslFA1iiGagf-mdMHOQcdykcsilvTnMPao6SEjOkpkfWarJRLqyMfEgj3Ez2j8C9PXxtq_a3iC77BU7Mng63YpGNhvJqPfvJFvFww"/>
+<span class="text-sm font-bold font-headline text-on-surface">TEAM ALPHA</span>
+</div>
+<span class="text-lg font-black font-headline text-primary">2</span>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-2">
+<img alt="Vanguard" class="w-6 h-6 rounded" data-alt="modern esports team logo featuring a neon orange shield emblem on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhz8hjMgfC8h8mthL16Frq1O-Cxb37QqWarYgekd6gQfjvq9jyfx3UVokgwjSjz3tVXfMNQSaFa2P5aK0joPo7mDzm4wVZ-CfEePvmGsIFo0CVJppIr7_VZX9jJgWcO-8yVRKOU-8ZMkrt2rRy7A_9swSjxWrYyA0g8eW7oe1td_J8YIAGamaF0GKsc4Tg1rn3YRUUOfapMxSb1v_gQ8sSWFJIgcORg-dBP9QMDZ5QBsOsxQZ25j8z-Xhxb0eS0aRxmjT5_XYh0Lg"/>
+<span class="text-sm font-bold font-headline text-on-surface">VANGUARD</span>
+</div>
+<span class="text-lg font-black font-headline text-on-surface">0</span>
+</div>
+</div>
+</div>
+<!-- Match 2 -->
+<div class="bg-surface-container-low border-r-2 border-[#5a4042]/30 rounded-lg overflow-hidden hover:bg-surface-container">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #702</span>
+<span class="text-[0.6rem] font-black uppercase text-[#5a4042]">14:00 GMT</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Ghost Squad" class="w-6 h-6 rounded" data-alt="sleek gaming logo of a white ghost silhouette with purple neon accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH2SlYKE5s6ur-f26xCVdO_qE4VdnMf6d_RtMLx2vKxVcIQvBieWY_qe9F0TscdaUzRn_kC-fyzHFOFFhkjKAyTPvU1Z_CmEozj57uLJKh3zoy_5D8b1LkhSEjDuZwsOFDRGbPg4cdoR5vLTNGBqBVgTArYsuSUiEdQWeL2MnmgME3NdEn0FP-tv7QuAAUwhv9c68qTeFcz_qimdQCx6z5TN9_ADHo7L-wiWmiDIfa4YvUfzohGwfKloPz_leQxhr8Y58f9A_yE_k"/>
+<span class="text-sm font-bold font-headline text-on-surface">GHOST SQUAD</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Nebula" class="w-6 h-6 rounded" data-alt="abstract esports logo representing a swirling nebula in magenta and cyan tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSpfHSX0BPJE7PXCMhpJpIV6rW3RYk25GgMcgwDbCPeqZNP-DBBzvA3VQBTsl3T0nbSwHxoJqjpyJUbDR8cJw27dja1qCz6T0MNChhsRe8vscPk6ld_58ZS9_b8ppRjeHo_pcoDlKJhZr0Uxgy0kPvPIz5ywZQdNTsl5bLFSMhgcKXe8qqACCDktosaL7BE84TcKcJGiclwS4mB95m1DFBepXouaab2H3pcRFfevjFELseBqh-LAF3v6mvg-L0n0wYkBHQCI0eldc"/>
+<span class="text-sm font-bold font-headline text-on-surface">NEBULA</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lower Bracket Match 1 -->
+<div class="space-y-4 mt-8">
+<div class="bg-surface-container-low border-r-2 border-[#5a4042]/30 rounded-lg overflow-hidden hover:bg-surface-container">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #703</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-[#5a4042] text-[0.6rem] font-black uppercase">Finalized</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-2">
+<img alt="Delta" class="w-6 h-6 rounded" data-alt="geometric esports logo of a stylized green triangle with tech patterns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB93A1Id9dwfJ35aL-0zIFFgaNjNepygxNNJW7_SN6algjXwKLyi9gnneWeIALUGywvZYVUIdJa4pVvTPqLgxOE1LSz2_e1qg4UMY0ks0hCrKP_PljlXejuP6jrvmr_S89qZJl6mIHmaO4SCacI17WXR5P-vExzTGd6jSPorvXr25K1BQQeOAMJkBPt4dhLltHoV_e1s1TSlTnFlPYwo1qtaAacMx8ycpwRWMLLNwdbpt-VLiUbopbgplGYuAFFMpc2gNmGBJrAhjE"/>
+<span class="text-sm font-bold font-headline text-on-surface">DELTA INC</span>
+</div>
+<span class="text-lg font-black font-headline text-on-surface">1</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Rogue" class="w-6 h-6 rounded" data-alt="esports logo of a hooded figure in shadows with red glowing eyes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzQ6pYVWW5kfUf0eiYxS_fZ3seaCUoNc369ttl5M4xRGPTkyxYmFMS3vD9j4cnaTv6ux_aPr7VuBF5Czcme8Q9pth9K6RilesaVr29v5DR2aWsmkddsmKMbRk5v8kFZNmXRL2bZKWIV5ZrGK-RfqABICuD1YRRr8LWsICYqDdur2B6U-FfPwPwpEQnHppKWqbDDxQekDRPoImDuL4YB8hddi4UhusG44I4UZZmLZnUgnGh_RuBbV_KFtmEa8Jy0_y3XJzmT-tRzC8"/>
+<span class="text-sm font-bold font-headline text-on-surface">ROGUE OPS</span>
+</div>
+<span class="text-lg font-black font-headline text-primary">2</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low border-r-2 border-[#5a4042]/30 rounded-lg overflow-hidden hover:bg-surface-container">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #704</span>
+<span class="text-[0.6rem] font-black uppercase text-[#5a4042]">Pending</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Shadow" class="w-6 h-6 rounded" data-alt="simple dark ninja silhouette logo with yellow accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHvm0QZiUa30nOpmR5jQdIUVtztPmyWojRiu8ynbYV_KYlmweLeBRQPXpGReBAlL_VFzoh-yzFyXOZ0G-FQiLxtpjh6VNvqfBbXco7srvyC6okrZMKHfTsbB9mi7zqEYkn-Olir5J55mKodz_rD-Z64QFniO1rnGtxun_zYiOsp4QAH4mhpM2a3zaLpDJ4DUOKRxNqZkgwHX7XU-jtYq9emzdjlOpyw5UO8QZiGSNZJTNj-hvHjqMD_tXy97EO2N9jyNUjZbtagXo"/>
+<span class="text-sm font-bold font-headline text-on-surface">SHADOWS</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Phoenix" class="w-6 h-6 rounded" data-alt="fiery phoenix bird logo in bright orange and yellow gradients" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHEXPfjhgBDYYjgLarPTR8o6LqE1wvIYlUKphzMkg_pXclduADbWA57ahT5lyjg4ugVuAFRlo7-XhK0K7NzVQmKPFQphE7aHU-uagUXouTvnyzkizUXefWyM01rs8G7leV21Cgrnig1rnuo5n89uTTG8iDnwqbMV940x16pGrUIkjzVmmxzTMUxXCL7lC5J7XhTRRh21EEVi8TSVlDl3J1qwW5jkeB6BOxEKZCW2mRVYgauef33XRTLYd5wka-b9AwPLtEASAUAxQ"/>
+<span class="text-sm font-bold font-headline text-on-surface">PHOENIX</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ROUND 2 -->
+<div class="flex flex-col gap-12 w-64 pt-32">
+<div class="mb-4">
+<span class="font-headline text-[0.6875rem] font-bold tracking-widest text-[#5a4042] block mb-2 border-b border-[#5a4042]/20 pb-2">SEMI-FINALS</span>
+</div>
+<!-- Semi Final 1 -->
+<div class="bg-surface-container-low border-r-2 border-primary shadow-[0_0_15px_rgba(252,83,109,0.1)] rounded-lg overflow-hidden">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #801</span>
+<span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[0.6rem] font-black uppercase tracking-widest">
+                                UPCOMING
+                            </span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Team Alpha" class="w-6 h-6 rounded" data-alt="minimalist esports team logo featuring a stylized white wolf on a deep navy background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCxEvmMzWtZC7HaiPMRny6IHti1wcTDh2aANwP_WKf1DrKNLJZOF0lj9RMJRSN2kZXLH2XWd2KsfNaVVf4btXnQC-gdnX9QI2yQu2gopUDO7eP9aE-ZOwsUZyuyG5qhctufL8KJmggAK-HY0GWuQ_ZpvkgJqMW_Af61y5OIEHOcEwtnLTIbB3VcVmbYcvIR8-gWEFoYGYtBZmmAEdsEexFOza7DS6-R4hxdyA-g_pg18aBfM53-D7tvdO7gCLEDQDJBwPKAQqT8kY"/>
+<span class="text-sm font-bold font-headline text-on-surface">TEAM ALPHA</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-[#0a0e14] border border-dashed border-[#5a4042] flex items-center justify-center">
+<span class="text-[0.5rem] text-[#5a4042] font-black">TBD</span>
+</div>
+<span class="text-sm font-bold font-headline text-[#5a4042]">TBD (M#702)</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+</div>
+</div>
+<div class="mt-44">
+<!-- Semi Final 2 -->
+<div class="bg-surface-container-low border-r-2 border-[#5a4042]/30 rounded-lg overflow-hidden">
+<div class="bg-surface-container-high px-3 py-1.5 flex justify-between items-center border-b border-[#5a4042]/10">
+<span class="text-[0.6rem] font-bold font-headline text-[#5a4042]">MATCH ID: #802</span>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img alt="Rogue" class="w-6 h-6 rounded" data-alt="esports logo of a hooded figure in shadows with red glowing eyes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9dE3B82QG2hHbTH-NmiNdxkX_DrqTMeEDsc4F9kkb23JvRHIBIUaKIXBHnF1oR1fr2TtSKkJrrBOGsaFcLQilKucclw78IkuMRF2XRcK2VCF3vW_pymUrF8BusyzAO_MZGvb1dPxlXW7W9tQs67TVOzvlyka4Mo9_PHmChnr1hbIT2KLS-BY1IGNF7B_tsEoKqlIWqphy8EEblWdo853Ovu2oLgay3eb-kwNMMA6aiyKvELzzbItv4cvZFN54M1SvyApBX7kmYZ0"/>
+<span class="text-sm font-bold font-headline text-on-surface">ROGUE OPS</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded bg-[#0a0e14] border border-dashed border-[#5a4042] flex items-center justify-center">
+<span class="text-[0.5rem] text-[#5a4042] font-black">TBD</span>
+</div>
+<span class="text-sm font-bold font-headline text-[#5a4042]">TBD (M#704)</span>
+</div>
+<span class="text-lg font-black font-headline text-[#5a4042]">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FINALS -->
+<div class="flex flex-col gap-12 w-64 pt-[350px]">
+<div class="mb-4 text-center">
+<span class="font-headline text-[0.8rem] font-black tracking-[0.4em] text-primary block mb-2 uppercase">GRAND FINALS</span>
+<div class="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-30"></div>
+</div>
+<!-- Grand Finals Match -->
+<div class="bg-secondary-container/40 backdrop-blur-md border border-primary/20 rounded-lg overflow-hidden shadow-[0_0_30px_rgba(252,83,109,0.1)] relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="bg-primary/10 px-3 py-2 flex justify-center items-center border-b border-primary/10">
+<span class="text-[0.7rem] font-black font-headline text-primary tracking-[0.2em] uppercase">TROPHY MATCH</span>
+</div>
+<div class="p-6 space-y-6">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-[#5a4042] flex items-center justify-center bg-[#0a0e14]">
+<span class="material-symbols-outlined text-[#5a4042]" data-icon="trophy">trophy</span>
+</div>
+<span class="text-xs font-bold font-headline text-[#5a4042] uppercase">Championship Seed 01</span>
+</div>
+<div class="flex items-center justify-center gap-4 py-2 border-y border-[#5a4042]/10">
+<span class="text-3xl font-black font-headline text-on-surface opacity-30 italic">VS</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-[#5a4042] flex items-center justify-center bg-[#0a0e14]">
+<span class="material-symbols-outlined text-[#5a4042]" data-icon="history">history</span>
+</div>
+<span class="text-xs font-bold font-headline text-[#5a4042] uppercase">Lower Bracket Finalist</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tactical Overlay Stats (Floating) -->
+<div class="mt-8 grid grid-cols-4 gap-6">
+<div class="bg-surface-container p-4 rounded border-l-4 border-secondary flex justify-between items-center">
+<div>
+<p class="text-[0.6rem] font-bold text-[#5a4042] font-headline uppercase">Peak Viewers</p>
+<p class="text-xl font-black font-headline text-on-surface">1.2M</p>
+</div>
+<span class="material-symbols-outlined text-secondary opacity-30" data-icon="visibility">visibility</span>
+</div>
+<div class="bg-surface-container p-4 rounded border-l-4 border-primary flex justify-between items-center">
+<div>
+<p class="text-[0.6rem] font-bold text-[#5a4042] font-headline uppercase">Active Betting</p>
+<p class="text-xl font-black font-headline text-on-surface">$4.5M</p>
+</div>
+<span class="material-symbols-outlined text-primary opacity-30" data-icon="payments">payments</span>
+</div>
+<div class="bg-surface-container p-4 rounded border-l-4 border-tertiary flex justify-between items-center">
+<div>
+<p class="text-[0.6rem] font-bold text-[#5a4042] font-headline uppercase">Matches Ready</p>
+<p class="text-xl font-black font-headline text-on-surface">06</p>
+</div>
+<span class="material-symbols-outlined text-tertiary opacity-30" data-icon="stadium">stadium</span>
+</div>
+<div class="bg-surface-container p-4 rounded border-l-4 border-outline flex justify-between items-center">
+<div>
+<p class="text-[0.6rem] font-bold text-[#5a4042] font-headline uppercase">Staff Online</p>
+<p class="text-xl font-black font-headline text-on-surface">42</p>
+</div>
+<span class="material-symbols-outlined text-outline opacity-30" data-icon="support_agent">support_agent</span>
+</div>
+</div>
+</main>
+<!-- FAB Action (Contextual) -->
+<button class="fixed bottom-10 right-10 bg-primary-container text-on-primary-fixed w-16 h-16 rounded-lg flex items-center justify-center shadow-[0_0_30px_rgba(252,83,109,0.4)] hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl font-bold" data-icon="videogame_asset">videogame_asset</span>
+</button>
+</body></html>

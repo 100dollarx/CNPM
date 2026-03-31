@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETMS | Tactical Command - Map Veto</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#93000a",
+                        "primary-container": "#fc536d",
+                        "surface-variant": "#31353c",
+                        "on-secondary-fixed": "#001b3c",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#67001c",
+                        "on-surface": "#dfe2eb",
+                        "on-tertiary": "#003921",
+                        "tertiary-fixed-dim": "#67dc9f",
+                        "surface-container": "#1c2026",
+                        "inverse-on-surface": "#2d3137",
+                        "on-primary-fixed": "#40000e",
+                        "on-secondary-container": "#9bbaee",
+                        "secondary-fixed": "#d5e3ff",
+                        "tertiary-container": "#25a46d",
+                        "surface-tint": "#ffb2b7",
+                        "secondary-container": "#294a77",
+                        "on-secondary": "#09305c",
+                        "surface-container-low": "#181c22",
+                        "tertiary": "#67dc9f",
+                        "tertiary-fixed": "#84f9ba",
+                        "surface-container-high": "#262a31",
+                        "on-tertiary-fixed": "#002111",
+                        "on-tertiary-container": "#00311c",
+                        "background": "#10141a",
+                        "surface": "#10141a",
+                        "secondary-fixed-dim": "#a9c8fc",
+                        "on-tertiary-fixed-variant": "#005232",
+                        "secondary": "#a9c8fc",
+                        "on-secondary-fixed-variant": "#274774",
+                        "outline": "#a9898a",
+                        "surface-dim": "#10141a",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#5a4042",
+                        "on-primary-container": "#5b0017",
+                        "on-surface-variant": "#e2bebf",
+                        "primary-fixed": "#ffdadb",
+                        "primary-fixed-dim": "#ffb2b7",
+                        "primary": "#ffb2b7",
+                        "on-primary-fixed-variant": "#91002b",
+                        "on-error": "#690005",
+                        "on-background": "#dfe2eb",
+                        "surface-bright": "#353940",
+                        "inverse-surface": "#dfe2eb",
+                        "inverse-primary": "#b71d3f",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-error-container": "#ffdad6"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0D1117;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .hud-scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(255, 178, 183, 0.02) 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-[#5a4042]/15 bg-[#0D1117]">
+<div class="p-6 flex flex-col gap-1">
+<span class="text-xl font-black text-[#ffb2b7] tracking-tighter font-headline">ETMS</span>
+<span class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold text-[#5a4042]">TACTICAL COMMAND</span>
+</div>
+<nav class="flex-1 overflow-y-auto py-4">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#1c2026] text-[#ffb2b7] border-r-2 border-[#E94560] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+                Tournaments
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                Teams
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                Bracket
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                Schedule
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span>
+                Results
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+                Leaderboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+                Disputes
+            </a>
+<div class="mt-auto border-t border-[#5a4042]/15 pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    Settings
+                </a>
+</div>
+</nav>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-[#5a4042]/15">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 bg-surface-container-lowest px-4 py-1.5 rounded-lg border-b-2 border-outline-variant">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none text-xs font-headline focus:ring-0 text-on-surface w-48" placeholder="COMMAND SEARCH..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4">
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-[#5a4042]/15">
+<div class="text-right">
+<p class="text-xs font-bold font-headline text-[#ffb2b7]">COMMANDER_VANCE</p>
+<p class="text-[10px] text-[#5a4042] uppercase tracking-widest">Operator Level 4</p>
+</div>
+<div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Stylized esports avatar with neon accents and tactical gear, professional gamer profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYUinKKgExhpTDliqw3RVIIWDqgUnz60HkavPcuPXV4uLTrK46aAxwSlpTOC0ZK8ioxbb0v1Y6LV_hN5MrisO5tb5NctsHZoUZOOetdMk07uDXs7KZB4sk_UjIkfYSNsM5-5KT_jZfFDPOMY4WYlaXfjjulQ6SR1qD9A03_s4YXWOO6e_Pbg6NZ9D4LWnLEaRGWPvjDRYm2M-fYqhoVoChvjN9Sd6_7P8R3MDYpPKWepPyRsjXNyzNSQIRTidUBv29nnvBW6cYA6Y"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-8 h-[calc(100vh-4rem)] overflow-hidden flex flex-col gap-8 relative hud-scanline">
+<!-- Veto Header & Sequence Bar -->
+<section class="flex flex-col gap-6">
+<div class="flex justify-between items-end">
+<div>
+<span class="label-sm font-label text-primary tracking-[0.2em] mb-1 block uppercase">Active Phase: Strategic Veto</span>
+<h1 class="headline-md font-headline font-bold text-on-surface uppercase tracking-tight flex items-center gap-3">
+                        Match #772: <span class="text-primary-container">Team Wraith</span> vs <span class="text-secondary">Nova Esports</span>
+</h1>
+</div>
+<div class="flex flex-col items-end">
+<span class="label-sm font-label text-outline-variant uppercase tracking-widest mb-1">Turn Timer</span>
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-high" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary-container shadow-[0_0_10px_rgba(252,83,109,0.5)]" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="60" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<span class="absolute font-headline text-2xl font-black text-on-surface">42s</span>
+</div>
+</div>
+</div>
+<!-- Sequence Progress -->
+<div class="grid grid-cols-7 gap-1 h-12">
+<div class="bg-error-container/40 border-b-2 border-error flex items-center justify-center gap-2 px-4 group transition-all">
+<span class="label-sm font-label text-white/50 group-hover:text-white">01. BAN</span>
+<span class="text-[10px] font-headline text-white/30">Wraith</span>
+</div>
+<div class="bg-error-container/40 border-b-2 border-error flex items-center justify-center gap-2 px-4 group">
+<span class="label-sm font-label text-white/50">02. BAN</span>
+<span class="text-[10px] font-headline text-white/30">Nova</span>
+</div>
+<div class="bg-primary-container/20 border-b-4 border-primary-container flex items-center justify-center gap-2 px-4 relative">
+<div class="absolute inset-0 bg-primary-container/10 animate-pulse"></div>
+<span class="label-sm font-label text-primary font-bold">03. PICK</span>
+<span class="text-[10px] font-headline text-on-primary-container font-black">Wraith</span>
+</div>
+<div class="bg-surface-container-high flex items-center justify-center gap-2 px-4 opacity-50">
+<span class="label-sm font-label">04. PICK</span>
+<span class="text-[10px] font-headline text-outline">Nova</span>
+</div>
+<div class="bg-surface-container-high flex items-center justify-center gap-2 px-4 opacity-50">
+<span class="label-sm font-label">05. BAN</span>
+<span class="text-[10px] font-headline text-outline">Wraith</span>
+</div>
+<div class="bg-surface-container-high flex items-center justify-center gap-2 px-4 opacity-50">
+<span class="label-sm font-label">06. BAN</span>
+<span class="text-[10px] font-headline text-outline">Nova</span>
+</div>
+<div class="bg-surface-container-high flex items-center justify-center gap-2 px-4 opacity-50">
+<span class="label-sm font-label">07. DECIDER</span>
+</div>
+</div>
+</section>
+<div class="flex-1 flex gap-8 min-h-0">
+<!-- Map Pool Grid -->
+<div class="flex-1 grid grid-cols-3 grid-rows-2 gap-4">
+<!-- Map Card: Banned -->
+<div class="relative group cursor-not-allowed overflow-hidden rounded-lg border border-outline-variant/10">
+<img alt="Dust III" class="w-full h-full object-cover grayscale opacity-40" data-alt="Cinematic wide shot of a futuristic desert marketplace with neon signs and industrial shipping containers, sunset lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaAZDzFjYCE6dDgEtyFJGrcQoUUQNd2Y3_2dTKsp9zev-YNUslf2nCR92P42iVhWDmoJD6Bjs8mXcQ0N31bL0cm-qOqtPGXOtapmNZtNWBqFWjL2l2Udkq8N1u8b64suSNVRWpeMWDBIFY0JonGfSE02p8Vps0FK7OURPY1q0Uza9cRMns9xwshNrRn5AoLqfv4IaRqV2pk1IE9-V_Xkvwex-ORL_xIL1xA9hay0uJRe0fJjEgh-I7Mhf4TaZXF0b71W5fEZdmAkE"/>
+<div class="absolute inset-0 bg-error-container/60 flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-white text-6xl font-thin" data-icon="close">close</span>
+<div class="text-center">
+<h3 class="font-headline font-black text-lg text-white uppercase italic tracking-tighter">DUST III</h3>
+<span class="label-sm font-label text-white/80">BANNED BY TEAM WRAITH</span>
+</div>
+</div>
+</div>
+<!-- Map Card: Active Hover / Selected -->
+<div class="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-primary-container shadow-[0_0_25px_rgba(252,83,109,0.3)]">
+<img alt="Cyber Station" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="High-tech space station corridor with blue glowing panels and mechanical floor textures, futuristic interior design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1kJwo26Pq1XbUK5BusYiVKbSlt2U1CBEpjSZtRXo0xjxbQ4GTY_Jj9qtbHrE9vj-Mqq3hpv3Sq7EuqElXRbSMawhOVV-MzSqhs60k-PyQ2hS6ATDCn2Wi8zYrfgIVx0LGSqs6TlqQv36EMwmlO2aSlXTgA8XgaJXSzRlX9pAhxVfjuBiGXx5PEgexQKKHQBJKo5vS0sZRoMWDR3Fptznq6imUZJD6-uf03cBIyb8Y_yX2gHvI3cvsJDT8wH-z3NqGEZbnucEqulo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+<div>
+<h3 class="font-headline font-black text-xl text-on-surface uppercase italic tracking-tighter group-hover:text-primary transition-colors">CYBER STATION</h3>
+<span class="label-sm font-label text-primary/80">READY TO PICK</span>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="ads_click">ads_click</span>
+</div>
+<div class="absolute top-4 right-4 flex gap-2">
+<span class="px-2 py-1 bg-surface-container-lowest/80 backdrop-blur-md text-[10px] font-label text-on-surface border border-outline-variant/20">WIN RATE: 64%</span>
+</div>
+</div>
+<!-- Map Card: Picked -->
+<div class="relative group cursor-default overflow-hidden rounded-lg border border-primary/20">
+<img alt="Neon District" class="w-full h-full object-cover opacity-80" data-alt="Rainy urban street at night with multi-colored neon advertisements and dark puddles reflecting the lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByaDgLu4Jc2OlAhopA9mHxGmXpO0M3UlZDOyaejk3Ysn6_cpXzaHtViuIFKt9eLJjhRmqORAKfu2uRDK62MqWLbanmePyAnj-_738i855HkgCkExsBceQebI6972K2XAZJTDjHKTN-x3OvJPWpwBOXjYfOPBz8WUm1kzMt9oMrNxMNxCfDyFpslmNd_o4f9uTVCPw3c9S44PaNhJu09Gj7THjd0-n8E-a0avGf5w6O_oPl_30BuCCbAk5kU1VK2ApgPH9ZbnqkByY"/>
+<div class="absolute inset-0 border-4 border-primary-container/20"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary-container px-6 py-2 -rotate-12 shadow-2xl">
+<span class="label-sm font-label text-on-primary-container font-black tracking-[0.3em]">MAP SELECTED</span>
+</div>
+</div>
+<div class="absolute bottom-4 left-4">
+<h3 class="font-headline font-black text-lg text-on-surface uppercase italic tracking-tighter">NEON DISTRICT</h3>
+</div>
+</div>
+<!-- Map Card: Neutral -->
+<div class="relative group cursor-pointer overflow-hidden rounded-lg border border-outline-variant/15 hover:border-primary/40 transition-all">
+<img alt="Frozen Apex" class="w-full h-full object-cover grayscale transition-all group-hover:grayscale-0" data-alt="Vast snowy mountain peak under a starry night sky with a small futuristic observatory nestled on the edge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvjW89a8fHRFoDEYOK2-LnuxCM0kgerKqDk97ezwCS9biAVcd-Ca0utTGHhEDUpKXiduuBfzBBB5Tskf4jl7uEtpxCs4SBhESfz3IjsUYl6vWQGWMpDcvg7M-mX_dMjgWuy6-Nx52K9IsHaqQEC95yvoZ8tpmI92plomC01KLaWUyK2fg8G8HP80v4Bk7b9RWdGMjmpNcvPQDm41MyJEnzKs8svj8YultTpLNR5oweSW36qN-Ji_xx_qFklSjD97mz4hvOmaCbmpU"/>
+<div class="absolute inset-0 bg-surface-container-lowest/40 group-hover:bg-transparent transition-colors"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="font-headline font-black text-lg text-on-surface/60 uppercase italic tracking-tighter group-hover:text-on-surface">FROZEN APEX</h3>
+</div>
+</div>
+<!-- Map Card: Neutral -->
+<div class="relative group cursor-pointer overflow-hidden rounded-lg border border-outline-variant/15 hover:border-primary/40 transition-all">
+<img alt="Sunken Harbor" class="w-full h-full object-cover grayscale transition-all group-hover:grayscale-0" data-alt="Post-apocalyptic flooded shipyard with rusted industrial cranes and overgrown green vines, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiUvGDREMQn3Tfqp1jhsKDcS6h1oCRYFmLP1iroKti014rvcprG2LbmNFs4rhEZKECxJIQji8POQctqsahb-D7UXFGfRdMee87ULAcYW0dJgtSfLLAva8iIxV3m2xld8-z0NhtxGgvRuIzX-4Bs5yjzRegVV2mVG_HgVk3FTV9lc-GOhxQyoNLRieSsay5LU-FIwISIksnHGDmuuezL3NGTatdj5g6SpDzCuX_Jea5raWRcOUa779_GHoYXmoe8tu9-bJjh9vh9ME"/>
+<div class="absolute inset-0 bg-surface-container-lowest/40 group-hover:bg-transparent transition-colors"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="font-headline font-black text-lg text-on-surface/60 uppercase italic tracking-tighter group-hover:text-on-surface">SUNKEN HARBOR</h3>
+</div>
+</div>
+<!-- Map Card: Banned -->
+<div class="relative group cursor-not-allowed overflow-hidden rounded-lg border border-outline-variant/10">
+<img alt="Iron Factory" class="w-full h-full object-cover grayscale opacity-40" data-alt="Heavy industrial factory interior with molten metal sparks and massive steel gears, warm fiery lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgNIy8Ydv_co2aEsYpTdy-71jzDsc_cwSDF3e7LVtYaBADcYfdruMs-wPUviwguiOx3bgEfu3lJ-CWaqMFCJAf-91ide16g-JwlpWi85spL2v77A1rwW08CEicDiSJK-FcWUS2a8YnAWNFO5GplUkAfl1zGmEtfzCHFtSzBy5ShDeIACTE5OFvWh35xdHLXjZh92g7DnVQhoKRH1t4H73QSDijvs_3GvSY9_eATECdK07c6-0-HKcvfHdPvBMgVUb_9kxzxntbstA"/>
+<div class="absolute inset-0 bg-error-container/60 flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-white text-6xl font-thin" data-icon="close">close</span>
+<div class="text-center">
+<h3 class="font-headline font-black text-lg text-white uppercase italic tracking-tighter">IRON FACTORY</h3>
+<span class="label-sm font-label text-white/80">BANNED BY NOVA ESPORTS</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Log Sidebar -->
+<aside class="w-80 flex flex-col gap-4">
+<div class="flex-1 bg-surface-container-low rounded-lg p-6 border-l border-outline-variant/20 flex flex-col">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="history_edu">history_edu</span>
+<h2 class="label-sm font-label font-bold text-on-surface tracking-widest uppercase">TACTICAL ACTION LOG</h2>
+</div>
+<div class="flex-1 overflow-y-auto space-y-4 pr-2">
+<!-- Log Entry -->
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+<div class="w-[1px] h-full bg-outline-variant/30"></div>
+</div>
+<div>
+<p class="text-[10px] text-outline-variant font-headline uppercase mb-1">14:02:11</p>
+<p class="text-sm font-body leading-tight">
+<span class="text-primary-container font-bold">WRAITH</span> banned 
+                                    <span class="text-on-surface font-headline uppercase italic">Dust III</span>
+</p>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<div class="w-[1px] h-full bg-outline-variant/30"></div>
+</div>
+<div>
+<p class="text-[10px] text-outline-variant font-headline uppercase mb-1">14:02:45</p>
+<p class="text-sm font-body leading-tight">
+<span class="text-secondary font-bold">NOVA</span> banned 
+                                    <span class="text-on-surface font-headline uppercase italic">Iron Factory</span>
+</p>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<div class="w-[1px] h-full bg-outline-variant/30"></div>
+</div>
+<div>
+<p class="text-[10px] text-outline-variant font-headline uppercase mb-1">14:03:02</p>
+<p class="text-sm font-body leading-tight">
+<span class="text-primary-container font-bold">WRAITH</span> picked 
+                                    <span class="text-on-surface font-headline uppercase italic">Neon District</span>
+</p>
+</div>
+</div>
+<!-- Log Entry -->
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="w-6 h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="bolt">bolt</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-3 rounded-lg border-l-2 border-primary">
+<p class="text-xs font-bold text-primary mb-1 uppercase tracking-tighter font-headline">SYSTEM ALERT</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">NOVA ESPORTS has 42s remaining to select Map #2.</p>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/15">
+<div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-2 rounded border border-outline-variant/20">
+<input class="bg-transparent border-none text-xs flex-1 focus:ring-0 text-on-surface" placeholder="Send tactical signal..." type="text"/>
+<button class="material-symbols-outlined text-primary text-lg" data-icon="send">send</button>
+</div>
+</div>
+</div>
+<!-- Strategic Summary Card -->
+<div class="bg-secondary-container/40 p-4 rounded-lg border-b border-secondary/30">
+<div class="flex justify-between items-center mb-3">
+<span class="label-sm font-label text-secondary tracking-widest">MAP ADVANTAGE</span>
+<span class="text-xs font-headline font-black text-secondary">+12.4%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full bg-secondary w-3/4"></div>
+</div>
+<p class="text-[10px] text-on-secondary-container mt-3 leading-tight opacity-70">
+                        Nova Esports shows 82% win rate on remaining maps in the pool.
+                    </p>
+</div>
+</aside>
+</div>
+<!-- Confirm Selection Button (Floating Bottom) -->
+<div class="flex justify-center mt-4">
+<button class="group relative px-12 py-4 bg-gradient-to-r from-primary to-primary-container overflow-hidden rounded-lg transition-transform active:scale-95 duration-100 ease-linear shadow-[0_4px_20px_rgba(252,83,109,0.3)]">
+<div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+<div class="relative flex items-center gap-3">
+<span class="material-symbols-outlined text-on-primary-fixed" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-headline font-black text-on-primary-fixed tracking-widest uppercase">LOCK SELECTION</span>
+</div>
+</button>
+</div>
+</main>
+</body></html>

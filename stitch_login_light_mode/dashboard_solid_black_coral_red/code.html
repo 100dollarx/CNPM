@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TACTICAL COMMAND | Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#dfe2eb",
+              "error": "#ffb4ab",
+              "on-error": "#690005",
+              "inverse-surface": "#dfe2eb",
+              "on-secondary-fixed": "#001b3c",
+              "on-secondary-container": "#9bbaee",
+              "secondary-container": "#294a77",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#b71d3f",
+              "surface-variant": "#31353c",
+              "secondary-fixed-dim": "#a9c8fc",
+              "surface-container-high": "#262a31",
+              "on-tertiary-fixed-variant": "#005232",
+              "on-primary-container": "#5b0017",
+              "on-primary": "#67001c",
+              "on-tertiary": "#003921",
+              "error-container": "#93000a",
+              "tertiary": "#67dc9f",
+              "tertiary-container": "#25a46d",
+              "on-secondary-fixed-variant": "#274774",
+              "secondary-fixed": "#d5e3ff",
+              "background": "#10141a",
+              "on-secondary": "#09305c",
+              "secondary": "#a9c8fc",
+              "primary-fixed": "#ffdadb",
+              "inverse-on-surface": "#2d3137",
+              "primary-container": "#fc536d",
+              "tertiary-fixed": "#84f9ba",
+              "on-surface-variant": "#e2bebf",
+              "outline-variant": "#5a4042",
+              "surface-bright": "#353940",
+              "outline": "#a9898a",
+              "on-primary-fixed": "#40000e",
+              "primary": "#ffb2b7",
+              "surface-container-lowest": "#0a0e14",
+              "on-primary-fixed-variant": "#91002b",
+              "on-tertiary-fixed": "#002111",
+              "surface-container": "#1c2026",
+              "primary-fixed-dim": "#ffb2b7",
+              "on-tertiary-container": "#00311c",
+              "tertiary-fixed-dim": "#67dc9f",
+              "surface-tint": "#ffb2b7",
+              "surface": "#10141a",
+              "surface-dim": "#10141a",
+              "surface-container-low": "#181c22",
+              "surface-container-highest": "#31353c",
+              "on-background": "#dfe2eb"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      body { background-color: #10141a; color: #dfe2eb; font-family: 'Inter', sans-serif; }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .glass-panel { background: rgba(41, 74, 119, 0.6); backdrop-filter: blur(12px); }
+      .primary-glow { box-shadow: 0 0 20px rgba(255, 178, 183, 0.04); }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#181c22] dark:bg-[#181c22] flex flex-col py-8 no-border tonal-shift">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-primary-container">terminal</span>
+</div>
+<div>
+<h1 class="font-headline font-bold text-[#ffb2b7] tracking-tight text-lg">HQ COMMAND</h1>
+<p class="font-label text-[10px] text-tertiary tracking-[0.2em]">OPERATIONAL</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-4">
+<a class="flex items-center gap-4 bg-gradient-to-r from-[#ffb2b7] to-[#fc536d] text-[#40000e] rounded-sm px-4 py-3 font-label text-xs font-medium uppercase tracking-[0.05em] active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-3 font-label text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#31353c] transition-all duration-100 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span>Tournaments</span>
+</a>
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-3 font-label text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#31353c] transition-all duration-100 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>Brackets</span>
+</a>
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-3 font-label text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#31353c] transition-all duration-100 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Teams</span>
+</a>
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-3 font-label text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#31353c] transition-all duration-100 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span>Analytics</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-6">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed py-3 rounded-lg font-headline font-bold text-xs tracking-wider uppercase shadow-lg shadow-primary-container/20 active:scale-95 transition-transform">
+                CREATE TOURNAMENT
+            </button>
+<div class="space-y-1 pt-4 border-t border-outline-variant/10">
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-2 font-label text-xs font-medium uppercase tracking-[0.05em] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-4 text-slate-400 hover:text-white px-4 py-2 font-label text-xs font-medium uppercase tracking-[0.05em] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 z-30 bg-[#10141a] h-16 px-6 flex justify-between items-center shadow-[0_4px_20px_rgba(255,178,183,0.04)]">
+<div class="flex items-center flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+<input class="w-full bg-surface-container-lowest border-b-2 border-outline-variant/30 focus:border-primary text-xs font-label text-on-surface py-2 pl-10 focus:ring-0 transition-colors uppercase tracking-widest" placeholder="SEARCH SYSTEM ARCHIVES..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6 ml-6">
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-[#ffb2b7] transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-[#ffb2b7] transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-3">
+<span class="text-right">
+<p class="font-headline font-bold text-xs text-primary uppercase tracking-tighter">TACTICAL COMMAND</p>
+<p class="font-label text-[10px] text-slate-500">OPERATOR_08</p>
+</span>
+<div class="w-10 h-10 rounded-lg overflow-hidden border border-primary/20">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Close-up portrait of a serious gamer in a darkened room with red and blue neon lighting reflecting on their face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ts3ks18Io9PAwlfgbUzpRhq82rtWUoKEJKc7nxB2Mxdm4BVYyz9PJwPtYzB7aP2-Ur2SNuBR0SUJ1ytCsixpvDG3qKIuIXo-17DsFHOPjawNaQ_yL3S9IPI1YbP1nFT4AkrmcqNHNgfJnZ9GUSrWzT4p8SbCooN-MuraUvLJwXzfmAX6kxnF_UwNwEkmVB2znJzDr4kcz16t-dgbKZgKkR2Z3ZZ4jgeJ6wEHc9YeOQHL0Juc14kfxob-I6XuKJgV4QAIixbDOYU"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="mt-16 p-8 space-y-8 max-w-7xl mx-auto w-full">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline font-bold text-3xl tracking-tight text-on-surface uppercase">Mission Control</h2>
+<p class="font-body text-sm text-slate-400 mt-1 italic">Tactical oversight of active tournament infrastructure</p>
+</div>
+<div class="flex gap-3">
+<div class="bg-surface-container-high px-4 py-2 flex items-center gap-3 rounded-lg border border-outline-variant/10">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface">System Online</span>
+</div>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Stat Card 1 -->
+<div class="bg-secondary-container p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="emoji_events">emoji_events</span>
+</div>
+<p class="font-label text-xs text-on-secondary-container uppercase tracking-widest mb-2">Active Tournaments</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-4xl font-bold text-primary">12</span>
+<span class="text-xs text-tertiary font-body">+2 today</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-lowest/30 rounded-full">
+<div class="h-full bg-primary w-3/4 rounded-full"></div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-secondary-container p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="groups">groups</span>
+</div>
+<p class="font-label text-xs text-on-secondary-container uppercase tracking-widest mb-2">Pending Teams</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-4xl font-bold text-primary">48</span>
+<span class="text-xs text-primary-container font-body">Urgent</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-lowest/30 rounded-full">
+<div class="h-full bg-primary-container w-1/2 rounded-full"></div>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-secondary-container p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="schedule">schedule</span>
+</div>
+<p class="font-label text-xs text-on-secondary-container uppercase tracking-widest mb-2">Matches Today</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-4xl font-bold text-primary">156</span>
+<span class="text-xs text-slate-400 font-body">Global</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-lowest/30 rounded-full">
+<div class="h-full bg-tertiary w-full rounded-full"></div>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-secondary-container p-6 rounded-lg relative overflow-hidden group border border-primary/10">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl text-error" data-icon="gavel">gavel</span>
+</div>
+<p class="font-label text-xs text-error uppercase tracking-widest mb-2">Open Disputes</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-4xl font-bold text-error">03</span>
+<span class="text-xs text-error font-body font-bold">Action Required</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-lowest/30 rounded-full">
+<div class="h-full bg-error w-1/4 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Two Column Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Recent Tournaments Table -->
+<div class="lg:col-span-2 space-y-4">
+<div class="bg-surface-container-low rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container px-6 py-4 flex justify-between items-center">
+<h3 class="font-headline font-bold text-sm text-on-surface uppercase tracking-widest">Recent Tournaments</h3>
+<button class="text-primary font-label text-[10px] uppercase hover:underline">View Global Registry</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-outline-variant/10">
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-widest text-slate-500">Tournament Name</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-widest text-slate-500">Game Type</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-widest text-slate-500">Status</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-widest text-slate-500">Start Date</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary group-hover:animate-ping"></div>
+<span class="font-body text-sm font-medium">Cyber Siege Protocol X</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/50 text-secondary text-[10px] font-label px-2 py-1 rounded uppercase">Tactical FPS</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-tertiary text-[10px] font-label uppercase">
+<span class="material-symbols-outlined text-xs">radio_button_checked</span>
+                                                In Progress
+                                            </span>
+</td>
+<td class="px-6 py-4 font-label text-[10px] text-slate-400">OCT 24, 2023</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-600"></div>
+<span class="font-body text-sm font-medium">Neon Blitz Open</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/50 text-secondary text-[10px] font-label px-2 py-1 rounded uppercase">MOBA Elite</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-slate-400 text-[10px] font-label uppercase">
+<span class="material-symbols-outlined text-xs">pending</span>
+                                                Registrations Open
+                                            </span>
+</td>
+<td class="px-6 py-4 font-label text-[10px] text-slate-400">OCT 28, 2023</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="font-body text-sm font-medium">Velocity Pro League</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/50 text-secondary text-[10px] font-label px-2 py-1 rounded uppercase">Racing Sim</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-primary-container text-[10px] font-label uppercase">
+<span class="material-symbols-outlined text-xs">notification_important</span>
+                                                Urgent Action
+                                            </span>
+</td>
+<td class="px-6 py-4 font-label text-[10px] text-slate-400">NOV 02, 2023</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-600"></div>
+<span class="font-body text-sm font-medium">Titan Gauntlet V</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container/50 text-secondary text-[10px] font-label px-2 py-1 rounded uppercase">Battle Royale</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-slate-500 text-[10px] font-label uppercase">
+<span class="material-symbols-outlined text-xs">hourglass_empty</span>
+                                                Seeding Phase
+                                            </span>
+</td>
+<td class="px-6 py-4 font-label text-[10px] text-slate-400">NOV 05, 2023</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Recent Activity Feed -->
+<div class="space-y-4">
+<div class="bg-surface-container-low rounded-lg h-full flex flex-col">
+<div class="bg-surface-container px-6 py-4 flex justify-between items-center">
+<h3 class="font-headline font-bold text-sm text-on-surface uppercase tracking-widest">Recent Activity</h3>
+<span class="material-symbols-outlined text-slate-500 text-sm">history</span>
+</div>
+<div class="p-6 space-y-6 flex-1 overflow-y-auto max-h-[400px]">
+<!-- Activity Item 1 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-0 w-[1px] bg-outline-variant/10"></div>
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/40">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="gavel">gavel</span>
+</div>
+<div>
+<p class="font-body text-xs text-on-surface"><span class="font-bold">ADMIN_KIM</span> flagged a match dispute in <span class="text-primary">Neon Blitz Open</span>.</p>
+<p class="font-label text-[10px] text-slate-500 mt-1">2 MINUTES AGO</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-0 w-[1px] bg-outline-variant/10"></div>
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border border-secondary/40">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="groups">groups</span>
+</div>
+<div>
+<p class="font-body text-xs text-on-surface"><span class="font-bold">Team Liquid</span> registered for <span class="text-secondary">Velocity Pro League</span>.</p>
+<p class="font-label text-[10px] text-slate-500 mt-1">15 MINUTES AGO</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-0 w-[1px] bg-outline-variant/10"></div>
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-tertiary-container/20 flex items-center justify-center border border-tertiary/40">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<p class="font-body text-xs text-on-surface">Tournament <span class="font-bold">Alpha Strike</span> completed successfully.</p>
+<p class="font-label text-[10px] text-slate-500 mt-1">45 MINUTES AGO</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/40">
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="settings">settings</span>
+</div>
+<div>
+<p class="font-body text-xs text-on-surface">System backup automated protocol initialized.</p>
+<p class="font-label text-[10px] text-slate-500 mt-1">1 HOUR AGO</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Dashboard Modules (Bento Grid Style Bottom) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant/10 hover:border-primary/30 transition-colors group">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="security">security</span>
+<span class="material-symbols-outlined text-slate-500 text-sm group-hover:text-primary transition-colors">arrow_outward</span>
+</div>
+<h4 class="font-headline font-bold text-sm uppercase tracking-widest text-on-surface">Security Logs</h4>
+<p class="font-body text-xs text-slate-400 mt-2">Monitor access attempts and permission shifts across HQ.</p>
+</div>
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant/10 hover:border-primary/30 transition-colors group">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+<span class="material-symbols-outlined text-slate-500 text-sm group-hover:text-primary transition-colors">arrow_outward</span>
+</div>
+<h4 class="font-headline font-bold text-sm uppercase tracking-widest text-on-surface">Payout Queue</h4>
+<p class="font-body text-xs text-slate-400 mt-2">Manage prize pool distribution and team bank verifying.</p>
+</div>
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant/10 hover:border-primary/30 transition-colors group">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="language">language</span>
+<span class="material-symbols-outlined text-slate-500 text-sm group-hover:text-primary transition-colors">arrow_outward</span>
+</div>
+<h4 class="font-headline font-bold text-sm uppercase tracking-widest text-on-surface">Server Health</h4>
+<p class="font-body text-xs text-slate-400 mt-2">Real-time ping and latency logs for tournament realms.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for Create Tournament (Suppressed on details but active on Dashboard) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary-fixed rounded-xl flex items-center justify-center shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined font-bold text-2xl" data-icon="add">add</span>
+</button>
+</body></html>

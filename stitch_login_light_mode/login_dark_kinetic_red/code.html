@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETMS | Kinetic Command Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        // Updated Primary to Coral Red (#E94560) and derived shades
+                        "primary": "#E94560",
+                        "primary-container": "#510d1a",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#ffdadb",
+                        "on-surface": "#dfe2eb",
+                        "on-surface-variant": "#ccc3d2",
+                        "surface": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-container-low": "#181c22",
+                        "surface-container-high": "#262a31",
+                        "surface-container-highest": "#31353c",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline": "#958e9b",
+                        "outline-variant": "#4a4550",
+                        "background": "#10141a",
+                        "error": "#ffb4ab"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .mesh-gradient-bg {
+            background-color: #0a0e14;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(348,78%,12%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(348,78%,8%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(348,78%,12%,1) 0, transparent 50%),
+                radial-gradient(at 50% 100%, hsla(348,78%,10%,1) 0, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary/30">
+<!-- Suppressing Shared Nav Shells for focused Login Screen -->
+<main class="min-h-screen flex flex-col md:flex-row overflow-hidden">
+<!-- LEFT PANEL: Brand Identity (40%) -->
+<section class="hidden md:flex md:w-[40%] bg-surface-container-low relative flex-col justify-between p-12 overflow-hidden border-r border-outline-variant/10">
+<!-- Background Aesthetic -->
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-full h-full bg-primary/10 blur-[120px] rounded-full"></div>
+</div>
+<!-- Logo & Brand -->
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-on-primary text-3xl" data-icon="emoji_events" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<h1 class="font-headline text-3xl font-bold tracking-tighter bg-gradient-to-r from-primary to-[#ffb2b7] bg-clip-text text-transparent">ETMS</h1>
+</div>
+<p class="font-headline text-on-surface-variant text-lg font-medium leading-tight">Esports Tournament Management System</p>
+</div>
+<!-- Features Bento-lite -->
+<div class="relative z-10 space-y-6">
+<div class="space-y-4">
+<div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-high/50 backdrop-blur-sm border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="sports_esports">sports_esports</span>
+<div>
+<h3 class="font-headline font-semibold text-on-surface">Multi-game support</h3>
+<p class="text-sm text-on-surface-variant">Centralized management for FPS, MOBA, and Battle Royale titles.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-high/50 backdrop-blur-sm border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="account_tree">account_tree</span>
+<div>
+<h3 class="font-headline font-semibold text-on-surface">Real-time bracket</h3>
+<p class="text-sm text-on-surface-variant">Live updates with automated match progression and seeding.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-high/50 backdrop-blur-sm border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="devices">devices</span>
+<div>
+<h3 class="font-headline font-semibold text-on-surface">Cross-platform</h3>
+<p class="text-sm text-on-surface-variant">Seamless synchronization across mobile, web, and broadcast overlays.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Metadata -->
+<div class="relative z-10">
+<div class="text-xs font-medium font-label tracking-widest text-outline uppercase opacity-50">Version v4.0.0 Kinetic Command</div>
+</div>
+</section>
+<!-- RIGHT PANEL: Login Form (60%) -->
+<section class="flex-1 flex flex-col mesh-gradient-bg relative p-6 md:p-12">
+<!-- Top Controls -->
+<nav class="flex justify-end gap-4 items-center h-14">
+<div class="flex bg-surface-container rounded-full p-1 border border-outline-variant/10">
+<button class="px-3 py-1 text-xs font-bold font-label rounded-full bg-primary text-on-primary transition-all">EN</button>
+<button class="px-3 py-1 text-xs font-bold font-label rounded-full text-on-surface-variant hover:text-on-surface transition-all">VI</button>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container border border-outline-variant/10 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="light_mode">light_mode</span>
+</button>
+</nav>
+<!-- Login Container -->
+<div class="flex-1 flex items-center justify-center">
+<div class="w-full max-w-[420px] p-8 md:p-10 rounded-2xl bg-surface-container/40 backdrop-blur-2xl border border-outline-variant/10 shadow-2xl">
+<header class="mb-10 text-center md:text-left">
+<h2 class="font-headline text-3xl font-bold text-on-surface mb-2 tracking-tight">Sign in to your account</h2>
+<p class="text-on-surface-variant font-body">Đăng nhập hệ thống quản lý giải đấu</p>
+</header>
+<form class="space-y-6">
+<!-- Username Field -->
+<div class="space-y-2">
+<label class="text-xs font-bold font-label uppercase tracking-widest text-on-surface-variant ml-1">Username</label>
+<div class="group relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl py-3.5 pl-11 pr-4 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="e.g. administrator_01" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-end ml-1">
+<label class="text-xs font-bold font-label uppercase tracking-widest text-on-surface-variant">Password</label>
+<a class="text-xs font-semibold text-primary hover:text-[#ffb2b7] transition-colors" href="#">Quên mật khẩu?</a>
+</div>
+<div class="group relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl py-3.5 pl-11 pr-11 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••••••" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-4 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember & Meta -->
+<div class="flex items-center gap-3">
+<input class="w-5 h-5 rounded border-outline-variant/30 bg-surface-container-lowest text-primary focus:ring-primary/20 focus:ring-offset-0" id="remember" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface-variant select-none" for="remember">Remember this device</label>
+</div>
+<!-- Action Button -->
+<button class="w-full group relative overflow-hidden bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline font-bold py-4 rounded-xl shadow-lg shadow-primary/10 hover:shadow-primary/25 active:scale-[0.98] transition-all" type="submit">
+<span class="relative z-10 flex items-center justify-center gap-2">
+                                Đăng nhập / Sign In
+                                <span class="material-symbols-outlined text-[18px]" data-icon="login">login</span>
+</span>
+</button>
+</form>
+<footer class="mt-8 text-center">
+<p class="text-sm text-on-surface-variant">
+                            New to ETMS? <a class="text-primary font-bold hover:underline" href="#">Request access</a>
+</p>
+</footer>
+</div>
+</div>
+<!-- Mobile Footer -->
+<div class="md:hidden mt-auto text-center py-4">
+<p class="text-[10px] font-label text-outline uppercase tracking-tighter">Kinetic Command v4.0.0</p>
+</div>
+</section>
+</main>
+<!-- Visual Enhancements Overlay -->
+<div class="fixed inset-0 pointer-events-none opacity-30 mix-blend-overlay">
+<div class="w-full h-full" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCO86Ysb0zh2zQ0EgTkv2zuIS7aRG1PeeHP2gUn8KX-rpfVkcx1JYRsMUObNC-Bv02tjHrYRI1wvWc4BZ3RqNHfCw-ShYPy8j0ZgFsKrAoqBMLg7GuM3Fab81yCS2fexSVHTwp5iTrJppNLufCMWSrnmbqCJzm-dfnkeCevtZPYZ4LDC_wjzHimhaAewhVMxqYOcWf21W3rEc7D8z1k6_5mBcdW1Jm0htAL-vkbNa36ew234AQJt9v8z559ByQfRtcHsG_KtgpVK7A');"></div>
+</div>
+</body></html>

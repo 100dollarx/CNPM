@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audit Log - ETMS Tactical Command</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "error-container": "#93000a",
+            "primary-container": "#fc536d",
+            "surface-variant": "#31353c",
+            "on-secondary-fixed": "#001b3c",
+            "surface-container-highest": "#31353c",
+            "on-primary": "#67001c",
+            "on-surface": "#dfe2eb",
+            "on-tertiary": "#003921",
+            "tertiary-fixed-dim": "#67dc9f",
+            "surface-container": "#1c2026",
+            "inverse-on-surface": "#2d3137",
+            "on-primary-fixed": "#40000e",
+            "on-secondary-container": "#9bbaee",
+            "secondary-fixed": "#d5e3ff",
+            "tertiary-container": "#25a46d",
+            "surface-tint": "#ffb2b7",
+            "secondary-container": "#294a77",
+            "on-secondary": "#09305c",
+            "surface-container-low": "#181c22",
+            "tertiary": "#67dc9f",
+            "tertiary-fixed": "#84f9ba",
+            "surface-container-high": "#262a31",
+            "on-tertiary-fixed": "#002111",
+            "on-tertiary-container": "#00311c",
+            "background": "#10141a",
+            "surface": "#10141a",
+            "secondary-fixed-dim": "#a9c8fc",
+            "on-tertiary-fixed-variant": "#005232",
+            "secondary": "#a9c8fc",
+            "on-secondary-fixed-variant": "#274774",
+            "outline": "#a9898a",
+            "surface-dim": "#10141a",
+            "error": "#ffb4ab",
+            "outline-variant": "#5a4042",
+            "on-primary-container": "#5b0017",
+            "on-surface-variant": "#e2bebf",
+            "primary-fixed": "#ffdadb",
+            "primary-fixed-dim": "#ffb2b7",
+            "primary": "#ffb2b7",
+            "on-primary-fixed-variant": "#91002b",
+            "on-error": "#690005",
+            "on-background": "#dfe2eb",
+            "surface-bright": "#353940",
+            "inverse-surface": "#dfe2eb",
+            "inverse-primary": "#b71d3f",
+            "surface-container-lowest": "#0a0e14",
+            "on-error-container": "#ffdad6"
+          },
+          fontFamily: {
+            "headline": ["Space Grotesk"],
+            "body": ["Inter"],
+            "label": ["Space Grotesk"]
+          },
+          borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #10141a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #5a4042;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar Anchor -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-[#5a4042]/15 bg-[#0D1117]">
+<div class="p-6 flex flex-col gap-1">
+<div class="text-xl font-black text-[#ffb2b7] tracking-tighter font-headline">ETMS</div>
+<div class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold text-[#5a4042]">TACTICAL COMMAND</div>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar py-4">
+<div class="flex flex-col">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span> Tournaments
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span> Teams
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Bracket
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span> Schedule
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span> Results
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span> Leaderboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span> Disputes
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span> Notifications
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#1c2026] text-[#ffb2b7] border-r-2 border-[#E94560] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span> Audit Log
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span> User Management
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> Settings
+        </a>
+</div>
+</nav>
+</aside>
+<!-- TopAppBar Anchor -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-[#5a4042]/15">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#5a4042] group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+</span>
+<input class="bg-surface-container-lowest border-none border-b-2 border-outline-variant text-sm font-body py-1.5 pl-10 pr-4 w-64 focus:ring-0 focus:border-primary transition-all placeholder-[#5a4042]" placeholder="Search logs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold font-headline uppercase tracking-wider text-on-surface">Commander</p>
+<p class="text-[10px] font-medium text-[#5a4042] uppercase tracking-tighter">Profile</p>
+</div>
+<img alt="User Avatar" class="w-10 h-10 rounded-lg border border-outline-variant" data-alt="close-up portrait of a professional gamer with high-tech headset and dramatic neon rim lighting on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7NzfjKImVYCA_xhuMpJCHD_6T8a-TlWom7Eu0v5r7J8CiLFA57wbVYTWLKaWFFvEjrzrY2DwNgspDccFBMqVwgj3t-UQDKXn96D_KHe0OVTOFBCsBZ7BKHEj_4Ty6jddYLeFYvanWWc7HU9Dj95Kf4O3wASoW5SwwO3WszdNvm7Li5wwu09JVootjWuhZyXgSLdh8piTYsoDdNjZKqtvMsVonCLJ_LP9XMq1D2jYoGfsTXUt38M4APM5yGQ1WFMV49SM9jPQBE38"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 pt-16 min-h-screen p-8 bg-[#0D1117]">
+<!-- Hero Section / Title -->
+<section class="mb-10">
+<div class="flex items-end justify-between">
+<div>
+<span class="font-label text-label-sm text-primary-container tracking-[0.2em] mb-2 block">SYSTEM SECURITY</span>
+<h1 class="font-headline text-4xl font-black text-on-surface uppercase tracking-tight">Audit Log</h1>
+<p class="text-on-surface-variant font-body mt-2 max-w-2xl">Real-time system oversight and administrative activity tracking for the ETMS Tactical Grid.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container-highest border border-primary/20 text-on-surface font-label text-xs font-bold uppercase px-6 py-3 rounded-lg hover:bg-surface-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span> Export CSV
+          </button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed font-label text-xs font-bold uppercase px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span> Refresh Stream
+          </button>
+</div>
+</div>
+</section>
+<!-- Filters Toolbar -->
+<section class="bg-surface-container-low p-6 rounded-xl mb-8 flex flex-wrap gap-6 items-end border border-outline-variant/10">
+<div class="flex flex-col gap-2">
+<label class="font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Date Range</label>
+<div class="flex items-center bg-surface-container-lowest px-4 py-2 rounded-lg border-b-2 border-outline-variant">
+<span class="material-symbols-outlined text-sm text-[#5a4042] mr-3" data-icon="event">event</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs font-mono text-on-surface w-40" type="text" value="OCT 24 - OCT 31, 2023"/>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Action Type</label>
+<div class="relative">
+<select class="bg-surface-container-lowest border-none border-b-2 border-outline-variant text-xs font-label font-bold uppercase py-2 pl-4 pr-10 rounded-lg appearance-none focus:ring-0 focus:border-primary text-on-surface w-48">
+<option>All Actions</option>
+<option>Create</option>
+<option>Approve</option>
+<option>Delete</option>
+<option>Update</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#5a4042] pointer-events-none" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Admin User</label>
+<div class="relative">
+<select class="bg-surface-container-lowest border-none border-b-2 border-outline-variant text-xs font-label font-bold uppercase py-2 pl-4 pr-10 rounded-lg appearance-none focus:ring-0 focus:border-primary text-on-surface w-48">
+<option>All Administrators</option>
+<option>System</option>
+<option>Lead Mod</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#5a4042] pointer-events-none" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+</div>
+<div class="flex-1"></div>
+<button class="text-primary font-label text-[10px] font-bold uppercase tracking-widest hover:underline mb-3">Clear All Filters</button>
+</section>
+<!-- Tactical Audit Table -->
+<section class="bg-surface-container rounded-xl overflow-hidden shadow-2xl">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/10">
+<th class="px-6 py-4 font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Timestamp</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Administrator</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Action</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest">Target Entity</th>
+<th class="px-6 py-4 font-label text-[10px] font-bold text-[#5a4042] uppercase tracking-widest text-center">Result</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high/40 transition-colors group">
+<td class="px-6 py-5 font-mono text-[11px] text-on-surface-variant">2023-10-31 14:22:05</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Admin Avatar" class="w-6 h-6 rounded-md" data-alt="professional digital headshot of a female executive with subtle tech glow behind her on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcTPX_Po85O-kzgttKR4PssgMy_UDK4SBI661DDU6VtkZsBSQEeMZLVKEL7RRmTyV5K3IOTvpSnRKeNjnqA-b8haxBadeDo2EeU8KUrcoyPIStQOngz9iPpXCeb4DbUHSqdDjJ9y4iXXY3GM4vpj0tTypiccH9VWJlvfzF58ZbLjJPNkk6kuAUpaKIy_rGLRIBLr5OfS-UYLJclFa7oe3__ncs5z_Nu5gnstFOals_gOzmS5pVm7Wbr0H6piewQ5Zx3PLNWY3EiDQ"/>
+<span class="text-xs font-bold text-on-surface">Alex "Raptor" K.</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-tertiary-container/20 text-tertiary border border-tertiary/20">CREATE</span>
+</td>
+<td class="px-6 py-5 font-headline text-xs text-on-surface">Match_Bracket_S4_Finals</td>
+<td class="px-6 py-5 text-center">
+<span class="material-symbols-outlined text-tertiary text-lg" data-icon="check_circle">check_circle</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-[#5a4042] group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="unfold_more">unfold_more</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Expanded) -->
+<tr class="bg-surface-container-lowest/40">
+<td class="px-6 py-5 font-mono text-[11px] text-on-surface-variant">2023-10-31 13:58:12</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Admin Avatar" class="w-6 h-6 rounded-md" data-alt="digital avatar of a tactical officer with holographic glasses and sharp lighting features" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY_O7nHraMZ5piaXN4C3sxyccHoqi2gQymM7knYbP8TDD6Zn2SYCF0lu7zZrv8ZCQI0lmXk9ECr7IthmrfMaCyTBavPvgZBolEi8ew5m39YmakGYAg2Aj5UVAFCkgjhGLllSzPk4NFAi_OLuskYy262yUfy5gFsCgKV3Ik-siiubx_cHPRP2_5ixb8R04Ma7PbrFwDLFvkEXRD0-j2ZHGlkfc_ERyj4SvLacw4fcDcGwLhQvc6iHWVUZl36K5B-rptudPLfu1JABw"/>
+<span class="text-xs font-bold text-on-surface">Sarah "Nova" Chen</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-error-container/20 text-error border border-error/20">DELETE</span>
+</td>
+<td class="px-6 py-5 font-headline text-xs text-on-surface">Dispute_Ticket_#4491</td>
+<td class="px-6 py-5 text-center">
+<span class="material-symbols-outlined text-tertiary text-lg" data-icon="check_circle">check_circle</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="unfold_less">unfold_less</span>
+</button>
+</td>
+</tr>
+<!-- Code Block Expansion -->
+<tr>
+<td class="p-0" colspan="6">
+<div class="bg-surface-container-lowest p-6 border-l-4 border-primary m-4 rounded-lg">
+<div class="flex justify-between items-start mb-4">
+<h4 class="font-label text-[10px] font-bold text-primary uppercase tracking-widest">Transaction JSON Detail</h4>
+<span class="font-mono text-[10px] text-[#5a4042]">TRACE_ID: 88F9-22B1-CX02</span>
+</div>
+<pre class="font-mono text-[11px] leading-relaxed text-secondary-container/80 overflow-x-auto whitespace-pre-wrap">
+{
+  "action": "DELETE",
+  "actor_id": "MOD_0922",
+  "target": {
+    "type": "dispute_ticket",
+    "id": "4491",
+    "reason": "Duplicate Entry"
+  },
+  "previous_state": {
+    "status": "OPEN",
+    "priority": "HIGH",
+    "timestamp": "2023-10-31T09:12:00Z"
+  },
+  "ip_address": "192.168.1.104",
+  "user_agent": "ETMS_HUD_V2.1.0"
+}</pre>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high/40 transition-colors group">
+<td class="px-6 py-5 font-mono text-[11px] text-on-surface-variant">2023-10-31 12:45:33</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Admin Avatar" class="w-6 h-6 rounded-md" data-alt="avatar portrait of an esports official wearing an orange and black jersey with futuristic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8BBMGqNAjezS0aAAaSMpqPlrqrDaYUY71pPvL2SZZHw8KG0bAJ0EmMrQVHjhuWl2ZX7-Yrtg_6HGfcbimSIWpJSBcniJXjMWLwr7SYKvl_OPUp03lcIn62oIho2zu-rj0uxrKi9pf6XW4otFzBsci4H7ukd4CRJ62EFei2GWArmi8lTRl2e_3QyFPSuU--NYDVgr4h4rROFXopxyvHsl8-IuvV-sJj88L2rDSsp5UXWwCh5uCQd6IC60TxoGS3Bn_Sz4mkyED3CY"/>
+<span class="text-xs font-bold text-on-surface">System Process</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-secondary-container/20 text-secondary border border-secondary/20">APPROVE</span>
+</td>
+<td class="px-6 py-5 font-headline text-xs text-on-surface">Payout_Escrow_TeamSolo</td>
+<td class="px-6 py-5 text-center">
+<span class="material-symbols-outlined text-error text-lg" data-icon="error">error</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-[#5a4042] group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="unfold_more">unfold_more</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-high/40 transition-colors group">
+<td class="px-6 py-5 font-mono text-[11px] text-on-surface-variant">2023-10-31 11:30:01</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Admin Avatar" class="w-6 h-6 rounded-md" data-alt="stylized vector avatar of a digital administrator on a dark grid pattern background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfYBbBFwRxSrvZj3K_Md2qX-yCbPxxiQj2O8keufN0YVIWOncSsK9y7J9B-sD_g3NeVycq_BGr6Rp5_sxIoF3oAV9E9a6LybEzyfbp07ZuqHNYEiBU2QkVmQA3MXNB3fVS8yU1T0D6SevhsAqkrMBTkhKs9YeGJ75aVW_X5Gd4Bet_OW_LNyXi5z-JFLpLLnQE2-kZ1qvk8OcUCOoE_21tbQyj-z54mf4s0Pq-sI-mcBSo34CDF3h10athF-eZFinlBIONr1ZbokM"/>
+<span class="text-xs font-bold text-on-surface">Marcus "Titan" J.</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-tertiary-container/20 text-tertiary border border-tertiary/20">CREATE</span>
+</td>
+<td class="px-6 py-5 font-headline text-xs text-on-surface">Team_Registration_NexusG</td>
+<td class="px-6 py-5 text-center">
+<span class="material-symbols-outlined text-tertiary text-lg" data-icon="check_circle">check_circle</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-[#5a4042] group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="unfold_more">unfold_more</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-low px-6 py-4 flex items-center justify-between">
+<span class="font-body text-[11px] text-[#5a4042]">DISPLAYING 1-20 OF 2,491 LOG ENTRIES</span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant/20 text-[#5a4042] hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-on-primary-fixed text-xs font-bold font-headline">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-[#5a4042] text-xs font-bold font-headline hover:bg-surface-container-high transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-[#5a4042] text-xs font-bold font-headline hover:bg-surface-container-high transition-colors">3</button>
+<span class="text-[#5a4042] mx-1">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded text-[#5a4042] text-xs font-bold font-headline hover:bg-surface-container-high transition-colors">125</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant/20 text-[#5a4042] hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Audit Summary Bento Grid Widgets -->
+<section class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="font-label text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2 block">CRITICAL EVENTS</span>
+<div class="flex items-end justify-between">
+<h3 class="font-headline text-3xl font-black text-on-surface tracking-tighter">04</h3>
+<span class="text-error text-xs font-bold mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span> +24%
+            </span>
+</div>
+<p class="text-[11px] text-on-surface-variant font-body mt-2">Security alerts requiring immediate commander review.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-8xl" data-icon="gavel">gavel</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="font-label text-[10px] font-bold text-tertiary uppercase tracking-[0.2em] mb-2 block">ADMIN VELOCITY</span>
+<div class="flex items-end justify-between">
+<h3 class="font-headline text-3xl font-black text-on-surface tracking-tighter">142</h3>
+<span class="text-tertiary text-xs font-bold mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="equalizer">equalizer</span> NORMAL
+            </span>
+</div>
+<p class="text-[11px] text-on-surface-variant font-body mt-2">Average operations processed per hour across all nodes.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-8xl" data-icon="speed">speed</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="font-label text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-2 block">ENTITY HEALTH</span>
+<div class="flex items-end justify-between">
+<h3 class="font-headline text-3xl font-black text-on-surface tracking-tighter">99.8%</h3>
+<span class="text-[#5a4042] text-xs font-bold mb-1">STABLE</span>
+</div>
+<p class="text-[11px] text-on-surface-variant font-body mt-2">Integrity score of system-wide data object transactions.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-8xl" data-icon="verified_user">verified_user</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

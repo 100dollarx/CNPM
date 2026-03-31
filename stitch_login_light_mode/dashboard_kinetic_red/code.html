@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bảng điều khiển - ETMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#E94560",
+                        "on-primary": "#ffffff",
+                        "primary-container": "rgba(233, 69, 96, 0.2)",
+                        "on-primary-container": "#ffb2b7",
+                        "surface": "#06122e",
+                        "surface-container-lowest": "#06122e",
+                        "surface-container-low": "#0f1a37",
+                        "surface-container": "#151f3d",
+                        "surface-container-high": "#1e2946",
+                        "surface-container-highest": "#273455",
+                        "on-surface": "#dfe2eb",
+                        "on-surface-variant": "#ccc3d2",
+                        "outline": "#958e9b",
+                        "outline-variant": "#4a4550",
+                        "background": "#06122e",
+                        "on-background": "#dfe2eb",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface min-h-screen">
+<!-- SideNavBar (Authority: COMPONENTS_9) -->
+<aside class="w-[240px] h-screen fixed left-0 top-0 border-r-0 bg-[#0f1a37] flex flex-col py-8 z-50">
+<div class="px-6 mb-8">
+<h1 class="text-2xl font-bold tracking-tighter text-[#ffb2b7] font-headline">ETMS</h1>
+<p class="font-['Space_Grotesk'] uppercase tracking-[0.1rem] text-[0.75rem] font-bold text-slate-500">Pro Esports Management</p>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto scrollbar-hide">
+<!-- Active: Dashboard -->
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 bg-[#1e2946] text-[#ffb2b7] border-r-2 border-[#E94560] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="emoji_events">emoji_events</span>
+<span>Tournaments</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="groups">groups</span>
+<span>Teams</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="account_tree">account_tree</span>
+<span>Bracket</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="calendar_today">calendar_today</span>
+<span>Schedule</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="assessment">assessment</span>
+<span>Results</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="leaderboard">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="gavel">gavel</span>
+<span>Disputes</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="notifications">notifications</span>
+<span>Notifications</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="history">history</span>
+<span>Audit Log</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="manage_accounts">manage_accounts</span>
+<span>User Management</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-white/5 space-y-1">
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="account_circle">account_circle</span>
+<span>Profile</span>
+</a>
+<a class="flex items-center px-6 py-3 transition-all duration-150 active:scale-90 text-[#a9c8fc] opacity-70 hover:bg-[#1e2946] hover:text-[#ffb2b7] font-['Space_Grotesk'] text-sm tracking-tight" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="logout">logout</span>
+<span>Log Out</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar (Authority: COMPONENTS_9) -->
+<header class="h-[56px] fixed top-0 right-0 left-[240px] z-40 bg-[#06122e]/80 backdrop-blur-md flex justify-between items-center px-8 w-full font-['Space_Grotesk'] font-bold">
+<div class="flex items-center bg-[#0f1a37] border border-outline-variant/20 rounded-lg px-4 py-1.5 w-96">
+<span class="material-symbols-outlined text-slate-400 text-lg mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full text-slate-300 placeholder-slate-500 font-normal" placeholder="Tìm kiếm nhanh..." type="text"/>
+</div>
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-[#a9c8fc] hover:text-[#ffb2b7] cursor-pointer transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[#a9c8fc] hover:text-[#ffb2b7] cursor-pointer transition-colors" data-icon="settings">settings</span>
+<div class="flex items-center ml-4 cursor-pointer hover:brightness-125 transition-all">
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-[#E94560]/30" data-alt="professional portrait of an esports manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA97uBCNTOTS-TlF3G_3Ey_Yvyx2QlsBeU22crrPM8G9lfEUaIiTnjTsLQayJR0X0DWPICSHL9KSUrGF9Ko9ddn8c-fRLgdb74UOpGaGfxx-dauq8_tBJ8iJbBbqro14kl0o--cO2b76vOATXf97-FdzaIF_lVSNrmYuRfP8eIZ7xil1-6rOTUvOA6t7VH_RWtdH26y54Hl9qwuOurvh0a7XwSzolHUEGH1GgQmN4RyYW62gtEqsRiDCeWToK2cPVfIVCZqiyGMiSU"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] pt-20 p-8 min-h-screen">
+<!-- Page Title -->
+<div class="mb-10">
+<h2 class="text-4xl font-headline font-bold text-on-surface tracking-tight">Bảng điều khiển</h2>
+<p class="text-slate-400 mt-1">Chào mừng trở lại, chỉ huy. Hệ thống đang trong trạng thái tối ưu.</p>
+</div>
+<!-- Stat Cards Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded-xl p-6 relative overflow-hidden group hover:bg-surface-container-high transition-all duration-300">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="emoji_events">emoji_events</span>
+</div>
+<div class="w-12 h-12 bg-[#E94560]/20 rounded-lg flex items-center justify-center mb-4 text-[#E94560] shadow-lg shadow-[#E94560]/10">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-1">Giải đấu đang diễn ra</p>
+<p class="text-3xl font-headline font-bold text-on-surface">12</p>
+<div class="mt-4 flex items-center text-xs text-green-400">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="trending_up">trending_up</span>
+<span>+2 so với tháng trước</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded-xl p-6 relative overflow-hidden group hover:bg-surface-container-high transition-all duration-300">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="pending">pending</span>
+</div>
+<div class="w-12 h-12 bg-[#F59E0B]/20 rounded-lg flex items-center justify-center mb-4 text-[#F59E0B]">
+<span class="material-symbols-outlined" data-icon="pending">pending</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-1">Đội chờ duyệt</p>
+<p class="text-3xl font-headline font-bold text-on-surface">48</p>
+<div class="mt-4 flex items-center text-xs text-orange-400">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="timer">timer</span>
+<span>12 đội cần duyệt gấp</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded-xl p-6 relative overflow-hidden group hover:bg-surface-container-high transition-all duration-300">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="calendar_today">calendar_today</span>
+</div>
+<div class="w-12 h-12 bg-[#38BDF8]/20 rounded-lg flex items-center justify-center mb-4 text-[#38BDF8]">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-1">Trận hôm nay</p>
+<p class="text-3xl font-headline font-bold text-on-surface">156</p>
+<div class="mt-4 flex items-center text-xs text-blue-400">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="live_tv">live_tv</span>
+<span>8 trận đang trực tiếp</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container rounded-xl p-6 relative overflow-hidden group hover:bg-surface-container-high transition-all duration-300">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="report">report</span>
+</div>
+<div class="w-12 h-12 bg-[#E94560]/20 rounded-lg flex items-center justify-center mb-4 text-[#E94560]">
+<span class="material-symbols-outlined" data-icon="report">report</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-1">Khiếu nại mở</p>
+<p class="text-3xl font-headline font-bold text-on-surface">05</p>
+<div class="mt-4 flex items-center text-xs text-red-400">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="priority_high">priority_high</span>
+<span>2 trường hợp nghiêm trọng</span>
+</div>
+</div>
+</div>
+<!-- Main Dashboard Split Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Recent Tournaments Table -->
+<div class="col-span-12 lg:col-span-8">
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-xl shadow-black/20">
+<div class="p-6 flex justify-between items-center border-b border-white/5">
+<h3 class="text-xl font-headline font-semibold text-on-surface">Giải đấu gần đây</h3>
+<button class="text-[#E94560] text-sm font-semibold hover:underline flex items-center">
+                            Xem tất cả <span class="material-symbols-outlined text-sm ml-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Tên giải đấu</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Thể loại</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Trạng thái</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày bắt đầu</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Hành động</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1: Active -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-slate-200">Vietnam Championship Series 2024</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-[#E94560]/20 text-[#ffb2b7] text-[10px] font-bold uppercase tracking-wide border border-[#E94560]/30">MOBA</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center text-green-400 text-sm">
+<span class="w-2 h-2 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                            Active
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400 font-headline">20 Oct, 2024</td>
+<td class="px-6 py-4">
+<button class="p-2 text-slate-400 hover:text-[#E94560] transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Registration -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-slate-200">PUBG Pro League Season 9</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-wide border border-orange-500/30">BR</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center text-orange-400 text-sm">
+                                            Registration
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400 font-headline">15 Nov, 2024</td>
+<td class="px-6 py-4">
+<button class="p-2 text-slate-400 hover:text-[#E94560] transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Draft -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-slate-200">CS2 Regional Masters</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wide border border-blue-500/30">FPS</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center text-slate-500 text-sm">
+                                            Draft
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400 font-headline">01 Dec, 2024</td>
+<td class="px-6 py-4">
+<button class="p-2 text-slate-400 hover:text-[#E94560] transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Completed -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-slate-200">Tekken 8 Global Finals</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wide border border-red-500/30">Fighting</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center text-blue-400 text-sm">
+                                            Completed
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400 font-headline">05 Sep, 2024</td>
+<td class="px-6 py-4">
+<button class="p-2 text-slate-400 hover:text-[#E94560] transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Cancelled -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-slate-500 line-through">Starcraft II Invitational</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-teal-500/20 text-teal-400 text-[10px] font-bold uppercase tracking-wide border border-teal-500/30">RTS</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center text-red-500 text-sm">
+                                            Cancelled
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 font-headline italic">N/A</td>
+<td class="px-6 py-4">
+<button class="p-2 text-slate-400 hover:text-[#E94560] transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right: Activity Log -->
+<div class="col-span-12 lg:col-span-4">
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-xl shadow-black/20 flex flex-col h-full">
+<div class="p-6 border-b border-white/5">
+<h3 class="text-xl font-headline font-semibold text-on-surface">Nhật ký hoạt động</h3>
+</div>
+<div class="flex-1 overflow-y-auto p-6">
+<div class="space-y-6">
+<!-- Activity Item 1 -->
+<div class="flex items-start">
+<img alt="Admin 1" class="w-8 h-8 rounded-full mr-4 border border-[#E94560]/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxrbaWuT19DNh4wbgTTSie1VCEHnIrw4NUYW5oLIv6OH2ya4HxqpywezU5F1_-Fc5u83kpQrACcfX9CQdaiSkT72mul0NVK8CmenpombJyUiTj64wZnkzj-sraAdoy3HuAn1Stjwfrrtx4lVjDyEbJ-HN5YNW6CjnDkKHrxRhib1ustvBxhr7Gr1iuYERtqs9215TlpW_RMiiw3P03GnFc0DMy--JkKzldc-oKAxxtEgIJiLPKuL4C6J23iJ706Hz-8QSxBMJJUlM"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200"><span class="font-bold text-[#E94560]">Admin_Alex</span> đã phê duyệt đội <span class="font-bold text-slate-100">"Dragon Slayers"</span></p>
+<p class="text-[10px] text-slate-500 uppercase mt-1 font-headline">10 phút trước</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="flex items-start">
+<img alt="Admin 2" class="w-8 h-8 rounded-full mr-4 border border-[#E94560]/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEX9GiH9tgwD2mwoWsS2YKPe7UhnYeQHR_9fUTL-Hl6TFXSNvXlGFOfTTE91w592NhOxrO_Pvv39Aihfg1DBdnxjppGg1uLi8-4UAgN51CqcoJyeO0wNo7MDmKiFv8DP819ViOP9z4K26nOwUkLrl_e3dRsrb0F_L57e2H6r4fdcVd8USQ3MMuQCHqIk-DTeQaaHkA2YMbBqNVOeqVIVX7rMJn1d1I-RNnsWxNRs11D148XGZhy9EcxWvrb6KFLxc8avdZTstWKBo"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200"><span class="font-bold text-[#E94560]">System_Master</span> đã tự động cập nhật bảng đấu <span class="font-bold text-slate-100">VCS Season 2</span></p>
+<p class="text-[10px] text-slate-500 uppercase mt-1 font-headline">2 giờ trước</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="flex items-start">
+<img alt="Admin 3" class="w-8 h-8 rounded-full mr-4 border border-[#E94560]/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuN6bPs411BA3vN9bU1ASy2FSFo2Gi-K5q2uvSL56-AFX-ZrYyZnDDwPbBkQzSS6LDhgNA9otjW5y9Pbsu723pEZJsA8trPTREsmhQINyba5v3ZsUxtg1lQ1WxBcERgA_1d6pJ1NZLAKL9s2BHDQSiIwFcM0vs1eUXolAxOXOX-7mvHFYVGkQWk5gzoRtHJKkVc9IqpKPe_PnG4TZ4O5R-_FZQau4Xszekmrozg99bKgtcf--CnSBfl1Y5qTYPsKbpMvhuxjJGnXk"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200"><span class="font-bold text-[#E94560]">Noah_K</span> đã giải quyết khiếu nại trận #3442</p>
+<p class="text-[10px] text-slate-500 uppercase mt-1 font-headline">5 giờ trước</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="flex items-start">
+<img alt="Admin 1" class="w-8 h-8 rounded-full mr-4 border border-[#E94560]/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBej7KNECNkl9Q3N6xxet52Kos_2pvdysUNHnm_CTaMPUk-NsxxLwWHA2kLYaMn-InbjwMepHLtutJbTjx-Yj1pjGtkPqBm9cqAJ9jpbrczmP5Kvi0RqzkVyexKptgij88MChMnfSBeWgBhQTRTvbLtByi5zK7wXiUSVzFMIcwyew2VG4Os6CghZ4HYGSag8Lx7uZCqosyY2UVVWXrG-x70f-jh1kTMh0-vb7EPxRFRLK-O63dW6VgRA6WKduDP4jfLUaif_sQ1tIY"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200"><span class="font-bold text-[#E94560]">Admin_Alex</span> đã hủy giải đấu <span class="font-bold text-slate-100">Starcraft Invitational</span></p>
+<p class="text-[10px] text-slate-500 uppercase mt-1 font-headline">Hôm qua</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 rounded-lg border border-outline-variant/20 text-slate-400 hover:bg-white/5 transition-colors text-sm font-semibold">
+                            Tải thêm hoạt động
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

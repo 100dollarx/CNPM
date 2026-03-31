@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETMS - Tactical Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#93000a",
+                        "primary-container": "#fc536d",
+                        "surface-variant": "#31353c",
+                        "on-secondary-fixed": "#001b3c",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#67001c",
+                        "on-surface": "#dfe2eb",
+                        "on-tertiary": "#003921",
+                        "tertiary-fixed-dim": "#67dc9f",
+                        "surface-container": "#1c2026",
+                        "inverse-on-surface": "#2d3137",
+                        "on-primary-fixed": "#40000e",
+                        "on-secondary-container": "#9bbaee",
+                        "secondary-fixed": "#d5e3ff",
+                        "tertiary-container": "#25a46d",
+                        "surface-tint": "#ffb2b7",
+                        "secondary-container": "#294a77",
+                        "on-secondary": "#09305c",
+                        "surface-container-low": "#181c22",
+                        "tertiary": "#67dc9f",
+                        "tertiary-fixed": "#84f9ba",
+                        "surface-container-high": "#262a31",
+                        "on-tertiary-fixed": "#002111",
+                        "on-tertiary-container": "#00311c",
+                        "background": "#10141a",
+                        "surface": "#10141a",
+                        "secondary-fixed-dim": "#a9c8fc",
+                        "on-tertiary-fixed-variant": "#005232",
+                        "secondary": "#a9c8fc",
+                        "on-secondary-fixed-variant": "#274774",
+                        "outline": "#a9898a",
+                        "surface-dim": "#10141a",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#5a4042",
+                        "on-primary-container": "#5b0017",
+                        "on-surface-variant": "#e2bebf",
+                        "primary-fixed": "#ffdadb",
+                        "primary-fixed-dim": "#ffb2b7",
+                        "primary": "#ffb2b7",
+                        "on-primary-fixed-variant": "#91002b",
+                        "on-error": "#690005",
+                        "on-background": "#dfe2eb",
+                        "surface-bright": "#353940",
+                        "inverse-surface": "#dfe2eb",
+                        "inverse-primary": "#b71d3f",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-error-container": "#ffdad6"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0D1117;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(41, 74, 119, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        .primary-glow {
+            background: linear-gradient(45deg, #ffb2b7, #fc536d);
+        }
+        .recessed-input {
+            background-color: #0a0e14;
+            border-bottom: 2px solid #5a4042;
+        }
+        .recessed-input:focus {
+            border-bottom-color: #ffb2b7;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-[#0D1117]">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-[#5a4042]/15 bg-[#0D1117]">
+<div class="p-6">
+<h1 class="text-xl font-black text-[#ffb2b7] tracking-tighter">ETMS</h1>
+<p class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold text-[#5a4042]">TACTICAL COMMAND</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span> Tournaments
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span> Teams
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Bracket
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#1c2026] text-[#ffb2b7] border-r-2 border-[#E94560] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span> Schedule
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span> Results
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span> Leaderboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:bg-[#181c22] hover:text-white transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span> Disputes
+            </a>
+</nav>
+<div class="p-4 border-t border-[#5a4042]/15">
+<div class="flex items-center gap-3 px-2 py-3 bg-[#181c22] rounded-lg">
+<img alt="User Avatar" class="w-8 h-8 rounded-full" data-alt="Cyberpunk style character portrait with glowing neon accents and tactical headset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpThbKw6fwfd8xNUG6nTJOoKfhZSHmB4BqlobKBZouxo10N0goe9D9PdG9iSbpcSspCl77XLqj7X528v2F2uJE-yfqv0s9d26zp6AwFGlOPWnElcp709w7HhUZxvhI3TuDSx1KedoVVoMWGVT49cBi1LGNibiHr1QUIYQoZZUgVws12wI_pRAqoXIz3leaGhghJQalBAIJpZ7KIX5h18XrKszU-Vv1n929CIl6EkN_2FpjSwKCFFhH6jkCoH311JIze0kUwsS_694"/>
+<div>
+<p class="text-xs font-bold text-on-surface">COMMANDER_7</p>
+<p class="text-[0.6rem] text-outline">ONLINE</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-[#5a4042]/15">
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="recessed-input pl-10 pr-4 py-1.5 text-xs font-['Space_Grotesk'] tracking-widest w-64 uppercase" placeholder="SEARCH SQUAD OR MATCH..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors flex items-center gap-1 font-['Space_Grotesk'] text-sm font-medium">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#5a4042] hover:text-[#ffb2b7] transition-colors flex items-center gap-1 font-['Space_Grotesk'] text-sm font-medium">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+<div class="h-4 w-[1px] bg-[#5a4042]/30 mx-2"></div>
+<span class="font-['Space_Grotesk'] text-sm font-bold text-[#ffb2b7] uppercase tracking-tighter">Tactical HUD</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-12 px-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div>
+<p class="font-['Space_Grotesk'] text-[0.6875rem] font-bold text-[#ffb2b7] uppercase tracking-[0.2em] mb-2">Operational Pipeline</p>
+<h2 class="font-['Space_Grotesk'] text-4xl font-black text-on-surface tracking-tighter uppercase">Match Schedule</h2>
+</div>
+<!-- Filters Group -->
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-2 bg-surface-container-low rounded-lg border border-outline-variant/10">
+<span class="font-['Space_Grotesk'] text-[0.6rem] font-bold text-outline uppercase">Status:</span>
+<select class="bg-transparent border-none text-xs font-bold text-primary focus:ring-0 p-0 uppercase">
+<option>All Operations</option>
+<option>Upcoming</option>
+<option>Live</option>
+<option>Completed</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 bg-surface-container-low rounded-lg border border-outline-variant/10">
+<span class="font-['Space_Grotesk'] text-[0.6rem] font-bold text-outline uppercase">Squad Search:</span>
+<input class="bg-transparent border-none text-xs font-bold text-on-surface focus:ring-0 p-0 w-24 uppercase" placeholder="TYPE NAME..." type="text"/>
+</div>
+<button class="px-4 py-2 bg-surface-container-high hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+<span class="font-['Space_Grotesk'] text-[0.6875rem] font-bold uppercase tracking-widest">Advanced</span>
+</button>
+</div>
+</div>
+<!-- Schedule Container -->
+<div class="space-y-12">
+<!-- Day Group: OCTOBER 24 -->
+<section>
+<div class="sticky top-16 z-20 py-4 bg-[#0D1117] flex items-center gap-4">
+<h3 class="font-['Space_Grotesk'] text-xl font-bold text-[#ffb2b7] uppercase tracking-tight">OCT 24, 2023</h3>
+<div class="h-[1px] flex-1 bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+<span class="font-['Space_Grotesk'] text-[0.6rem] font-bold text-outline uppercase">5 Active Deployments</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-separate border-spacing-y-2">
+<thead class="hidden lg:table-header-group">
+<tr class="text-[#5a4042] font-['Space_Grotesk'] text-[0.6875rem] uppercase tracking-widest">
+<th class="pb-4 pl-4 font-bold">T-Minus</th>
+<th class="pb-4 font-bold">Phase</th>
+<th class="pb-4 font-bold">Engagement</th>
+<th class="pb-4 font-bold">Status</th>
+<th class="pb-4 font-bold">Intel / Veto</th>
+<th class="pb-4 pr-4 text-right font-bold">Protocol</th>
+</tr>
+</thead>
+<tbody class="space-y-4">
+<!-- Match Row 1 -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors group">
+<td class="py-5 pl-4 rounded-l-lg border-l-2 border-primary">
+<div class="flex flex-col">
+<span class="text-on-surface font-bold text-sm">18:00</span>
+<span class="text-[0.6rem] text-outline font-['Space_Grotesk'] uppercase">UTC +2</span>
+</div>
+</td>
+<td class="py-5">
+<span class="px-2 py-0.5 bg-secondary-container/30 text-secondary text-[0.6rem] font-bold font-['Space_Grotesk'] rounded-sm uppercase tracking-tighter">Quarter-Final A</span>
+</td>
+<td class="py-5">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container-lowest rounded flex items-center justify-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-xs text-[#ffb2b7]" data-icon="shield">shield</span>
+</div>
+<span class="text-sm font-bold uppercase tracking-tight">Rogue One</span>
+</div>
+<span class="text-[0.6rem] font-black text-outline/40">VS</span>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container-lowest rounded flex items-center justify-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="swords">swords</span>
+</div>
+<span class="text-sm font-bold uppercase tracking-tight">Ghost Squad</span>
+</div>
+</div>
+</td>
+<td class="py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-[0.6rem] font-black text-primary uppercase tracking-widest">In Progress</span>
+</div>
+</td>
+<td class="py-5">
+<div class="flex flex-col gap-1">
+<span class="text-[0.65rem] text-on-surface font-medium">Map: de_inferno</span>
+<div class="flex gap-1">
+<span class="px-1.5 py-0.5 bg-surface-container-low text-outline text-[0.55rem] font-bold rounded uppercase">Vetoed: mirage</span>
+<span class="px-1.5 py-0.5 bg-surface-container-low text-outline text-[0.55rem] font-bold rounded uppercase">Vetoed: nuke</span>
+</div>
+</div>
+</td>
+<td class="py-5 pr-4 text-right rounded-r-lg">
+<button class="px-4 py-2 bg-surface-container-highest border border-outline-variant/20 text-[0.6875rem] font-['Space_Grotesk'] font-bold uppercase tracking-widest hover:bg-surface-variant transition-colors">
+                                        Watch Live
+                                    </button>
+</td>
+</tr>
+<!-- Match Row 2 -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors group">
+<td class="py-5 pl-4 rounded-l-lg border-l-2 border-transparent">
+<div class="flex flex-col">
+<span class="text-on-surface font-bold text-sm">21:30</span>
+<span class="text-[0.6rem] text-outline font-['Space_Grotesk'] uppercase">UTC +2</span>
+</div>
+</td>
+<td class="py-5">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[0.6rem] font-bold font-['Space_Grotesk'] rounded-sm uppercase tracking-tighter">Quarter-Final B</span>
+</td>
+<td class="py-5">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container-lowest rounded flex items-center justify-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-xs text-[#ffb2b7]" data-icon="electric_bolt">electric_bolt</span>
+</div>
+<span class="text-sm font-bold uppercase tracking-tight">Pulse Gaming</span>
+</div>
+<span class="text-[0.6rem] font-black text-outline/40">VS</span>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 bg-surface-container-lowest rounded flex items-center justify-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="hexagon">hexagon</span>
+</div>
+<span class="text-sm font-bold uppercase tracking-tight">Apex Legion</span>
+</div>
+</div>
+</td>
+<td class="py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-[#5a4042]"></span>
+<span class="text-[0.6rem] font-black text-outline uppercase tracking-widest">Upcoming</span>
+</div>
+</td>
+<td class="py-5">
+<span class="text-[0.6rem] text-outline font-['Space_Grotesk'] uppercase italic">Veto in 45m</span>
+</td>
+<td class="py-5 pr-4 text-right rounded-r-lg">
+<button class="primary-glow px-6 py-2 rounded-lg text-on-primary-fixed text-[0.6875rem] font-['Space_Grotesk'] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+                                        Check-In
+                                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Day Group: OCTOBER 25 -->
+<section>
+<div class="sticky top-16 z-20 py-4 bg-[#0D1117] flex items-center gap-4">
+<h3 class="font-['Space_Grotesk'] text-xl font-bold text-on-surface uppercase tracking-tight">OCT 25, 2023</h3>
+<div class="h-[1px] flex-1 bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+<span class="font-['Space_Grotesk'] text-[0.6rem] font-bold text-outline uppercase">2 Active Deployments</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-separate border-spacing-y-2">
+<tbody class="space-y-4">
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors group">
+<td class="py-5 pl-4 rounded-l-lg border-l-2 border-transparent w-24">
+<div class="flex flex-col">
+<span class="text-on-surface font-bold text-sm">16:00</span>
+<span class="text-[0.6rem] text-outline font-['Space_Grotesk'] uppercase">UTC +2</span>
+</div>
+</td>
+<td class="py-5 w-32">
+<span class="px-2 py-0.5 bg-surface-container-low text-outline text-[0.6rem] font-bold font-['Space_Grotesk'] rounded-sm uppercase tracking-tighter">Semi-Final 1</span>
+</td>
+<td class="py-5">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 opacity-50">
+<div class="w-6 h-6 bg-surface-container-lowest rounded border border-outline-variant/10 border-dashed"></div>
+<span class="text-[0.6rem] font-bold uppercase text-outline">TBD (Winner QF-A)</span>
+</div>
+<span class="text-[0.6rem] font-black text-outline/40">VS</span>
+<div class="flex items-center gap-2 opacity-50">
+<div class="w-6 h-6 bg-surface-container-lowest rounded border border-outline-variant/10 border-dashed"></div>
+<span class="text-[0.6rem] font-bold uppercase text-outline">TBD (Winner QF-B)</span>
+</div>
+</div>
+</td>
+<td class="py-5 w-32">
+<span class="text-[0.6rem] font-black text-outline/40 uppercase tracking-widest">Awaiting Intel</span>
+</td>
+<td class="py-5 pr-4 text-right rounded-r-lg w-40">
+<span class="text-[0.6rem] font-bold text-outline uppercase tracking-widest">Locked</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Featured Map Carousel (Bento-style Meta Data) -->
+<div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="md:col-span-2 relative h-48 rounded-xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Cinematic wide shot of a professional esports arena stage with glowing red and blue lighting and large digital screens" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqlS35jteTJYFBgs_tCEXQhCPw3Hx0rRuzOkxPyXMI4f_Zr7_ge5OdYRF6cKHH_xvYEgGkQlHlqJzZWJtPV5gHoOW5lbX6O0o3tQjDrYsOUFpAwUDw9-Hr4hmmTAjEUTIDy8tX3bQxf20r-BXFgkJzIda4A8_Dc6Gty_fIrN_Gx0P3-qR5G0RRaG854u7RrZQYQFrxb3iMKKdRYFKKJFGeIfXm9hXJId8y60a-gBS7dTUvMPNbs7wE_7lBOxekr_rR-ovk_-CFz1E"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#0D1117] to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<p class="font-['Space_Grotesk'] text-[0.6rem] font-black text-primary uppercase tracking-[0.3em] mb-1">Map of the Month</p>
+<h4 class="font-['Space_Grotesk'] text-2xl font-black text-white uppercase tracking-tighter">Overpass Sector 7</h4>
+</div>
+<div class="absolute top-4 right-6 bg-primary-container/20 backdrop-blur-md px-3 py-1 border border-primary/20">
+<span class="font-['Space_Grotesk'] text-[0.6rem] font-black text-[#ffb2b7] uppercase">Tactical Preference: 68%</span>
+</div>
+</div>
+<div class="bg-secondary-container p-6 rounded-xl flex flex-col justify-between border border-outline-variant/10">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="monitoring">monitoring</span>
+<h5 class="font-['Space_Grotesk'] text-lg font-bold text-white uppercase leading-tight mb-2">Live Veto Tracker</h5>
+<p class="text-xs text-on-secondary-container leading-relaxed">Automatic map selection protocols initiated for scheduled matches.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+<span class="text-[0.6rem] font-bold text-outline uppercase">Next Sync</span>
+<span class="text-[0.6rem] font-black text-[#ffb2b7] uppercase tracking-widest">00:14:59</span>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Suppression Rule: FAB NOT RENDERED ON SCHEDULE PAGE -->
+</body></html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#93000a",
+              "primary-container": "#fc536d",
+              "surface-variant": "#31353c",
+              "on-secondary-fixed": "#001b3c",
+              "surface-container-highest": "#31353c",
+              "on-primary": "#67001c",
+              "on-surface": "#dfe2eb",
+              "on-tertiary": "#003921",
+              "tertiary-fixed-dim": "#67dc9f",
+              "surface-container": "#1c2026",
+              "inverse-on-surface": "#2d3137",
+              "on-primary-fixed": "#40000e",
+              "on-secondary-container": "#9bbaee",
+              "secondary-fixed": "#d5e3ff",
+              "tertiary-container": "#25a46d",
+              "surface-tint": "#ffb2b7",
+              "secondary-container": "#294a77",
+              "on-secondary": "#09305c",
+              "surface-container-low": "#181c22",
+              "tertiary": "#67dc9f",
+              "tertiary-fixed": "#84f9ba",
+              "surface-container-high": "#262a31",
+              "on-tertiary-fixed": "#002111",
+              "on-tertiary-container": "#00311c",
+              "background": "#10141a",
+              "surface": "#10141a",
+              "secondary-fixed-dim": "#a9c8fc",
+              "on-tertiary-fixed-variant": "#005232",
+              "secondary": "#a9c8fc",
+              "on-secondary-fixed-variant": "#274774",
+              "outline": "#a9898a",
+              "surface-dim": "#10141a",
+              "error": "#ffb4ab",
+              "outline-variant": "#5a4042",
+              "on-primary-container": "#5b0017",
+              "on-surface-variant": "#e2bebf",
+              "primary-fixed": "#ffdadb",
+              "primary-fixed-dim": "#ffb2b7",
+              "primary": "#ffb2b7",
+              "on-primary-fixed-variant": "#91002b",
+              "on-error": "#690005",
+              "on-background": "#dfe2eb",
+              "surface-bright": "#353940",
+              "inverse-surface": "#dfe2eb",
+              "inverse-primary": "#b71d3f",
+              "surface-container-lowest": "#0a0e14",
+              "on-error-container": "#ffdad6"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0D1117;
+            color: #dfe2eb;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary selection:text-on-primary-fixed">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 h-screen w-64 border-r border-[#5a4042]/15 bg-[#0D1117]">
+<div class="p-6">
+<div class="text-xl font-black text-[#ffb2b7] tracking-tighter font-headline">ETMS</div>
+<div class="font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold text-[#5a4042] mt-1">TACTICAL COMMAND</div>
+</div>
+<nav class="flex-1 mt-4">
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+                Tournaments
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                Teams
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                Bracket
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                Schedule
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 bg-[#1c2026] text-[#ffb2b7] border-r-2 border-[#E94560] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span>
+                Results
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+                Leaderboard
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+                Disputes
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 text-[#5a4042] hover:text-[#ffb2b7] transition-all duration-100 font-['Space_Grotesk'] tracking-tight uppercase text-[0.6875rem] font-bold cursor-pointer">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                Notifications
+            </div>
+</nav>
+<div class="p-4 border-t border-[#5a4042]/15">
+<div class="flex items-center gap-3 text-[#5a4042] px-4 py-2 font-headline text-[0.6875rem] font-bold uppercase">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </div>
+</div>
+</aside>
+<!-- TopAppBar (Execution from JSON) -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-[#5a4042]/15">
+<div class="flex items-center gap-4">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-[#5a4042]" data-icon="search">search</span>
+<input class="bg-surface-container-lowest border-none text-sm font-headline tracking-widest pl-10 pr-4 py-2 w-64 focus:ring-1 focus:ring-primary-container text-on-surface" placeholder="SEARCH MATCH_ID..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-[#5a4042] cursor-pointer hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[#5a4042] cursor-pointer hover:text-primary transition-colors" data-icon="language">language</span>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-[#5a4042]/30">
+<span class="font-headline text-sm font-medium text-[#5a4042]">OPERATOR_7</span>
+<div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a futuristic esports professional with neon backlighting and tactical headset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIFV5D7CjvzjYPpgihg_0bw51sKzZYkgkavDZbai6WVgsP9cx-8yowrR1PD-gYcAK3iP_rONqCJ3UakqTSuMQsHmyotdeW2UlmeEgCcLM7_ABLiCcNm34HuE8UV9iU-2A5tFhSKNA1BiQVbXDnG60SLvt_ELzZ5oJqCcTQsa1nJEfFP6oHAR5hnNnUeEb5eWScWA4OpcsysN6Hf03uBSbn-7P_SmyQgcLbIoz_Nz9iARnheF0HVJBWuJX47EHq0FKc27FeBl4wmQs"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-8 max-w-6xl mx-auto">
+<!-- Page Header -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/10 text-primary-container px-2 py-0.5 rounded text-[0.625rem] font-bold font-label uppercase tracking-widest">LIVE REPORTING</span>
+<span class="text-outline text-[0.625rem] font-bold font-label tracking-widest uppercase">MATCH_ID: #4920-X</span>
+</div>
+<h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface uppercase italic">Submit Match Results</h1>
+<p class="font-body text-outline mt-1 max-w-xl">Ensure all data is accurate before finalizing. Inaccurate reporting may lead to automated dispute flags and ranking penalties.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 bg-surface-container-highest text-outline font-headline text-xs font-bold uppercase tracking-widest border border-primary/10 hover:border-primary/40 transition-all">Discard</button>
+<button class="px-8 py-2 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-headline text-xs font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(255,178,183,0.15)] hover:scale-105 transition-transform active:scale-95">Finalize Result</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Match Meta Info (Left Rail) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<section class="bg-surface-container-low p-6 border-l-2 border-primary">
+<h3 class="font-headline text-[0.6875rem] font-bold text-primary uppercase tracking-widest mb-4">Tournament Intelligence</h3>
+<div class="space-y-4">
+<div>
+<label class="block font-label text-[0.625rem] text-outline uppercase tracking-widest mb-1">Competition</label>
+<p class="font-headline text-sm font-bold text-on-surface">VALORANT PRO SERIES IV</p>
+</div>
+<div>
+<label class="block font-label text-[0.625rem] text-outline uppercase tracking-widest mb-1">Phase</label>
+<p class="font-headline text-sm font-bold text-on-surface">QUARTER-FINALS [BO3]</p>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-outline-variant/20">
+<div>
+<label class="block font-label text-[0.625rem] text-outline uppercase tracking-widest mb-1">Date</label>
+<p class="font-body text-xs text-on-surface">OCT 24, 2023</p>
+</div>
+<div>
+<label class="block font-label text-[0.625rem] text-outline uppercase tracking-widest mb-1">Server</label>
+<p class="font-body text-xs text-on-surface">US-EAST-1</p>
+</div>
+</div>
+</div>
+</section>
+<div class="bg-secondary-container/40 backdrop-blur-md p-6 border border-outline-variant/10">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="verified">verified</span>
+<h3 class="font-headline text-[0.6875rem] font-bold text-on-surface uppercase tracking-widest">Evidence Verification</h3>
+</div>
+<div class="space-y-4">
+<div class="relative">
+<label class="block font-label text-[0.625rem] text-outline uppercase tracking-widest mb-2">Proof of Victory (URL)</label>
+<div class="bg-surface-container-lowest p-0.5 border-b-2 border-outline-variant focus-within:border-primary transition-colors">
+<input class="w-full bg-transparent border-none text-xs font-body py-2 px-3 focus:ring-0 text-on-surface" placeholder="https://imgur.com/a/screenshot..." type="url"/>
+</div>
+</div>
+<!-- Link Preview Card -->
+<div class="bg-surface-container-lowest rounded overflow-hidden border border-outline-variant/30">
+<div class="h-32 bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-500 cursor-zoom-in" data-alt="screenshot of an esports game final score board with neon highlights and player statistics on a dark digital interface" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYTK3NYhvAVm58rMpbbmnth_3xlDmrKOKyjIteaPVMA03o7BQaKchuScnZISxssvMVA-3SpURfkD2ViCpjGCbSzfx-8oOOgz77Nc05SuHbAu3NzMkKLBSGRsmlb1DbyqyLAhQ5SEvDUs7d_rkT2-ynJslMnIu28A7JLUGXCOmnipprhfgsKQeivCgiwUInWOCFqNgHvBFwwuWRir6EsaGxCp-jkCA_5xfIzEQuinvDrIbPNOL5JLRekus_V3bzXyJyBIfkSyXbT7c')"></div>
+<div class="p-3">
+<div class="flex justify-between items-center mb-1">
+<p class="text-[0.625rem] font-bold font-headline text-primary uppercase">match_final_02.png</p>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="open_in_new">open_in_new</span>
+</div>
+<p class="text-[0.625rem] text-outline font-body leading-tight">Uploaded via IMGR-INTERNAL. Verified Metadata present.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Score Input (Center/Right) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Team vs Team Scoreboard HUD -->
+<section class="bg-surface-container rounded-lg overflow-hidden border border-outline-variant/10 shadow-2xl">
+<div class="bg-surface-container-low px-8 py-4 flex justify-between items-center border-b border-outline-variant/10">
+<span class="font-label text-[0.6875rem] font-bold text-outline tracking-[0.2em] uppercase">Result Configuration</span>
+<span class="font-headline text-[0.6875rem] text-primary-container font-black uppercase italic">Best of 3</span>
+</div>
+<div class="p-12">
+<div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+<!-- Team A -->
+<div class="flex flex-col items-center text-center">
+<div class="w-24 h-24 mb-6 relative">
+<div class="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
+<div class="relative w-full h-full bg-surface-container-high rounded-xl border border-primary/40 flex items-center justify-center p-4">
+<img alt="Team A Logo" class="w-full h-full object-contain" data-alt="minimalist professional esports team logo featuring a stylized red phoenix on a dark circular badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWLFRkUKbAU7kejJ3miesbCja6guOwYvnyHCsvTncXn1omZ4CRkCwROHBosui4OPX0Ym18LOnTOJP52Nl876whwRPpfejXXV7AB1plKrJHv-Gb5H_qQxS-Y_otpw4Hn2aG76mPpJOJm-pFJCPLhoMX3BXTfaQucIjs_5dETGsVmGolnuP-fI-EX1A1Qh2rfNHCEDFKiVA9DVbybSqEyTotGk_rTeXGnycV-azNsuV7-2NWa1dGinUfuw_q6FdQkbGglBx2b20hfUM"/>
+</div>
+</div>
+<h2 class="font-headline text-xl font-bold text-on-surface uppercase tracking-tighter mb-1">PHOENIX RISING</h2>
+<span class="font-label text-[0.625rem] text-outline uppercase tracking-widest">Home Team</span>
+<!-- Big Score Input -->
+<div class="mt-8 flex flex-col items-center">
+<label class="font-label text-[0.625rem] text-outline uppercase tracking-widest mb-3">Sets Won</label>
+<input class="w-24 h-24 bg-surface-container-lowest border-none text-center font-headline text-6xl font-black text-on-surface focus:ring-2 focus:ring-primary rounded-lg" max="3" min="0" type="number" value="2"/>
+</div>
+</div>
+<!-- VS Divider -->
+<div class="flex flex-col items-center">
+<div class="h-px w-32 md:h-32 md:w-px bg-gradient-to-b from-transparent via-outline-variant/50 to-transparent"></div>
+<div class="my-4 font-headline text-2xl font-black italic text-outline/30 select-none">VS</div>
+<div class="h-px w-32 md:h-32 md:w-px bg-gradient-to-b from-transparent via-outline-variant/50 to-transparent"></div>
+</div>
+<!-- Team B -->
+<div class="flex flex-col items-center text-center">
+<div class="w-24 h-24 mb-6 relative">
+<div class="relative w-full h-full bg-surface-container-high rounded-xl border border-outline-variant/40 flex items-center justify-center p-4">
+<img alt="Team B Logo" class="w-full h-full object-contain" data-alt="minimalist professional esports team logo featuring a stylized silver frost giant on a deep navy hexagonal badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcHnu_QWOMy50C5ayljcFRPndiytV-eKkZq6Kili7-i4KMjWdm74PpDnhV42Ug16XN8-Fk6qjbgTzBQBnt06HZACb7O433wdV5v5eZqKo6TgNft--oQ88EGpIQRhIwy3wT3IBwbmSILAwVjCgkox9wiHOxvVZD-9L4ls-ROVjqGpRO7kDzKKNSZuOWKYlWS02ieFdWLe_V0X_l1JXciBte2sxhmmGNl-tS15DjeEeoPwomyxjMWMxSPesOpcW-qXeD9dbcM6Jg1IE"/>
+</div>
+</div>
+<h2 class="font-headline text-xl font-bold text-on-surface uppercase tracking-tighter mb-1">ARCTIC OPS</h2>
+<span class="font-label text-[0.625rem] text-outline uppercase tracking-widest">Away Team</span>
+<!-- Big Score Input -->
+<div class="mt-8 flex flex-col items-center">
+<label class="font-label text-[0.625rem] text-outline uppercase tracking-widest mb-3">Sets Won</label>
+<input class="w-24 h-24 bg-surface-container-lowest border-none text-center font-headline text-6xl font-black text-on-surface focus:ring-2 focus:ring-primary rounded-lg" max="3" min="0" type="number" value="1"/>
+</div>
+</div>
+</div>
+<!-- Large Visual Score Display -->
+<div class="mt-16 flex justify-center">
+<div class="bg-surface-container-lowest px-12 py-3 rounded-full border border-primary/20 flex items-center gap-6">
+<div class="text-xs font-headline font-bold uppercase tracking-widest text-outline">Match Status</div>
+<div class="flex items-center gap-4">
+<span class="font-headline text-4xl font-black text-primary">2</span>
+<span class="font-headline text-2xl font-bold text-outline-variant">:</span>
+<span class="font-headline text-4xl font-black text-on-surface">1</span>
+</div>
+<div class="bg-primary/20 text-primary-container px-3 py-1 rounded-sm text-[0.625rem] font-black font-label uppercase">Confirmed</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Breakdown per Set -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-container-low p-4 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label text-[0.625rem] font-bold text-outline uppercase tracking-widest">Set 01 - Ascent</span>
+<span class="material-symbols-outlined text-sm text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex justify-between font-headline text-lg font-bold">
+<span class="text-on-surface">13</span>
+<span class="text-outline-variant">:</span>
+<span class="text-outline">08</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label text-[0.625rem] font-bold text-outline uppercase tracking-widest">Set 02 - Bind</span>
+<span class="material-symbols-outlined text-sm text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex justify-between font-headline text-lg font-bold">
+<span class="text-outline">11</span>
+<span class="text-outline-variant">:</span>
+<span class="text-on-surface">13</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label text-[0.625rem] font-bold text-outline uppercase tracking-widest">Set 03 - Haven</span>
+<span class="material-symbols-outlined text-sm text-outline/30" data-icon="pending">pending</span>
+</div>
+<div class="flex justify-between font-headline text-lg font-bold">
+<span class="text-on-surface">13</span>
+<span class="text-outline-variant">:</span>
+<span class="text-outline">05</span>
+</div>
+</div>
+</div>
+<!-- Additional Details Card -->
+<div class="bg-surface-container-high p-8 border-t border-primary/20">
+<h3 class="font-headline text-[0.6875rem] font-bold text-on-surface uppercase tracking-widest mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="notes">notes</span>
+                            Match Commentary / Log
+                        </h3>
+<textarea class="w-full bg-surface-container-lowest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-sm font-body text-on-surface p-4 placeholder:text-outline/40" placeholder="Enter match details, player disputes, or technical issues encountered during the sets..." rows="4"></textarea>
+<div class="mt-8 flex items-center justify-between">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 bg-surface-container-lowest border-outline-variant rounded-sm text-primary focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="font-body text-[0.6875rem] text-outline group-hover:text-on-surface transition-colors">I confirm all scores match the official game replay.</span>
+</label>
+<button class="px-10 py-3 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-headline text-sm font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                                SUBMIT FINAL REPORT
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<footer class="mt-12 py-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-label text-[0.625rem] text-outline uppercase tracking-[0.15em]">System Status: Nominal</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-outline" data-icon="history">history</span>
+<span class="font-label text-[0.625rem] text-outline uppercase tracking-[0.15em]">Last Sync: 2m Ago</span>
+</div>
+</div>
+<div class="text-[0.625rem] font-label text-outline/30 uppercase tracking-widest">
+                    Tactical Management Interface v4.2.0 // (c) 2023 ETMS Global
+                </div>
+</footer>
+</div>
+</main>
+</body></html>

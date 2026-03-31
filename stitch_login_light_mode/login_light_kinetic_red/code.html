@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETMS | Kinetic Command Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "outline-variant": "#c9c5d0",
+              "secondary-fixed-dim": "#a9c8fc",
+              "on-error-container": "#410002",
+              "on-secondary-fixed-variant": "#274774",
+              "secondary-fixed": "#d5e3ff",
+              "tertiary-fixed-dim": "#ffb2b7",
+              "on-tertiary-fixed-variant": "#91002b",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed": "#ffdadb",
+              "on-tertiary": "#ffffff",
+              "surface-container": "#f3f3f7",
+              "on-error": "#ffffff",
+              "surface": "#f9f9ff",
+              "on-primary-container": "#41000d",
+              "inverse-surface": "#2e3135",
+              "surface-bright": "#f9f9ff",
+              "on-secondary-fixed": "#001b3c",
+              "on-tertiary-container": "#40000e",
+              "surface-variant": "#e7e0eb",
+              "on-primary-fixed-variant": "#91002b",
+              "tertiary": "#91002b",
+              "primary-fixed": "#ffdadb",
+              "surface-container-highest": "#e2e2e6",
+              "inverse-primary": "#ffb2bb",
+              "secondary-container": "#d5e3ff",
+              "secondary": "#3f5f90",
+              "on-tertiary-fixed": "#40000e",
+              "primary-container": "#ffdadb",
+              "surface-container-low": "#f3f3f7",
+              "surface-container-high": "#ececf0",
+              "outline": "#7a757f",
+              "on-surface-variant": "#49454f",
+              "surface-tint": "#E94560",
+              "error": "#ba1a1a",
+              "background": "#f9f9ff",
+              "on-secondary": "#ffffff",
+              "on-surface": "#191c20",
+              "primary-fixed-dim": "#ffb2bb",
+              "on-primary-fixed": "#40000e",
+              "primary": "#E94560",
+              "surface-dim": "#d9d9e0",
+              "on-background": "#191c20",
+              "inverse-on-surface": "#f0f0f7",
+              "tertiary-container": "#ffdadb",
+              "on-secondary-container": "#001b3c",
+              "error-container": "#ffdad6"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(20px);
+      }
+      .gradient-primary {
+        background: linear-gradient(135deg, #E94560 0%, #91002b 100%);
+      }
+      .mask-linear-top {
+        mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<main class="min-h-screen w-full flex flex-col md:flex-row overflow-hidden">
+<!-- Left Section: Feature Showcase (40%) -->
+<section class="w-full md:w-[40%] bg-surface-container-low flex flex-col p-8 md:p-16 relative overflow-hidden">
+<!-- Decorative Glow Background -->
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-secondary/5 rounded-full blur-[80px]"></div>
+<!-- Branding -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+</div>
+<h1 class="font-headline text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">ETMS</h1>
+</div>
+<div class="mt-auto z-10">
+<h2 class="font-headline text-4xl md:text-5xl font-bold leading-tight text-on-surface">
+                Master the <span class="text-primary">Arena</span>
+</h2>
+<p class="mt-6 text-on-surface-variant text-lg max-w-sm">
+                Professional-grade tournament infrastructure built for the next generation of competitive gaming.
+            </p>
+<!-- Feature List -->
+<div class="mt-12 space-y-8">
+<div class="flex gap-4 items-start group">
+<div class="mt-1 p-2 rounded-lg bg-surface-container-high border border-outline-variant/10 group-hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-semibold text-on-surface">Real-time Analytics</h3>
+<p class="text-sm text-on-surface-variant mt-1">Surgical precision on player performance and match statistics.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start group">
+<div class="mt-1 p-2 rounded-lg bg-surface-container-high border border-outline-variant/10 group-hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-semibold text-on-surface">Dynamic Brackets</h3>
+<p class="text-sm text-on-surface-variant mt-1">Automated seeding and progression for complex tournament formats.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start group">
+<div class="mt-1 p-2 rounded-lg bg-surface-container-high border border-outline-variant/10 group-hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-semibold text-on-surface">Secure Governance</h3>
+<p class="text-sm text-on-surface-variant mt-1">Advanced anti-cheat integration and automated dispute resolution.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Quote/Micro-copy -->
+<div class="mt-auto pt-12 z-10">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover grayscale opacity-60" data-alt="Professional esports athlete in focused competition, cool blue lighting, high tech headset, cinematic composition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6vKU7mFYbdc5fBEekCtvkkcQJIhCNxbEJ7rFWyEL9oKm1-KDS_SStVEVIga21PHf5i1d2kyCKS5XsLEBH5lKeqdBgFiINUF6o385-Rwm8SqrWlaCMPp8Gglax7as2j5AJ0djylLrlVOVaLNcqduGQD4eknzsPlEkKBF5Edw7iWAdox4K6L41bf8HjaqOsdqa7mYWz-s_Ox9V901yWISOzW7JmgPewEr7jLDD4GiSrdQJ7OVHId7LodJc2REu5upNvZYz71B5oU2Y"/>
+<p class="text-xs text-on-surface-variant/70 font-medium uppercase tracking-widest">Powered by Kinetic Command v2.4</p>
+</div>
+</div>
+</section>
+<!-- Right Section: Login Interface (60%) -->
+<section class="w-full md:w-[60%] bg-surface flex flex-col relative">
+<!-- Header Controls -->
+<div class="absolute top-8 right-8 flex items-center gap-4 z-50">
+<div class="flex bg-surface-container-high p-1 rounded-full items-center border border-outline-variant/10">
+<button class="px-3 py-1 text-xs font-bold rounded-full bg-surface-bright text-on-surface shadow-sm transition-all">EN</button>
+<button class="px-3 py-1 text-xs font-bold text-on-surface-variant hover:text-on-surface transition-colors">VI</button>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary shadow-lg border border-outline-variant/10 transition-transform active:scale-95">
+<span class="material-symbols-outlined">light_mode</span>
+</button>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col items-center justify-center px-6">
+<div class="w-full max-w-md">
+<div class="mb-10 text-center md:text-left">
+<h2 class="font-headline text-3xl font-bold text-on-surface">Welcome Back</h2>
+<p class="text-on-surface-variant mt-2">Log in to manage your competitive ecosystem.</p>
+</div>
+<!-- Login Form Card -->
+<div class="bg-surface-container-lowest p-8 md:p-10 rounded-xl shadow-2xl shadow-black/5 border border-outline-variant/10 relative group transition-all duration-500 hover:border-primary/20">
+<form action="#" class="space-y-6" method="POST">
+<div class="space-y-2">
+<label class="text-sm font-medium text-on-surface-variant ml-1" for="email">Work Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">alternate_email</span>
+<input class="w-full bg-surface border border-outline-variant/30 rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all" id="email" name="email" placeholder="alex.v@kinetic.com" required="" type="email"/>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="text-sm font-medium text-on-surface-variant" for="password">Password</label>
+<a class="text-xs text-primary font-bold hover:underline" href="#">Forgot?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock_open</span>
+<input class="w-full bg-surface border border-outline-variant/30 rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all" id="password" name="password" placeholder="••••••••••••" required="" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3 py-2 px-1">
+<input class="w-4 h-4 rounded bg-surface border-outline-variant text-primary focus:ring-primary" id="remember" name="remember" type="checkbox"/>
+<label class="text-sm text-on-surface-variant cursor-pointer" for="remember">Remember this session</label>
+</div>
+<button class="w-full py-4 px-6 gradient-primary text-white font-headline font-bold rounded-lg shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group" type="submit">
+                            Authorize Command
+                            <span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Social Login Divider -->
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant/20"></div>
+</div>
+<div class="relative flex justify-center text-xs uppercase tracking-widest text-on-surface-variant/50">
+<span class="bg-surface-container-lowest px-4">Secure Gateway</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg text-on-surface text-sm font-medium hover:bg-surface-container-high transition-colors">
+<img alt="Google Logo" class="w-5 h-5 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTRuoJxK2HYXfp1IF8eSE1ypQM4m5bDgaEmqihXge9-LMvB5X9tDn_flycb0d9rVFLfAUwXHoZgeeCWGzpP7wF0A4ecDEuew3DVhrlYVn6znbwM-0-wZbwJw83u_0nfe4C-eHxVoAxcNs9zcj_-JJG5owb3LeCXwCtdbmiWYxQR4veGPqxsnaSCvV2XKJ0UUTeb4XvSIJzI99TgTGYtzLvHiEuoV4Y-nL-74PVtAJQEoxyxReRVMOthpZ56I5YMdDTl7fe-k7yMTQ"/>
+                            SSO
+                        </button>
+<button class="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg text-on-surface text-sm font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-xl text-on-surface-variant">key</span>
+                            Passkey
+                        </button>
+</div>
+</div>
+<p class="mt-8 text-center text-on-surface-variant text-sm">
+                    New organization? <a class="text-primary font-bold hover:underline" href="#">Request Access</a>
+</p>
+</div>
+</div>
+<!-- Bottom Brand Image Background Overlay -->
+<div class="mt-auto h-48 relative overflow-hidden opacity-10 pointer-events-none">
+<img class="w-full h-full object-cover object-top mask-linear-top grayscale brightness-125" data-alt="Abstract glowing purple geometric circuit board pattern on dark black surface, cinematic lighting, 8k resolution" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2HfGsJMnJUuJGb3KfVojWiE4CKnHypUZAR7P8fSFqLoHmVIC4vawBPLMc9LYt6o7FOoHn9MnitfF4tyNeS9kPLdQVcBkCHsRh0Xe0sudMx0pRjMol7R2LWFIHdc96jTCgua0TRr78bcx7RGNXewI0omwd9bLEZjq6hpDttBhZZ15drtPoUY4XyexNYHbt-xc3zzMZcIJ2BvIS0cd0htGYTwFXB7r-DCvyAa6fOGOcKLZHYTHw_vtqXY_WcFaaxGbq8HGVWMRGhl8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+</div>
+</section>
+</main>
+</body></html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-container": "#9bbaee",
+              "on-primary-fixed-variant": "#91002b",
+              "on-tertiary-fixed": "#002111",
+              "on-tertiary-container": "#00311c",
+              "on-error": "#690005",
+              "on-secondary": "#09305c",
+              "primary-fixed-dim": "#ffb2b7",
+              "inverse-surface": "#dfe2eb",
+              "outline": "#a9898a",
+              "on-primary-fixed": "#40000e",
+              "surface-tint": "#ffb2b7",
+              "surface-container-low": "#181c22",
+              "background": "#10141a",
+              "on-error-container": "#ffdad6",
+              "tertiary": "#67dc9f",
+              "on-tertiary-fixed-variant": "#005232",
+              "secondary": "#a9c8fc",
+              "surface-container-high": "#262a31",
+              "surface-container-lowest": "#0a0e14",
+              "on-secondary-fixed-variant": "#274774",
+              "on-primary": "#67001c",
+              "inverse-on-surface": "#2d3137",
+              "surface-container": "#1c2026",
+              "tertiary-container": "#25a46d",
+              "error-container": "#93000a",
+              "on-tertiary": "#003921",
+              "on-surface-variant": "#e2bebf",
+              "tertiary-fixed-dim": "#67dc9f",
+              "primary-fixed": "#ffdadb",
+              "primary": "#ffb2b7",
+              "outline-variant": "#5a4042",
+              "on-background": "#dfe2eb",
+              "secondary-fixed": "#d5e3ff",
+              "surface-dim": "#10141a",
+              "surface-variant": "#31353c",
+              "on-primary-container": "#5b0017",
+              "primary-container": "#fc536d",
+              "secondary-fixed-dim": "#a9c8fc",
+              "secondary-container": "#294a77",
+              "error": "#ffb4ab",
+              "surface": "#10141a",
+              "tertiary-fixed": "#84f9ba",
+              "surface-bright": "#353940",
+              "on-surface": "#dfe2eb",
+              "surface-container-highest": "#31353c",
+              "on-secondary-fixed": "#001b3c",
+              "inverse-primary": "#b71d3f"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #10141a;
+        color: #dfe2eb;
+      }
+      .glass-panel {
+        background: rgba(41, 74, 119, 0.6);
+        backdrop-filter: blur(12px);
+      }
+      .recessed-input {
+        background-color: #0a0e14;
+        border-bottom: 2px solid #5a404226;
+      }
+      .recessed-input:focus {
+        border-bottom-color: #ffb2b7;
+        outline: none;
+      }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#10141a] border-b border-[#5a4042]/15 h-16 flex justify-between items-center px-6">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-[#E94560] uppercase font-headline">TACTICAL COMMAND</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8 font-headline text-xs tracking-widest uppercase">
+<a class="text-slate-400 hover:text-[#E94560] transition-colors duration-100" href="#">Command</a>
+<a class="text-slate-400 hover:text-[#E94560] transition-colors duration-100" href="#">Tournaments</a>
+<a class="text-[#E94560] font-bold" href="#">Disputes</a>
+<a class="text-slate-400 hover:text-[#E94560] transition-colors duration-100" href="#">Analytics</a>
+</div>
+<div class="flex items-center gap-4 border-l border-[#5a4042]/15 pl-6">
+<button class="text-slate-400 hover:text-[#E94560] transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="text-slate-400 hover:text-[#E94560] transition-colors"><span class="material-symbols-outlined" data-icon="settings">settings</span></button>
+<div class="h-8 w-8 bg-surface-container-high rounded-lg flex items-center justify-center overflow-hidden">
+<img alt="Operator Profile" class="h-full w-full object-cover" data-alt="Close-up portrait of a high-tech tactical operations officer in a dark environment with blue lighting highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgdvxH5jXx7J-DWqa_-dIY7hmehfDLQtkMv7XzF_61JyM9EdUsF39XSOPPBDufshFOjVaWMiZDZAXkChSY8HMrM4LCVAD0xIj0EKsOpltLVP5DqiDNDs5Xq9oU5vVv6FEsxnDPJ5olnTOC0TVn5YP-z9wavfjEeE_poj_qInGfhUZP9DWhTKuvEmVcRJ03ajbc-7QftihIE00kBU24dZP02cvuqryITvmP-MVO1A_xi2aIu3iJykZIP7wRPyABJyWbYT2msskQ-Os"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-[#181c22] hidden md:flex flex-col z-40">
+<div class="p-6">
+<div class="mb-8">
+<h2 class="text-lg font-black text-[#E94560] font-headline">STRAT_OS</h2>
+<p class="font-headline uppercase text-[0.6875rem] tracking-[0.05em] text-slate-500">V2.4.0 ACTIVE</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:bg-[#262a31] hover:text-[#E94560] transition-all duration-100 active:bg-[#10141a]" href="#">
+<span class="material-symbols-outlined text-base" data-icon="dashboard">dashboard</span>
+<span>Command</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:bg-[#262a31] hover:text-[#E94560] transition-all duration-100 active:bg-[#10141a]" href="#">
+<span class="material-symbols-outlined text-base" data-icon="military_tech">military_tech</span>
+<span>Tournaments</span>
+</a>
+<a class="flex items-center gap-3 bg-[#294a77] text-[#ffb2b7] border-l-4 border-[#E94560] px-4 py-3 font-headline uppercase text-[0.6875rem] tracking-[0.05em]" href="#">
+<span class="material-symbols-outlined text-base" data-icon="account_tree">account_tree</span>
+<span>Disputes</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:bg-[#262a31] hover:text-[#E94560] transition-all duration-100 active:bg-[#10141a]" href="#">
+<span class="material-symbols-outlined text-base" data-icon="groups">groups</span>
+<span>Rosters</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:bg-[#262a31] hover:text-[#E94560] transition-all duration-100 active:bg-[#10141a]" href="#">
+<span class="material-symbols-outlined text-base" data-icon="monitoring">monitoring</span>
+<span>Analytics</span>
+</a>
+</nav>
+<div class="mt-8">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed py-3 rounded-lg font-headline font-bold text-xs tracking-widest uppercase shadow-[0_0_20px_rgba(255,178,183,0.1)] active:scale-95 transition-transform">
+                    DEPLOY MATCH
+                </button>
+</div>
+</div>
+<div class="mt-auto p-6 space-y-1 border-t border-[#5a4042]/10">
+<a class="flex items-center gap-3 text-slate-400 px-4 py-2 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:text-[#E94560] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+<span>System Log</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-2 font-headline uppercase text-[0.6875rem] tracking-[0.05em] hover:text-[#E94560] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help_center">help_center</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-16 min-h-screen">
+<div class="flex flex-col h-[calc(100vh-64px)]">
+<!-- Split View Container -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left: Dispute List -->
+<section class="w-full md:w-96 bg-surface-container-low flex flex-col border-r border-[#5a4042]/10">
+<div class="p-6 space-y-4">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-lg font-bold tracking-tight text-on-surface">DISPUTE QUEUE</h3>
+<span class="font-label text-xs text-primary font-bold">14 ACTIVE</span>
+</div>
+<!-- Status Filters -->
+<div class="flex gap-2 pb-2">
+<button class="bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded text-[10px] font-label font-bold tracking-wider uppercase border border-primary/20">All</button>
+<button class="bg-surface-container-highest text-slate-400 px-3 py-1.5 rounded text-[10px] font-label font-bold tracking-wider uppercase hover:text-on-surface transition-colors">Pending</button>
+<button class="bg-surface-container-highest text-slate-400 px-3 py-1.5 rounded text-[10px] font-label font-bold tracking-wider uppercase hover:text-on-surface transition-colors">In Review</button>
+</div>
+</div>
+<!-- Scrollable List -->
+<div class="flex-1 overflow-y-auto px-6 space-y-3 pb-6">
+<!-- Item Active -->
+<div class="p-4 bg-secondary-container border-l-4 border-primary rounded-lg shadow-lg cursor-pointer transition-transform active:scale-[0.98]">
+<div class="flex justify-between mb-2">
+<span class="bg-primary/20 text-primary px-2 py-0.5 rounded text-[9px] font-label font-bold">HACK/CHEAT</span>
+<span class="text-[9px] text-slate-400 font-label">#DISP-9021</span>
+</div>
+<h4 class="text-on-secondary-container font-headline font-bold text-sm mb-1">Aimbot suspicion in Round 4</h4>
+<p class="text-on-secondary-container/70 text-xs mb-3 font-body">Reported by: <span class="text-on-secondary-container font-medium">Ghost_Operator</span></p>
+<div class="flex justify-between items-center text-[10px] font-label text-on-secondary-container/50 uppercase tracking-tighter">
+<span>Apex Elite Tourney</span>
+<span>2m ago</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-4 bg-surface-container rounded-lg border border-outline-variant/15 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex justify-between mb-2">
+<span class="bg-tertiary/10 text-tertiary px-2 py-0.5 rounded text-[9px] font-label font-bold">WRONG SCORE</span>
+<span class="text-[9px] text-slate-400 font-label">#DISP-9018</span>
+</div>
+<h4 class="text-on-surface font-headline font-bold text-sm mb-1">Match result mismatch</h4>
+<p class="text-slate-500 text-xs mb-3 font-body">Reported by: <span class="text-on-surface font-medium">SniperX_99</span></p>
+<div class="flex justify-between items-center text-[10px] font-label text-slate-500 uppercase tracking-tighter">
+<span>Cod: Warzone Cup</span>
+<span>15m ago</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-4 bg-surface-container rounded-lg border border-outline-variant/15 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex justify-between mb-2">
+<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[9px] font-label font-bold">HACK/CHEAT</span>
+<span class="text-[9px] text-slate-400 font-label">#DISP-8992</span>
+</div>
+<h4 class="text-on-surface font-headline font-bold text-sm mb-1">Wallhack accusation</h4>
+<p class="text-slate-500 text-xs mb-3 font-body">Reported by: <span class="text-on-surface font-medium">ShadowFox</span></p>
+<div class="flex justify-between items-center text-[10px] font-label text-slate-500 uppercase tracking-tighter">
+<span>Valorant Pro Series</span>
+<span>1h ago</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Detail View -->
+<section class="flex-1 bg-surface-dim overflow-y-auto p-8 lg:p-12 relative">
+<!-- Detail Header -->
+<div class="mb-10">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="warning">warning</span>
+<h2 class="font-headline text-2xl lg:text-3xl font-black tracking-tight text-on-surface">DISPUTE #DISP-9021</h2>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="p-4 bg-surface-container rounded-lg">
+<p class="font-label text-[10px] text-slate-500 tracking-widest uppercase mb-1">Type</p>
+<p class="font-headline font-bold text-primary">HACK/CHEAT</p>
+</div>
+<div class="p-4 bg-surface-container rounded-lg">
+<p class="font-label text-[10px] text-slate-500 tracking-widest uppercase mb-1">Status</p>
+<p class="font-headline font-bold text-tertiary">IN REVIEW</p>
+</div>
+<div class="p-4 bg-surface-container rounded-lg">
+<p class="font-label text-[10px] text-slate-500 tracking-widest uppercase mb-1">Reported At</p>
+<p class="font-headline font-bold">14:22 UTC</p>
+</div>
+<div class="p-4 bg-surface-container rounded-lg">
+<p class="font-label text-[10px] text-slate-500 tracking-widest uppercase mb-1">Urgency</p>
+<p class="font-headline font-bold text-error">CRITICAL</p>
+</div>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+<!-- Main Info -->
+<div class="lg:col-span-2 space-y-8">
+<div class="space-y-4">
+<h3 class="font-headline text-lg font-bold text-on-surface border-l-2 border-primary pl-4">DESCRIPTION</h3>
+<p class="text-slate-400 font-body leading-relaxed bg-surface-container/30 p-4 rounded-lg">
+                                    Player <span class="text-on-surface font-bold">"ExoticMage_00"</span> was observed tracking enemies through solid walls during the final circle of Match #8821. Replay file timestamp 12:44 shows crosshair locking onto player "Ghost_Operator" who was fully concealed behind a building structure.
+                                </p>
+</div>
+<div class="space-y-4">
+<h3 class="font-headline text-lg font-bold text-on-surface border-l-2 border-primary pl-4">EVIDENCE ARTIFACTS</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="group relative aspect-video rounded-lg overflow-hidden cursor-pointer shadow-2xl border border-outline-variant/20">
+<img alt="Evidence View 1" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" data-alt="First person perspective screenshot of a competitive shooter game interface showing tactical HUD and player aiming" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzq2S5gDo66p9g5kIQxT_uMZW_1EI2ghOwZvWP6IcLgfWxk5iJG50ZhI_WGQRZIEkGfyOOGrrC8pqn7RD4z6u9UGB-4dOnbLQJ-1hwBLp5m6uwiGB9CyaIMvF6hiAGtTumfus0DuaN-xMBXvk2zckL9A4K8UIbGO_RorWbldhuNPAr72C-3Zj15GyVtfhI5EetNe8pwYrFzND4Eq-xe6MDefq_KE8cX8IWk7dw4F2EjK6pzRRsp91fSc-UcZot6cUuKmnF_xzvi_Y"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+<div class="group relative aspect-video rounded-lg overflow-hidden cursor-pointer shadow-2xl border border-outline-variant/20">
+<img alt="Evidence View 2" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" data-alt="High-resolution gaming monitor displaying complex match statistics and player performance metrics with dark theme" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDABol-fBEQWh38VY_-Pix1Pv7bXbRkDj8nW6Zq99Yv6zF5keal9QqYsqaICSJLQcmZFLzU6gvquSB9h0NKe7TvCA2cwv7AYqxbSAuCfXtpLIh5_zMO_K7O_COdjNcPj_YBkXxvj3Rs5yp02cw8fflBVdy38A2Dd1FJl9Q_Op3zl830-DGg2tekxma6Rpj99GLdi7FMfI9ywOXw6ywdMMmgEjmF0dJNGKv98WWDCOfJnlCT9q65qdJ6G_RfbIh17esHpZ4fgbQ5fKw"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Info -->
+<div class="space-y-6">
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant/10">
+<h3 class="font-headline font-bold text-sm text-slate-400 mb-4 uppercase tracking-widest">MATCH SUMMARY</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/5">
+<span class="text-xs text-slate-500">Tournament</span>
+<span class="text-xs font-bold">Apex Elite</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/5">
+<span class="text-xs text-slate-500">Match ID</span>
+<span class="text-xs font-bold text-primary">#8821</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/5">
+<span class="text-xs text-slate-500">Duration</span>
+<span class="text-xs font-bold">18:42</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/5">
+<span class="text-xs text-slate-500">Server</span>
+<span class="text-xs font-bold">US-WEST-1</span>
+</div>
+</div>
+<button class="w-full mt-6 py-2 bg-surface-container-highest text-primary font-label text-[10px] font-bold tracking-widest uppercase rounded border border-primary/20 hover:bg-primary hover:text-on-primary transition-all">
+                                    VIEW FULL REPLAY
+                                </button>
+</div>
+<div class="space-y-4">
+<h3 class="font-headline text-sm font-bold text-on-surface uppercase tracking-widest">ADMIN NOTES</h3>
+<textarea class="w-full h-32 recessed-input p-4 font-body text-xs text-on-surface placeholder-slate-600 resize-none" placeholder="Enter findings, evidence evaluation, or investigation notes..."></textarea>
+</div>
+<div class="flex flex-col gap-3">
+<button class="w-full py-4 bg-tertiary-container text-on-tertiary-container font-headline font-bold text-xs tracking-widest uppercase rounded-lg shadow-[0_0_20px_rgba(103,220,159,0.1)] hover:brightness-110 active:scale-95 transition-all">
+                                    UPHOLD DISPUTE
+                                </button>
+<button class="w-full py-4 bg-error-container text-on-error-container font-headline font-bold text-xs tracking-widest uppercase rounded-lg shadow-[0_0_20px_rgba(147,0,10,0.1)] hover:brightness-110 active:scale-95 transition-all">
+                                    DISMISS DISPUTE
+                                </button>
+</div>
+</div>
+</div>
+<!-- Timeline Section -->
+<div class="mt-8 border-t border-[#5a4042]/10 pt-10">
+<h3 class="font-headline text-lg font-bold text-on-surface mb-8 tracking-tight">INVESTIGATION TIMELINE</h3>
+<div class="relative flex flex-col md:flex-row justify-between items-start md:items-center px-4 md:px-0 gap-8 md:gap-0">
+<!-- Timeline Line -->
+<div class="absolute left-6 md:left-0 top-0 md:top-1/2 w-0.5 md:w-full h-full md:h-0.5 bg-surface-container-highest z-0"></div>
+<!-- Steps -->
+<div class="relative z-10 flex flex-col items-start md:items-center group">
+<div class="w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20 mb-3"></div>
+<div class="bg-surface-container p-3 rounded border border-outline-variant/10 md:text-center min-w-[120px]">
+<p class="font-label text-[9px] text-primary font-bold uppercase">Reported</p>
+<p class="font-headline text-[10px] font-bold">14:22:04</p>
+</div>
+</div>
+<div class="relative z-10 flex flex-col items-start md:items-center group">
+<div class="w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20 mb-3"></div>
+<div class="bg-surface-container p-3 rounded border border-outline-variant/10 md:text-center min-w-[120px]">
+<p class="font-label text-[9px] text-primary font-bold uppercase">Assigned</p>
+<p class="font-headline text-[10px] font-bold">14:25:31</p>
+</div>
+</div>
+<div class="relative z-10 flex flex-col items-start md:items-center group">
+<div class="w-4 h-4 rounded-full bg-secondary ring-4 ring-secondary/20 mb-3"></div>
+<div class="bg-secondary-container p-3 rounded border border-primary/20 md:text-center min-w-[120px]">
+<p class="font-label text-[9px] text-on-secondary-container font-bold uppercase">In Review</p>
+<p class="font-headline text-[10px] font-bold">14:30:11</p>
+</div>
+</div>
+<div class="relative z-10 flex flex-col items-start md:items-center group opacity-40">
+<div class="w-4 h-4 rounded-full bg-surface-container-highest mb-3"></div>
+<div class="bg-surface-container p-3 rounded border border-outline-variant/10 md:text-center min-w-[120px]">
+<p class="font-label text-[9px] text-slate-500 font-bold uppercase">Resolution</p>
+<p class="font-headline text-[10px] font-bold">Pending</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Navigation Overlay for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#181c22] border-t border-[#5a4042]/15 flex items-center justify-around z-50 px-6">
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="dashboard">dashboard</span>
+</a>
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="military_tech">military_tech</span>
+</a>
+<a class="text-[#E94560] flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="account_tree">account_tree</span>
+</a>
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="groups">groups</span>
+</a>
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="monitoring">monitoring</span>
+</a>
+</nav>
+</body></html>
