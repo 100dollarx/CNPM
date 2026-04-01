@@ -27,14 +27,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     try {
-      const res  = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) })
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 8000) // 8s timeout
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal,
+      })
+      clearTimeout(timer)
       const data = await res.json()
       if (!res.ok) return { ok: false, error: data.error ?? 'Đăng nhập thất bại.' }
       setUser(data.user); setToken(data.token)
       sessionStorage.setItem('etms_user', JSON.stringify(data.user))
       sessionStorage.setItem('etms_token', data.token)
       return { ok: true }
-    } catch { return { ok: false, error: 'Không thể kết nối tới máy chủ.' } }
+    } catch (e: unknown) {
+      console.error('[AuthContext] Login error:', e)
+      if (e instanceof Error && e.name === 'AbortError')
+        return { ok: false, error: 'Hết thời gian kết nối (8s). Kiểm tra backend đang chạy trên port 5126.' }
+      return { ok: false, error: 'Không thể kết nối tới máy chủ (localhost:5126). Hãy chạy: cd ETMS.Api && dotnet run' }
+    }
   }, [])
 
   const logout = useCallback(() => {
