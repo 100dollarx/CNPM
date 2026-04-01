@@ -11,3 +11,6 @@ E:\Công nghệ phần mềm\Final\ETMS.Core\obj\Debug\net8.0\ETMS.Core.dll
 E:\Công nghệ phần mềm\Final\ETMS.Core\obj\Debug\net8.0\refint\ETMS.Core.dll
 E:\Công nghệ phần mềm\Final\ETMS.Core\obj\Debug\net8.0\ETMS.Core.pdb
 E:\Công nghệ phần mềm\Final\ETMS.Core\obj\Debug\net8.0\ref\ETMS.Core.dll
+C:\Temp\ETMSApiBuild\ETMS.Core.deps.json
+C:\Temp\ETMSApiBuild\ETMS.Core.dll
+C:\Temp\ETMSApiBuild\ETMS.Core.pdb

@@ -61,7 +61,7 @@ namespace ETMS.BUS
                     Team1Name    = teams[teamIndex].Name,
                     Team2ID      = null,
                     WinnerID     = teams[teamIndex].TeamID, // auto win
-                    Status       = "Bye",
+                    Status       = "Walkover",  // DB CHECK constraint không có "Bye" → dùng Walkover
                     IsBye        = true,
                     Round        = 1,
                     MatchOrder   = i + 1
@@ -120,31 +120,6 @@ namespace ETMS.BUS
             // Gộp tất cả thành 1 list theo thứ tự Round → MatchOrder
             foreach (var rnd in roundMatches)
                 allMatches.AddRange(rnd);
-
-            // Bước 4: Thiết lập NextMatchID và NextMatchSlot
-            // Logic: mỗi 2 trận liên tiếp trong vòng R → winner vào cùng 1 trận vòng R+1
-            for (int r = 0; r < roundMatches.Count - 1; r++)
-            {
-                var current = roundMatches[r];
-                var next    = roundMatches[r + 1];
-
-                for (int i = 0; i < current.Count; i++)
-                {
-                    int nextMatchIdx  = i / 2;           // 2 trận feed vào 1 trận kế
-                    int slot          = (i % 2 == 0) ? 1 : 2;  // slot 1 hoặc 2
-
-                    current[i].NextMatchID   = -1;        // placeholder — sẽ được BracketDAL điền MatchID thực
-                    current[i].NextMatchSlot = slot;
-
-                    // Dùng MatchOrder của next match làm key mapping
-                    current[i].NextMatchID = -(nextMatchIdx + 1); // âm để BracketDAL nhận dạng là index
-                }
-            }
-
-            // Mapping: thực sự điền NextMatchID dựa trên index trong roundMatches + 1
-            // (BracketDAL sẽ nhận các MatchDTO và tự điền sau khi INSERT xong)
-            // Reset về null, dùng helper property để track
-            foreach (var m in allMatches) m.NextMatchID = null;
 
             // Associate next match references using in-memory indices trước khi save
             for (int r = 0; r < roundMatches.Count - 1; r++)

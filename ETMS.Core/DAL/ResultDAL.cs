@@ -29,6 +29,33 @@ namespace ETMS.DAL
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
+        public MatchResultDTO? GetByResultID(int resultID)
+        {
+            using var conn = DBConnection.GetConnection();
+            conn.Open();
+            const string sql = @"
+                SELECT ResultID,MatchID,Score1,Score2,EvidenceURL,Status,
+                       SubmittedBy,VerifiedBy,SubmittedAt,VerifiedAt
+                FROM tblMatchResult WHERE ResultID=@id";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@id", resultID);
+            using var dr = cmd.ExecuteReader();
+            if (!dr.Read()) return null;
+            return new MatchResultDTO
+            {
+                ResultID    = dr.GetInt32(0),
+                MatchID     = dr.GetInt32(1),
+                Score1      = dr.GetInt32(2),
+                Score2      = dr.GetInt32(3),
+                EvidenceURL = dr.IsDBNull(4) ? null : dr.GetString(4),
+                Status      = dr.GetString(5),
+                SubmittedBy = dr.IsDBNull(6) ? null : dr.GetInt32(6),
+                VerifiedBy  = dr.IsDBNull(7) ? null : dr.GetInt32(7),
+                SubmittedAt = dr.GetDateTime(8),
+                VerifiedAt  = dr.IsDBNull(9) ? null : dr.GetDateTime(9)
+            };
+        }
+
         public MatchResultDTO? GetByMatch(int matchID)
         {
             using var conn = DBConnection.GetConnection();

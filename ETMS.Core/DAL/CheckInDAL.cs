@@ -23,7 +23,7 @@ namespace ETMS.DAL
             {
                 // Đọc trạng thái hiện tại của trận (WITH UPDLOCK, SERIALIZABLE)
                 string readSql = @"
-                    SELECT Status, CheckIn1, CheckIn2, ScheduledTime
+                    SELECT Status, CheckIn_Team1, CheckIn_Team2, ScheduledTime
                     FROM tblMatch WITH (UPDLOCK, ROWLOCK)
                     WHERE MatchID = @id";
                 string status = "";
@@ -62,9 +62,9 @@ namespace ETMS.DAL
 
                 string updateSql;
                 if (teamSlot == 1)
-                    updateSql = "UPDATE tblMatch SET CheckIn1 = 1, Status = @newStatus WHERE MatchID = @id";
+                    updateSql = "UPDATE tblMatch SET CheckIn_Team1 = 1, Status = @newStatus WHERE MatchID = @id";
                 else
-                    updateSql = "UPDATE tblMatch SET CheckIn2 = 1, Status = @newStatus WHERE MatchID = @id";
+                    updateSql = "UPDATE tblMatch SET CheckIn_Team2 = 1, Status = @newStatus WHERE MatchID = @id";
 
                 using (var cmd = new SqlCommand(updateSql, conn, trans))
                 {
@@ -99,7 +99,7 @@ namespace ETMS.DAL
             conn.Open();
             // Tìm các trận check-in đã hết hạn
             const string findSql = @"
-                SELECT MatchID, CheckIn1, CheckIn2, Team1ID, Team2ID
+                SELECT MatchID, CheckIn_Team1, CheckIn_Team2, Team1ID, Team2ID
                 FROM tblMatch
                 WHERE TournamentID = @tid
                   AND Status IN ('CheckInOpen','Scheduled')

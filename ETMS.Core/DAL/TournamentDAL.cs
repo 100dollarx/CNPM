@@ -109,7 +109,7 @@ namespace ETMS.DAL
             MinPlayersPerTeam = dr.GetInt32(6),
             StartDate         = dr.IsDBNull(7) ? null : dr.GetDateTime(7),
             EndDate           = dr.IsDBNull(8) ? null : dr.GetDateTime(8),
-            CreatedBy         = dr.GetInt32(9),
+            CreatedBy         = dr.IsDBNull(9) ? null : dr.GetInt32(9),
             CreatedAt         = dr.GetDateTime(10)
         };
     }

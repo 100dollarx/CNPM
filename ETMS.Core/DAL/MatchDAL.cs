@@ -15,7 +15,7 @@ namespace ETMS.DAL
                        m.Team2ID, t2.Name,
                        m.WinnerID, m.LoserID,
                        m.Status, m.ScheduledTime, m.ActualStartTime,
-                       m.CheckIn1, m.CheckIn2,
+                       m.CheckIn_Team1, m.CheckIn_Team2,
                        m.NextMatchID, m.NextMatchSlot,
                        m.Round, m.MatchOrder, m.IsBye
                 FROM tblMatch m
@@ -39,7 +39,7 @@ namespace ETMS.DAL
                        m.Team2ID, t2.Name,
                        m.WinnerID, m.LoserID,
                        m.Status, m.ScheduledTime, m.ActualStartTime,
-                       m.CheckIn1, m.CheckIn2,
+                       m.CheckIn_Team1, m.CheckIn_Team2,
                        m.NextMatchID, m.NextMatchSlot,
                        m.Round, m.MatchOrder, m.IsBye
                 FROM tblMatch m
@@ -65,7 +65,7 @@ namespace ETMS.DAL
                        m.Team2ID, t2.Name,
                        m.WinnerID, m.LoserID,
                        m.Status, m.ScheduledTime, m.ActualStartTime,
-                       m.CheckIn1, m.CheckIn2,
+                       m.CheckIn_Team1, m.CheckIn_Team2,
                        m.NextMatchID, m.NextMatchSlot,
                        m.Round, m.MatchOrder, m.IsBye
                 FROM tblMatch m

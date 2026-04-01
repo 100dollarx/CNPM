@@ -11,7 +11,7 @@ namespace ETMS.DTO
         public int MinPlayersPerTeam { get; set; } = 5;
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public int CreatedBy { get; set; }
+        public int? CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

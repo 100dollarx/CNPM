@@ -49,6 +49,8 @@ namespace ETMS.BUS
 
         public List<MatchResultDTO> GetPendingResults(int tournamentID) => _resultDAL.GetPendingVerification(tournamentID);
 
+        public MatchResultDTO? GetByResultID(int resultID) => _resultDAL.GetByResultID(resultID);
+
         public MatchResultDTO? GetByMatch(int matchID) => _resultDAL.GetByMatch(matchID);
 
         /// <summary>
@@ -91,8 +93,10 @@ namespace ETMS.BUS
         public (bool success, string message) RejectResult(int resultID, string reason)
         {
             if (!Session.IsAdmin) return (false, "Chỉ Admin mới có quyền từ chối kết quả.");
-            _resultDAL.UpdateStatus(resultID, "Disputed", Session.CurrentUser!.UserID);
-            return (true, $"Đã bác bỏ kết quả với lý do: {reason}");
+            if (string.IsNullOrWhiteSpace(reason))
+                return (false, "Vui lòng nhập lý do từ chối.");
+            _resultDAL.UpdateStatus(resultID, "Rejected", Session.CurrentUser!.UserID);
+            return (true, $"Đã từ chối kết quả với lý do: {reason}");
         }
     }
 }

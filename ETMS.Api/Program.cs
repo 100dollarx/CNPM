@@ -30,9 +30,45 @@ app.MapGet("/api/health", () => new
 // ── Auth ──────────────────────────────────────────────────────────────────────
 app.MapPost("/api/auth/login",  ETMS.Api.Handlers.AuthHandler.Login);
 app.MapPost("/api/auth/logout", ETMS.Api.Handlers.AuthHandler.Logout);
-// DEV ONLY: Generate BCrypt hash — xóa sau khi seed xong
+// DEV ONLY: Generate BCrypt hash
 app.MapGet("/api/auth/hash", (string pwd) =>
     Results.Ok(new { pwd, hash = ETMS.BUS.AuthBUS.HashPassword(pwd) }));
+
+// DEV ONLY: Seed default users vào DB (gọi 1 lần sau khi tạo DB)
+app.MapPost("/api/dev/seed-users", () =>
+{
+    try
+    {
+        using var conn = ETMS.DAL.DBConnection.GetConnection();
+        conn.Open();
+        var users = new[] {
+            ("admin",     "admin",   "Quản Trị Viên",      "admin@etms.vn",   "Admin"),
+            ("captain01", "admin",   "Nguyễn Văn Captain", "cap@etms.vn",     "Captain"),
+            ("player01",  "admin",   "Trần Thị Player",    "player@etms.vn",  "Player"),
+        };
+        int count = 0;
+        foreach (var (uname, pwd, name, email, role) in users)
+        {
+            var hash = ETMS.BUS.AuthBUS.HashPassword(pwd);
+            const string sql = @"
+                IF NOT EXISTS (SELECT 1 FROM tblUser WHERE Username=@u)
+                    INSERT INTO tblUser(Username,PasswordHash,FullName,Email,Role,IsLocked,FailedLoginAttempts,CreatedAt)
+                    VALUES(@u,@h,@n,@e,@r,0,0,GETDATE())
+                ELSE
+                    UPDATE tblUser SET PasswordHash=@h WHERE Username=@u";
+            using var cmd = new Microsoft.Data.SqlClient.SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@u", uname);
+            cmd.Parameters.AddWithValue("@h", hash);
+            cmd.Parameters.AddWithValue("@n", name);
+            cmd.Parameters.AddWithValue("@e", email);
+            cmd.Parameters.AddWithValue("@r", role);
+            cmd.ExecuteNonQuery();
+            count++;
+        }
+        return Results.Ok(new { message = $"Seeded {count} users. Password: admin", users = new[]{"admin","captain01","player01"} });
+    }
+    catch (Exception ex) { return Results.Problem(ex.Message); }
+});
 
 // ── Overview ──────────────────────────────────────────────────────────────────
 app.MapGet("/api/overview/stats",    ETMS.Api.Handlers.OverviewHandler.GetStats);

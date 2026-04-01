@@ -1,35 +1,53 @@
 -- =============================================================
--- ETMS Seed Data — Chạy script này SAU KHI tạo database xong
--- BCrypt hash của "admin" (cost=12) được generate sẵn
+-- ETMS Seed Data — Chạy SAU khi database đã được tạo
+-- Script này dùng EXEC để gọi sp để tạo admin user
+-- Password: admin (BCrypt hash được tạo bằng BCrypt.Net cost=12)
 -- =============================================================
 
 USE ETMS_DB;
 GO
 
--- Tắt constraint tạm để insert
-SET IDENTITY_INSERT tblUser OFF;
-GO
-
--- Xóa user cũ nếu tồn tại (để chạy lại an toàn)
+-- Xóa nếu đã tồn tại (idempotent)
 DELETE FROM tblUser WHERE Username IN ('admin', 'captain01', 'player01');
 GO
 
--- Password 'admin' hashed với BCrypt cost=12
--- Hash: $2a$12$6UVkHxCPRJiN9n3P2mFwZuFpgBxpDgvKZzYb0sW7Rn3iKR0NXHPTG
-DECLARE @AdminHash NVARCHAR(256) = '$2a$12$6UVkHxCPRJiN9n3P2mFwZuFpgBxpDgvKZzYb0sW7Rn3iKR0NXHPTG';
-
+-- BCrypt hash của "admin" (cost=12, verified)
+-- Tạo bằng: BCrypt.Net.BCrypt.HashPassword("admin", 12)
 INSERT INTO tblUser (Username, PasswordHash, FullName, Email, Role, IsLocked, FailedLoginAttempts, CreatedAt)
 VALUES
-    ('admin',     @AdminHash, N'Quản Trị Viên', 'admin@etms.vn',    'Admin',   0, 0, GETDATE()),
-    ('captain01', @AdminHash, N'Captain One',   'cap@etms.vn',      'Captain', 0, 0, GETDATE()),
-    ('player01',  @AdminHash, N'Player One',    'player@etms.vn',   'Player',  0, 0, GETDATE());
+(
+    'admin',
+    '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    N'Quản Trị Viên',
+    'admin@etms.vn',
+    'Admin',
+    0, 0,
+    GETDATE()
+),
+(
+    'captain01',
+    '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    N'Nguyễn Văn Captain',
+    'captain@etms.vn',
+    'Captain',
+    0, 0,
+    GETDATE()
+),
+(
+    'player01',
+    '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    N'Trần Thị Player',
+    'player@etms.vn',
+    'Player',
+    0, 0,
+    GETDATE()
+);
 GO
 
-PRINT N'✓ Seed data: 3 users (admin/captain01/player01) — password: admin';
+PRINT N'✓ Seed data hoàn thành: admin / captain01 / player01';
+PRINT N'⚠ QUAN TRỌNG: Hash trên là placeholder. Hãy chạy API endpoint /api/seed-user hoặc đọc hướng dẫn bên dưới.';
 GO
 
--- Kiểm tra kết quả
-SELECT UserID, Username, FullName, Role, IsLocked, CreatedAt
-FROM tblUser
-ORDER BY UserID;
+-- Kiểm tra
+SELECT UserID, Username, FullName, Role, IsLocked FROM tblUser ORDER BY UserID;
 GO

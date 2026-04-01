@@ -16,7 +16,13 @@ public static class ResultHandler
 
     public static IResult Verify(int id)
     {
-        var (ok, err) = new ResultBUS().ApproveResult(id, id);
+        // id là resultID. ApproveResult cần matchID → lấy từ ResultBUS.GetByResultID
+        var bus    = new ResultBUS();
+        var result = bus.GetByResultID(id);
+        if (result == null)
+            return Results.NotFound(new { error = "Không tìm thấy kết quả với ID này." });
+
+        var (ok, err) = bus.ApproveResult(id, result.MatchID);
         return ok ? Results.Ok(new { resultId = id, status = "verified" })
                   : Results.BadRequest(new { error = err });
     }
