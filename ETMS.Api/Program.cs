@@ -30,6 +30,9 @@ app.MapGet("/api/health", () => new
 // ── Auth ──────────────────────────────────────────────────────────────────────
 app.MapPost("/api/auth/login",  ETMS.Api.Handlers.AuthHandler.Login);
 app.MapPost("/api/auth/logout", ETMS.Api.Handlers.AuthHandler.Logout);
+// DEV ONLY: Generate BCrypt hash — xóa sau khi seed xong
+app.MapGet("/api/auth/hash", (string pwd) =>
+    Results.Ok(new { pwd, hash = ETMS.BUS.AuthBUS.HashPassword(pwd) }));
 
 // ── Overview ──────────────────────────────────────────────────────────────────
 app.MapGet("/api/overview/stats",    ETMS.Api.Handlers.OverviewHandler.GetStats);
