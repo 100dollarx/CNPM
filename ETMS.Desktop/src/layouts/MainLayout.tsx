@@ -68,25 +68,15 @@ export default function MainLayout() {
             borderBottom: `1px solid ${c.panelBorder}`,
             minHeight: 76, position: 'relative', zIndex: 1,
           }}>
-            {/* Logo in a dark pill so gamepad is visible on both light & dark sidebar */}
-            <div style={{
-              width: collapsed ? 48 : 60, height: collapsed ? 48 : 60,
-              borderRadius: 12, flexShrink: 0,
-              background: '#0F1623',
-              border: '1.5px solid rgba(233,69,96,0.4)',
-              boxShadow: '0 0 12px rgba(233,69,96,0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'width 0.2s, height 0.2s',
-            }}>
-              <img
-                src="/logo.png" alt="NEXORA"
-                style={{
-                  width: collapsed ? 36 : 48, height: collapsed ? 36 : 48,
-                  objectFit: 'contain',
-                  transition: 'width 0.2s, height 0.2s',
-                }}
-              />
-            </div>
+            {/* Logo — no background, same as login page */}
+            <img
+              src="/logo.png" alt="NEXORA"
+              style={{
+                width: collapsed ? 48 : 60, height: collapsed ? 48 : 60,
+                objectFit: 'contain', flexShrink: 0,
+                transition: 'width 0.2s, height 0.2s',
+              }}
+            />
             {!collapsed && (
               <div>
                 <span style={{

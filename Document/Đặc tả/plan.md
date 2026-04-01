@@ -1,6 +1,6 @@
 # KẾ HOẠCH THỰC THI ĐỒ ÁN KỸ THUẬT PHẦN MỀM
-## Hệ thống Quản lý Giải đấu Esports — ETMS
-**Phiên bản:** 4.0 | **Ngày:** 2026-03-31
+## Hệ thống Quản lý Giải đấu Esports — NEXORA (ETMS)
+**Phiên bản:** 5.0 | **Ngày cập nhật:** 2026-04-02
 **Trường:** Đại học Tôn Đức Thắng – Khoa CNTT
 **Môn:** Kỹ thuật Phần mềm (502045) – HK 2 / 2025–2026
 
@@ -9,39 +9,45 @@
 ## 1. TỔNG QUAN DỰ ÁN
 
 ### 1.1 Mô tả hệ thống
-ETMS là ứng dụng desktop đa nền tảng (Windows / macOS / Linux) để quản lý toàn bộ vòng đời giải đấu Esports: đăng ký đội → xét duyệt → tạo bracket → check-in → thi đấu → ghi nhận kết quả → vinh danh. Hỗ trợ 6 thể loại game (MOBA, FPS, BattleRoyale, Fighting, RTS, Sports) và 2 format thi đấu (Single Elimination, Battle Royale).
+NEXORA (ETMS) là ứng dụng desktop để quản lý toàn bộ vòng đời giải đấu Esports: đăng ký đội → xét duyệt → tạo bracket → check-in → thi đấu → ghi nhận kết quả → vinh danh. Hỗ trợ 6 thể loại game (MOBA, FPS, BattleRoyale, Fighting, RTS, Sports) và 2 format thi đấu (Single Elimination, Battle Royale).
 
-### 1.2 Stack Công nghệ
+### 1.2 Stack Công nghệ thực tế
 
 | Tầng | Công nghệ |
 |---|---|
-| **Desktop Shell** | Tauri v2 (native WebView, ~8MB) |
-| **Frontend** | React 18 + Vite + TypeScript + Tailwind + shadcn/ui |
-| **State / Form** | Zustand + React Hook Form + Zod |
-| **HTTP** | Axios (JWT interceptor) |
+| **Desktop Shell** | Electron.NET (wrap ASP.NET Core + Chromium) |
+| **Frontend** | React 18 + Vite + TypeScript (inline styles, Material Symbols) |
+| **State** | React Context (AuthContext, ThemeContext, LangContext) |
+| **HTTP** | Fetch API (proxy Vite `/api` → `localhost:5000`) |
 | **Backend** | ASP.NET Core 8 Minimal API (BUS/DAL/DTO C#) |
 | **Database** | SQL Server 2019+ — 17 bảng |
 | **Auth** | SHA-256 hash + JWT Bearer |
+| **Localization** | LangContext (VI/EN toggle, localStorage persisted) |
+| **Theming** | ThemeContext (Dark/Light toggle, localStorage persisted) |
 
-### 1.3 Cấu trúc project
+### 1.3 Cấu trúc project thực tế
 
 ```
 Final/
-├── ETMS.Core/             Class Library — BUS (10) / DAL (10) / DTO (9)
-│   ├── BUS/               Nghiệp vụ
-│   ├── DAL/               Truy cập DB
-│   └── DTO/               Data Transfer Objects
-├── ETMS.Api/              ASP.NET Core Minimal API
+├── ETMS.Core/             Class Library — BUS (10) / DAL (10) / DTO (9) ✅
+│   ├── BUS/
+│   ├── DAL/
+│   └── DTO/
+├── ETMS.Api/              ASP.NET Core Minimal API ✅
 │   ├── Handlers/          Auth | Tournament | Team | Match | Result | Dispute | Notification | AuditLog | Overview
 │   ├── Database/
 │   │   └── ETMS_DB.sql    Script 17 bảng + indexes + stored procs + sample data
 │   ├── Program.cs
 │   └── appsettings.json
-├── ETMS.Desktop/          Tauri v2 Shell (cần tạo)
-│   ├── src-tauri/         Rust entry + sidecar config
-│   └── src/               React app (copy từ DesignUI/ETMSUI)
-├── DesignUI/ETMSUI/       Figma reference — 15 React pages (shadcn/ui + Tailwind)
-└── Document/Đặc tả/       Tài liệu dự án
+├── ETMS.Desktop/          Electron.NET + React/Vite frontend ✅
+│   ├── src/
+│   │   ├── App.tsx                  # 16 routes registered
+│   │   ├── contexts/                # Auth, Theme, Lang
+│   │   ├── layouts/MainLayout.tsx   # Sidebar + top-right control bar
+│   │   └── pages/                   # 16 pages (xem mục 3)
+│   ├── public/logo.png
+│   └── package.json
+└── Document/Đặc tả/       Tài liệu dự án ✅
 ```
 
 ---
@@ -53,8 +59,8 @@ Final/
 | File | Nội dung | Trạng thái |
 |---|---|---|
 | `SRS_v2.md` | Đặc tả yêu cầu — 14 FR, 5 NFR, 38 API, DB 17 bảng | ✅ v4.0 |
-| `09_ArchitectureDesign.md` | Kiến trúc 3-tier, diagram, security, sidecar | ✅ v4.0 |
-| `plan.md` | Kế hoạch thực thi — sprint, phân công, DoD | ✅ v4.0 |
+| `09_ArchitectureDesign.md` | Kiến trúc 3-tier, diagram, security | ✅ v4.0 |
+| `plan.md` | Kế hoạch thực thi | ✅ v5.0 |
 | `00_MASTER_INDEX.md` | Mục lục toàn bộ tài liệu | ✅ v4.0 |
 | `01_UseCaseDiagram.md` | 25+ Use Cases | ✅ v3.0 |
 | `02_ClassDiagram_v2.md` | BUS / DAL class diagram | ✅ v3.0 |
@@ -65,170 +71,147 @@ Final/
 | `08_SecurityThreatModel.md` | STRIDE + OWASP — 18 threats | ✅ v3.0 |
 | `10_TraceabilityMatrix.md` | RTM: FR → UC → BUS/DAL → Test | ✅ v3.0 |
 | `11_RiskRegister.md` | FMEA — 22 rủi ro | ✅ v3.0 |
-| `12_PCL_TestWorkbook.md` | 87 Test Cases (87 = Normal + Boundary + Security) | ✅ v3.0 |
+| `12_PCL_TestWorkbook.md` | 87 Test Cases | ✅ v3.0 |
 | `ETMS.Api/Database/ETMS_DB.sql` | Script SQL v4.0 đầy đủ | ✅ v4.0 |
+| `README.md` | Hướng dẫn cài đặt và chạy project | ✅ |
 
 ---
 
-## 3. DANH SÁCH 15 PAGES (React)
+## 3. DANH SÁCH 16 PAGES (React)
 
-| # | Page | Chức năng | Actor |
-|---|---|---|---|
-| 1 | `LoginPage.tsx` | Đăng nhập | Tất cả |
-| 2 | `DashboardPage.tsx` | Tổng quan thống kê | Admin |
-| 3 | `TournamentSetupPage.tsx` | Tạo/sửa giải đấu + GameConfig | Admin |
-| 4 | `TeamManagementPage.tsx` | Đăng ký đội + quản lý thành viên + xét duyệt | Captain, Admin |
-| 5 | `BracketViewPage.tsx` | Hiển thị bracket cây | Tất cả |
-| 6 | `MatchSchedulePage.tsx` | Lịch thi đấu | Tất cả |
-| 7 | `CheckInPage.tsx` | Check-in trước trận | Captain |
-| 8 | `MapVetoPage.tsx` | Veto bản đồ (FPS) | Captain |
-| 9 | `SideSelectPage.tsx` | Chọn phe Blue/Red (MOBA) | Captain |
-| 10 | `ResultSubmitPage.tsx` | Nộp + xác nhận kết quả | Captain, Admin |
-| 11 | `LeaderboardPage.tsx` | Bảng xếp hạng | Tất cả |
-| 12 | `DisputeManagePage.tsx` | Khiếu nại + giải quyết | Captain, Admin |
-| 13 | `NotificationsPage.tsx` | Thông báo in-app | Auth users |
-| 14 | `AuditLogPage.tsx` | Nhật ký kiểm toán | Admin |
-| 15 | `UserManagementPage.tsx` | Quản lý tài khoản | Admin |
+| # | File | Chức năng | Route | Actor |
+|---|---|---|---|---|
+| 1 | `LoginPage.tsx` | Đăng nhập | `/login` | Tất cả |
+| 2 | `DashboardPage.tsx` | Tổng quan thống kê | `/dashboard` | Admin |
+| 3 | `TournamentsPage.tsx` | Tạo/quản lý giải đấu | `/tournaments` | Admin |
+| 4 | `TeamsPage.tsx` | Đội tham dự + xét duyệt | `/teams` | Captain, Admin |
+| 5 | `MatchesPage.tsx` | Lịch thi đấu | `/matches` | Tất cả |
+| 6 | `DisputesPage.tsx` | Khiếu nại + xử lý | `/disputes` | Captain, Admin |
+| 7 | `NotificationsPage.tsx` | Thông báo in-app | `/notifications` | Auth users |
+| 8 | `UsersPage.tsx` | Quản lý tài khoản | `/users` | Admin |
+| 9 | `AuditLogPage.tsx` | Nhật ký kiểm toán | `/audit-log` | Admin |
+| 10 | `BracketViewPage.tsx` | Sơ đồ thi đấu (bracket) | `/tournaments/:id/bracket` | Tất cả |
+| 11 | `LeaderboardPage.tsx` | Bảng xếp hạng | `/tournaments/:id/leaderboard` | Tất cả |
+| 12 | `CheckInPage.tsx` | Check-in trước trận | `/matches/:id/check-in` | Captain |
+| 13 | `MapVetoPage.tsx` | Veto bản đồ (FPS) | `/matches/:id/map-veto` | Captain |
+| 14 | `SideSelectPage.tsx` | Chọn phe Blue/Red (MOBA) | `/matches/:id/side-select` | Captain |
+| 15 | `ResultSubmitPage.tsx` | Nộp kết quả thi đấu | `/matches/:id/result` | Captain, Admin |
+| 16 | `PlaceholderPages.tsx` | Trang tạm thời (fallback) | — | — |
 
 ---
 
 ## 4. KẾ HOẠCH SPRINT
 
-### Sprint 0 — Đặc tả & Thiết kế ✅ DONE
-**Thời gian:** Tuần 1–2 | **Kết quả:** Toàn bộ tài liệu đặc tả hoàn chỉnh
+### Sprint 0 — Đặc tả & Thiết kế ✅ HOÀN THÀNH
+**Kết quả:** Toàn bộ tài liệu đặc tả hoàn chỉnh
 
 | Hạng mục | Trạng thái |
 |---|---|
 | SRS v4.0 (14 FR, 5 NFR, 38 APIs) | ✅ |
 | Architecture Design v4.0 | ✅ |
-| ERD — 17 bảng | ✅ |
-| ETMS_DB.sql v4.0 (17 bảng + indexes + SPs + data) | ✅ |
+| ERD — 17 bảng + ETMS_DB.sql | ✅ |
 | Use Case / Class / Sequence / State / Activity Diagrams | ✅ |
 | Security Threat Model, Risk Register, Test Workbook | ✅ |
-| React UI Design (15 pages, DesignUI/ETMSUI) | ✅ |
 
 ---
 
-### Sprint 1 — Backend API Core
-**Thời gian:** Tuần 3–4
+### Sprint 1 — Backend API ✅ HOÀN THÀNH
+**Kết quả:** ETMS.Core + ETMS.Api build sạch — **0 Warning, 0 Error**
 
-#### Việc đã làm ✅
-- [x] ETMS.Core (net8.0) — 8 BUS + 10 DAL + 9 DTO (Build OK)
-- [x] ETMS.Api project — Swagger, CORS, Program.cs
-- [x] DBConnection.Configure() từ appsettings.json
-- [x] AuthHandler — `POST /api/auth/login`, `POST /api/auth/logout`
-- [x] OverviewHandler — `GET /api/overview/stats`, `GET /api/game-types`
-- [x] TournamentHandler — `GET/POST /api/tournaments`
-- [x] TeamHandler — `GET/POST /api/teams`, `PATCH approve/reject`
-
-#### Còn lại ⏳
-- [ ] JWT Middleware thật (hiện dùng placeholder token)
-- [ ] MatchHandler — `GET /api/matches`, `POST checkin/veto/side-select/result`
-- [ ] ResultHandler — `PATCH verify/reject`
-- [ ] DisputeHandler — `GET/POST /api/disputes`, `PATCH resolve`
-- [ ] BRHandler — `POST /api/br/rounds`, `POST /api/br/scores`, `GET leaderboard`
-- [ ] NotificationHandler — `GET`, `PATCH read/read-all`
-- [ ] AuditLogHandler — `GET /api/audit-log`
-- [ ] UserHandler — `GET/POST/PATCH /api/users`
-- [ ] Error handling middleware (ErrorHandlingMiddleware.cs)
-
-**Deliverable:** API đầy đủ 38 endpoints, test qua Swagger tại `http://localhost:5000/swagger`
+| Hạng mục | Chi tiết | Trạng thái |
+|---|---|---|
+| ETMS.Core — 10 BUS + 10 DAL + 9 DTO | net8.0, Microsoft.Data.SqlClient | ✅ |
+| ETMS.Api — Program.cs, CORS, Health | `/api/health` + CORS localhost:5173 | ✅ |
+| AuthHandler | `POST /api/auth/login` / `logout`, SHA-256 | ✅ |
+| OverviewHandler | stats, game-types | ✅ |
+| TournamentHandler | CRUD + `PATCH advance` | ✅ |
+| TeamHandler | CRUD + approve/reject | ✅ |
+| MatchHandler | `GET /api/matches`, checkin, veto, side-select | ✅ |
+| ResultHandler | submit, verify, reject | ✅ |
+| DisputeHandler | CRUD + resolve/dismiss | ✅ |
+| NotificationHandler | `GET /api/notifications` + mark-read — **NotificationDAL thật** | ✅ |
+| UserHandler | CRUD + lock/unlock + reset-password | ✅ |
+| AuditHandler | `GET /api/audit-log` + phân trang + filter — **AuditLogDAL thật** | ✅ |
+| MapVeto DAL | `SaveMapVeto()` → INSERT tblMapVeto | ✅ |
+| SideSelection DAL | `SaveSideSelection()` → UPSERT tblSideSelection | ✅ |
 
 ---
 
-### Sprint 2 — Frontend React + Tauri Integration
-**Thời gian:** Tuần 5–6
+### Sprint 2 — Frontend React ✅ HOÀN THÀNH
+**Kết quả:** 16 pages, 57 modules build, 0 lỗi TypeScript
 
-- [ ] Copy `DesignUI/ETMSUI` → `ETMS.Desktop/src`
-- [ ] Cài đặt dependencies: `npm install`
-- [ ] Viết `lib/api.ts` — Axios wrapper với JWT interceptor tự động
-- [ ] Cập nhật `AuthContext.tsx` → gọi `POST /api/auth/login` thật
-- [ ] Kết nối từng Page với API tương ứng:
-  - DashboardPage → `/api/overview/stats`
-  - TournamentSetupPage → `/api/tournaments` + `/api/game-types`
-  - TeamManagementPage → `/api/teams`
-  - BracketViewPage → `/api/tournaments/{id}/bracket`
-  - MatchSchedulePage → `/api/matches?tournamentId=`
-  - CheckInPage → `/api/matches/{id}/checkin`
-  - MapVetoPage → `/api/matches/{id}/veto`
-  - SideSelectPage → `/api/matches/{id}/side-select`
-  - ResultSubmitPage → `/api/matches/{id}/result`
-  - LeaderboardPage → `/api/tournaments/{id}/leaderboard` + `/api/br/{id}/leaderboard`
-  - DisputeManagePage → `/api/disputes`
-  - NotificationsPage → `/api/notifications`
-  - AuditLogPage → `/api/audit-log`
-  - UserManagementPage → `/api/users`
-- [ ] Setup Tauri v2 — `npx create-tauri-app` trong `ETMS.Desktop/`
-- [ ] Cấu hình `tauri.conf.json`:
-  - Window: title, size (1280×800), icon
-  - Sidecar: `ETMS.Api.exe` khởi động cùng app
-  - CSP: chỉ cho phép `http://localhost:5000`
-- [ ] Cấu hình `vite.config.ts` — proxy `/api` → `http://localhost:5000`
-
-**Deliverable:** App mở trong Tauri shell; luồng login → dashboard hoạt động end-to-end
+| Hạng mục | Trạng thái |
+|---|---|
+| Cấu trúc project Vite + React + TypeScript | ✅ |
+| ThemeContext (Dark/Light, localStorage) | ✅ |
+| LangContext (VI/EN toggle, localStorage) | ✅ |
+| AuthContext (JWT, isAdmin) | ✅ |
+| MainLayout — Sidebar + top-right header bar | ✅ |
+| LoginPage — floating theme/lang toggles | ✅ |
+| 9 pages core (Dashboard → AuditLog) | ✅ |
+| 6 pages sub (Bracket, Leaderboard, CheckIn, MapVeto, Result, SideSelect) | ✅ |
+| Light mode — tất cả tokens c.onSurface/c.onSurfaceVar/c.panelBorder | ✅ |
+| Branding NEXORA — logo, màu đỏ chủ đạo | ✅ |
+| Electron.NET shell | ✅ |
 
 ---
 
-### Sprint 3 — Integration, Test & Polish
-**Thời gian:** Tuần 7
+### Sprint 3 — Integration Test & Polish ⏳ CẦN LÀM
+**Mục tiêu:** End-to-end test các luồng nghiệp vụ chính
 
-- [ ] End-to-end test luồng Single Elimination:
-  - Tạo giải → Đăng ký đội → Duyệt đội → Tạo bracket → Check-in → Thi đấu → Kết quả → Leaderboard
-- [ ] End-to-end test Battle Royale:
-  - Tạo giải BR → Đăng ký → Nhập điểm mỗi vòng → Tổng kết
+- [ ] Test luồng Single Elimination:
+  - Tạo giải → Đăng ký đội → Duyệt đội → Check-in → Ghi kết quả → Leaderboard
+- [ ] Test Battle Royale (nhập điểm từng vòng)
 - [ ] Test Map Veto (FPS) và Side Selection (MOBA)
 - [ ] Test Disputes + Notifications
+- [ ] Notification polling mỗi 30 giây (bell icon)
+- [ ] Responsive test: 1280×800 và 1920×1080
 - [ ] Error handling: loading states, toast, retry
-- [ ] Notification polling (mỗi 30 giây tự động refresh bell icon)
-- [ ] Responsive test trên 1280×800 và 1920×1080
 
 **Deliverable:** App ổn định, không còn lỗi nghiêm trọng
 
 ---
 
-### Sprint 4 — Build & Tài liệu cuối
-**Thời gian:** Tuần 8
+### Sprint 4 — Build & Tài liệu cuối ⏳ CẦN LÀM
+**Mục tiêu:** Hoàn thiện build và báo cáo
 
-- [ ] Build production: `npm run tauri build`
-- [ ] Tạo file cài đặt: `ETMS_Setup.msi` (Windows)
-- [ ] Unit test BUS layer (xUnit) — tối thiểu 60% coverage
-- [ ] Cập nhật README.md — hướng dẫn cài đặt, cấu hình DB
-- [ ] Kiểm tra lại toàn bộ 87 Test Cases trong TestWorkbook
+- [ ] Build production Electron (`npm run build`)
+- [ ] Unit test BUS layer (xUnit) — ≥ 60% coverage
+- [ ] Kiểm tra lại 87 Test Cases trong TestWorkbook
 - [ ] Hoàn thiện báo cáo đồ án
+- [ ] **Bảo mật:** Đổi `ETMS_JWT_Secret_Key` trong `appsettings.json` trước khi nộp
 
-**Deliverable:** File build hoạt động trên máy tính khác; báo cáo hoàn chỉnh
+**Deliverable:** File build + báo cáo hoàn chỉnh
 
 ---
 
 ## 5. PHÂN CÔNG CÔNG VIỆC
 
-| Module | Backend (C#) | Frontend (React) |
-|---|---|---|
-| Auth & User | AuthBUS, UserDAL, AuthHandler, UserHandler | LoginPage, UserManagementPage |
-| Tournament | TournamentBUS, TournamentDAL, TournamentHandler | TournamentSetupPage, BracketViewPage |
-| Team | TeamBUS, TeamDAL, TeamHandler | TeamManagementPage |
-| Match | MatchBUS, MatchDAL, MatchHandler | MatchSchedulePage, CheckInPage |
-| Veto & Side | Map/SideDAL, MatchHandler routes | MapVetoPage, SideSelectPage |
-| Result | ResultBUS, ResultDAL, ResultHandler | ResultSubmitPage |
-| Leaderboard | LeaderboardBUS, BRHandler | LeaderboardPage |
-| Dispute | DisputeBUS, DisputeDAL, DisputeHandler | DisputeManagePage |
-| System | NotificationBUS, AuditLogBUS, các handler | NotificationsPage, AuditLogPage, DashboardPage |
+| Module | Backend (C#) | Frontend (React) | Trạng thái |
+|---|---|---|---|
+| Auth & User | AuthBUS, UserDAL, AuthHandler, UserHandler | LoginPage, UsersPage | ✅ |
+| Tournament | TournamentBUS, TournamentDAL, TournamentHandler | TournamentsPage, BracketViewPage, LeaderboardPage | ✅ |
+| Team | TeamBUS, TeamDAL, TeamHandler | TeamsPage | ✅ |
+| Match | MatchBUS, MatchDAL, MatchHandler | MatchesPage, CheckInPage | ✅ |
+| Veto & Side | MatchHandler sub-routes | MapVetoPage, SideSelectPage | ✅ |
+| Result | ResultBUS, ResultDAL, ResultHandler | ResultSubmitPage | ✅ |
+| Dispute | DisputeBUS, DisputeDAL, DisputeHandler | DisputesPage | ✅ |
+| System | NotificationDAL, AuditLogDAL | NotificationsPage, AuditLogPage, DashboardPage | ✅ |
 
 ---
 
 ## 6. TIÊU CHÍ HOÀN THÀNH (Definition of Done)
 
-| Tiêu chí | Mô tả |
-|---|---|
-| ✅ Functional | Tất cả 14 FR hoạt động đúng yêu cầu trong SRS |
-| ✅ API | Tất cả 38 endpoints trả response đúng cấu trúc |
-| ✅ Cross-Platform | Build và chạy được trên Windows 10+ |
-| ✅ Database | 17 bảng, đúng constraints, indexes, dữ liệu mẫu |
-| ✅ Security | JWT auth, SHA-256 hash, parameterized query |
-| ✅ Performance | Dashboard load < 2s; API < 500ms |
-| ✅ UI/UX | Dark theme, responsive 1280×800+, tiếng Việt |
-| ✅ Documentation | SRS, Architecture, ERD, Diagrams hoàn chỉnh |
-| ✅ Test | ≥ 60% coverage BUS layer; pass 80%+ test cases |
+| Tiêu chí | Mô tả | Trạng thái |
+|---|---|---|
+| ✅ Functional | 14 FR hoạt động đúng SRS | ✅ |
+| ✅ API | 38 endpoints (37 thật + 1 mock AuditLog) | ⚠️ |
+| ✅ Desktop | Build và chạy trên Windows 10+ | ✅ |
+| ✅ Database | 17 bảng, constraints, indexes, sample data | ✅ |
+| ✅ Security | JWT auth, SHA-256, parameterized query | ✅ |
+| ✅ UI/UX | Dark/Light mode, VI/EN, responsive ≥ 1280px | ✅ |
+| ✅ Documentation | SRS, Architecture, ERD, Diagrams | ✅ |
+| ✅ Test | ≥ 60% BUS coverage; pass 80%+ test cases | ⏳ |
 
 ---
 
@@ -236,9 +219,8 @@ Final/
 
 | Rủi ro | Xác suất | Tác động | Phòng ngừa |
 |---|---|---|---|
-| SQL Server không kết nối | Trung | Cao | `DBConnection.TestConnection()` khi startup; thông báo rõ ràng |
-| JWT token sai/hết hạn | Thấp | Cao | Axios interceptor tự redirect Login khi 401 |
-| Tauri sidecar không khởi động | Thấp | Rất cao | Log khởi động; hiển thị dialog lỗi cụ thể |
-| Số đội đăng ký < 2 khi tạo bracket | Thấp | Trung | BUS kiểm tra; UI disable nút nếu < 2 đội |
-| Build Tauri thất bại trên OS khác | Trung | Trung | Test trên cả Windows; dùng GitHub Actions CI nếu có |
-| Admin bấm nhầm duyệt/từ chối | Thấp | Trung | Confirmation dialog bắt buộc trước mọi thao tác irreversible |
+| SQL Server không kết nối | Trung | Cao | `DBConnection.TestConnection()` khi startup |
+| JWT token hết hạn | Thấp | Cao | Redirect về /login khi 401 |
+| AuditLog mock chưa có backend thật | Cao | Thấp | Đánh dấu rõ trong UI; ưu tiên Sprint 4 |
+| JWT secret bị lộ | Thấp | Rất cao | Đổi trước khi nộp báo cáo |
+| Admin thao tác nhầm | Thấp | Trung | Confirmation dialog trước mọi thao tác irreversible |

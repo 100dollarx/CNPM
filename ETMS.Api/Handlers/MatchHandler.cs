@@ -32,10 +32,28 @@ public static class MatchHandler
     }
 
     public static IResult SubmitVeto(int id, VetoRequest req)
-        => Results.Ok(new { matchId = id, note = "Veto sẽ hoàn thiện Sprint 2." });
+    {
+        if (string.IsNullOrWhiteSpace(req.Map) || string.IsNullOrWhiteSpace(req.Action))
+            return Results.BadRequest(new { error = "Map và Action không được trống." });
+        if (!new[] { "ban", "pick" }.Contains(req.Action.ToLower()))
+            return Results.BadRequest(new { error = "Action phải là 'ban' hoặc 'pick'." });
+
+        var dal = new ETMS.DAL.MatchDAL();
+        dal.SaveMapVeto(id, req.TeamID, req.Map, req.Action.ToLower());
+        return Results.Ok(new { matchId = id, teamId = req.TeamID, map = req.Map, action = req.Action, status = "recorded" });
+    }
 
     public static IResult SelectSide(int id, SideRequest req)
-        => Results.Ok(new { matchId = id, note = "Side select sẽ hoàn thiện Sprint 2." });
+    {
+        if (string.IsNullOrWhiteSpace(req.Side))
+            return Results.BadRequest(new { error = "Side không được trống." });
+        if (!new[] { "blue", "red" }.Contains(req.Side.ToLower()))
+            return Results.BadRequest(new { error = "Side phải là 'blue' hoặc 'red'." });
+
+        var dal = new ETMS.DAL.MatchDAL();
+        dal.SaveSideSelection(id, req.TeamID, req.Side.ToLower());
+        return Results.Ok(new { matchId = id, teamId = req.TeamID, side = req.Side, status = "recorded" });
+    }
 }
 
 public record CheckInRequest(int TeamSlot);

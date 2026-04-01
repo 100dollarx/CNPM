@@ -43,8 +43,23 @@ public static class UserHandler
 
 public static class AuditHandler
 {
-    public static IResult GetLog(int page = 1, int pageSize = 50)
-        => Results.Ok(new { data = Array.Empty<object>(), page, pageSize, message = "Audit log sẽ hoàn thiện Sprint 2." });
+    public static IResult GetLog(int page = 1, int pageSize = 50, string? action = null, int? userId = null)
+    {
+        if (page < 1) page = 1;
+        if (pageSize is < 1 or > 200) pageSize = 50;
+
+        var dal = new ETMS.DAL.AuditLogDAL();
+        var (records, total) = dal.GetLog(page, pageSize, action, userId);
+
+        return Results.Ok(new
+        {
+            data     = records,
+            total,
+            page,
+            pageSize,
+            pages    = (int)Math.Ceiling((double)total / pageSize)
+        });
+    }
 }
 
 public record CreateUserRequest(string Username, string FullName, string Role, string? Email);

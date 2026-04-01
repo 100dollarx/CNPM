@@ -169,6 +169,46 @@ namespace ETMS.DAL
             catch { trans.Rollback(); return false; }
         }
 
+        /// <summary>
+        /// Lưu kết quả veto bản đồ vào tblMapVeto.
+        /// Action: "ban" | "pick"
+        /// </summary>
+        public void SaveMapVeto(int matchID, int teamID, string map, string action)
+        {
+            using var conn = DBConnection.GetConnection();
+            conn.Open();
+            const string sql = @"
+                INSERT INTO tblMapVeto (MatchID, TeamID, MapName, Action, VetoOrder)
+                SELECT @mid, @tid, @map, @action,
+                       ISNULL((SELECT MAX(VetoOrder) FROM tblMapVeto WHERE MatchID=@mid), 0) + 1";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@mid",    matchID);
+            cmd.Parameters.AddWithValue("@tid",    teamID);
+            cmd.Parameters.AddWithValue("@map",    map);
+            cmd.Parameters.AddWithValue("@action", action);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Lưu lựa chọn phe (Blue/Red) vào tblSideSelection.
+        /// </summary>
+        public void SaveSideSelection(int matchID, int teamID, string side)
+        {
+            using var conn = DBConnection.GetConnection();
+            conn.Open();
+            // Upsert: nếu đã có thì cập nhật
+            const string sql = @"
+                IF EXISTS (SELECT 1 FROM tblSideSelection WHERE MatchID=@mid AND TeamID=@tid)
+                    UPDATE tblSideSelection SET Side=@side WHERE MatchID=@mid AND TeamID=@tid
+                ELSE
+                    INSERT INTO tblSideSelection (MatchID, TeamID, Side) VALUES (@mid, @tid, @side)";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@mid",  matchID);
+            cmd.Parameters.AddWithValue("@tid",  teamID);
+            cmd.Parameters.AddWithValue("@side", side);
+            cmd.ExecuteNonQuery();
+        }
+
         private static MatchDTO MapMatch(SqlDataReader dr) => new MatchDTO
         {
             MatchID         = dr.GetInt32(0),
