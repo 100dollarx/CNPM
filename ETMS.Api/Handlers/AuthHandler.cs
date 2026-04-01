@@ -1,5 +1,6 @@
 using ETMS.BUS;
 using ETMS.DTO;
+using ETMS.DAL;
 
 namespace ETMS.Api.Handlers;
 
@@ -14,25 +15,15 @@ public static class AuthHandler
         var (success, message) = bus.Login(req.Username, req.Password);
 
         if (!success)
-        {
-            // Tài khoản bị khóa hay sai mật khẩu đều trả 401 (không tiết lộ field nào sai - NFR-1)
             return Results.Json(new { error = message }, statusCode: 401);
-        }
 
         var user = Session.CurrentUser!;
-        // TODO: Thay bằng JWT thật khi tích hợp Microsoft.AspNetCore.Authentication.JwtBearer
         var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
 
         return Results.Ok(new
         {
             token,
-            user = new
-            {
-                user.UserID,
-                user.Username,
-                user.FullName,
-                user.Role
-            }
+            user = new { user.UserID, user.Username, user.FullName, user.Role }
         });
     }
 

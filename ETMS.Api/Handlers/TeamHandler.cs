@@ -1,4 +1,5 @@
 using ETMS.BUS;
+using ETMS.DTO;
 
 namespace ETMS.Api.Handlers;
 
@@ -9,8 +10,15 @@ public static class TeamHandler
         var bus  = new TeamBUS();
         var list = tournamentId.HasValue
             ? bus.GetByTournament(tournamentId.Value)
-            : new List<ETMS.DTO.TeamDTO>();  // GetAll không có trong BUS, lọc qua tournament
-        return Results.Ok(list);
+            : bus.GetByTournament(0); // 0 = tất cả tournaments, fallback
+        return Results.Ok(new { data = list, total = list.Count });
+    }
+
+    public static IResult GetByID(int id)
+    {
+        var bus = new TeamBUS();
+        var dto = bus.GetByID(id);
+        return dto == null ? Results.NotFound(new { error = "Đội không tồn tại." }) : Results.Ok(dto);
     }
 
     public static IResult Create(CreateTeamRequest req)
@@ -21,7 +29,7 @@ public static class TeamHandler
         var bus = new TeamBUS();
         var (teamID, error) = bus.CreateTeam(req.TournamentID, req.Name, req.CaptainID);
         return teamID > 0
-            ? Results.Ok(new { teamID, message = "Đăng ký đội thành công. Chờ Admin xét duyệt." })
+            ? Results.Created($"/api/teams/{teamID}", new { teamID, message = "Đăng ký đội thành công. Chờ Admin xét duyệt." })
             : Results.BadRequest(new { error });
     }
 
@@ -29,16 +37,15 @@ public static class TeamHandler
     {
         var bus = new TeamBUS();
         var (ok, error) = bus.ApproveTeam(id, req.TournamentID, req.MinPlayers);
-        return ok
-            ? Results.Ok(new { message = "Đội đã được duyệt." })
-            : Results.BadRequest(new { error });
+        return ok ? Results.Ok(new { teamId = id, status = "approved" })
+                  : Results.BadRequest(new { error });
     }
 
     public static IResult Reject(int id, RejectTeamRequest req)
     {
         var bus = new TeamBUS();
         bus.RejectTeam(id, req.Reason ?? "Không đáp ứng yêu cầu.");
-        return Results.Ok(new { message = "Đã từ chối đội." });
+        return Results.Ok(new { teamId = id, status = "rejected" });
     }
 }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ETMS.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fd16dd233abff616b907cc9e8c681589912b1fcf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e19bcccf9520c9b966c63e159ead33e695c823d")]
 [assembly: System.Reflection.AssemblyProductAttribute("ETMS.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ETMS.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

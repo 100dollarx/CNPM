@@ -1,0 +1,27 @@
+# Windows / VS artifacts
+bin/
+obj/
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# Rust / Tauri
+src-tauri/target/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vs/
+*.user
+*.suo
+.vscode/settings.json
+
+# Env / secrets
+.env
+.env.local
+appsettings.Development.json
