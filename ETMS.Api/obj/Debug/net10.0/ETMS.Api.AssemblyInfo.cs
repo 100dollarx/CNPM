@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ETMS.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e19bcccf9520c9b966c63e159ead33e695c823d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d6ff9bf8181f1d2ec2b21262f35a4d0c93f91f87")]
 [assembly: System.Reflection.AssemblyProductAttribute("ETMS.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ETMS.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
