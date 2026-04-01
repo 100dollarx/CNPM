@@ -9,6 +9,8 @@ dist/
 
 # Rust / Tauri
 src-tauri/target/
+ETMS.Desktop/src-tauri/target/
+C:/cargo-target/
 
 # OS
 .DS_Store
@@ -17,6 +19,14 @@ desktop.ini
 
 # IDE
 .vs/
+*.user
+*.suo
+.vscode/settings.json
+
+# Env / secrets
+.env
+.env.local
+appsettings.Development.json
 *.user
 *.suo
 .vscode/settings.json
