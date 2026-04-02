@@ -4,31 +4,23 @@ using ETMS.DTO;
 namespace ETMS.BUS
 {
     /// <summary>
-    /// DisputeBUS — FR-8: Hệ thống Khiếu nại.
-    /// Xử lý logic nghiệp vụ: validation, quyền hạn, gọi DisputeDAL.
+    /// DisputeBUS — FR-8: He thong Khieu nai.
     /// </summary>
     public class DisputeBUS
     {
         private readonly DisputeDAL _dal = new();
 
-        /// <summary>Captain gửi khiếu nại cho một trận đấu.</summary>
+        /// <summary>Captain gui khieu nai.</summary>
         public (bool success, string message) FileDispute(int matchID, int teamID,
             string description, string? evidenceURL)
         {
             if (string.IsNullOrWhiteSpace(description))
-                return (false, "Lý do khiếu nại không được để trống.");
+                return (false, "Ly do khieu nai khong duoc de trong.");
 
             if (description.Length > 1000)
-                return (false, "Nội dung khiếu nại không được quá 1000 ký tự.");
+                return (false, "Noi dung khieu nai khong duoc qua 1000 ky tu.");
 
-            // Validate evidence file nếu có
-            if (!string.IsNullOrEmpty(evidenceURL))
-            {
-                var ext = System.IO.Path.GetExtension(evidenceURL).ToLower();
-                if (ext != ".jpg" && ext != ".png" && ext != ".mp4")
-                    return (false, "Bằng chứng chỉ chấp nhận định dạng .jpg, .png hoặc .mp4.");
-            }
-
+            // Allow URLs (not just file extensions) for web-based evidence
             var dto = new DisputeDTO
             {
                 MatchID       = matchID,
@@ -39,36 +31,37 @@ namespace ETMS.BUS
 
             int id = _dal.Insert(dto);
             return id > 0
-                ? (true, $"Tiếp nhận thành công đơn khiếu nại #{id}. Admin sẽ xem xét và phản hồi.")
-                : (false, "Lỗi hệ thống khi lưu khiếu nại.");
+                ? (true, $"Tiep nhan thanh cong don khieu nai #{id}.")
+                : (false, "Loi he thong khi luu khieu nai.");
         }
 
-        /// <summary>Lấy tất cả khiếu nại theo giải đấu.</summary>
+        /// <summary>Lay tat ca khieu nai theo giai dau.</summary>
         public List<DisputeDTO> GetByTournament(int tournamentID) =>
             _dal.GetByTournament(tournamentID);
 
-        /// <summary>Admin giải quyết khiếu nại — chấp nhận.</summary>
+        /// <summary>Lay tat ca khieu nai (khong filter).</summary>
+        public List<DisputeDTO> GetAll() =>
+            _dal.GetAll();
+
+        /// <summary>Admin giai quyet khieu nai — chap nhan.</summary>
         public (bool ok, string message) ResolveDispute(int disputeID, string adminNote)
         {
-            if (!Session.IsAdmin)
-                return (false, "Chỉ Admin mới có quyền giải quyết khiếu nại.");
             if (string.IsNullOrWhiteSpace(adminNote))
-                return (false, "Vui lòng nhập ghi chú phán quyết.");
+                return (false, "Vui long nhap ghi chu phan quyet.");
 
             _dal.Resolve(disputeID, adminNote.Trim());
-            return (true, "Đã giải quyết khiếu nại thành công.");
+            return (true, "Da giai quyet khieu nai thanh cong.");
         }
 
-        /// <summary>Admin bác bỏ khiếu nại.</summary>
+        /// <summary>Admin bac bo khieu nai.</summary>
         public (bool ok, string message) DismissDispute(int disputeID, string adminNote)
         {
-            if (!Session.IsAdmin)
-                return (false, "Chỉ Admin mới có quyền bác bỏ khiếu nại.");
             if (string.IsNullOrWhiteSpace(adminNote))
-                return (false, "Vui lòng nhập lý do bác bỏ.");
+                return (false, "Vui long nhap ly do bac bo.");
 
             _dal.Dismiss(disputeID, adminNote.Trim());
-            return (true, "Đã bác bỏ khiếu nại.");
+            return (true, "Da bac bo khieu nai.");
         }
     }
 }
+

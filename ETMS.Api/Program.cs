@@ -17,7 +17,6 @@ builder.Services.AddCors(opt =>
 var app = builder.Build();
 
 app.UseCors();
-app.UseStaticFiles();
 
 // ── Health ────────────────────────────────────────────────────────────────────
 app.MapGet("/api/health", () => new
@@ -78,8 +77,26 @@ app.MapGet("/api/game-types",        ETMS.Api.Handlers.OverviewHandler.GetGameTy
 app.MapGet("/api/tournaments",              ETMS.Api.Handlers.TournamentHandler.GetAll);
 app.MapGet("/api/tournaments/{id:int}",     ETMS.Api.Handlers.TournamentHandler.GetByID);
 app.MapPost("/api/tournaments",             ETMS.Api.Handlers.TournamentHandler.Create);
-app.MapPut("/api/tournaments/{id:int}",     ETMS.Api.Handlers.TournamentHandler.Update);
+app.MapPatch("/api/tournaments/{id:int}",     ETMS.Api.Handlers.TournamentHandler.Update);
+app.MapPut("/api/tournaments/{id:int}",       ETMS.Api.Handlers.TournamentHandler.Update);
 app.MapPatch("/api/tournaments/{id:int}/advance", ETMS.Api.Handlers.TournamentHandler.AdvanceStatus);
+app.MapPost("/api/tournaments/{id:int}/generate-bracket", ETMS.Api.Handlers.TournamentHandler.GenerateBracket);
+app.MapGet("/api/tournaments/{id:int}/bracket", (int id) => {
+    var list = new ETMS.BUS.BracketBUS().GetBracket(id);
+    return Results.Ok(new { data = list, total = list.Count });
+});
+app.MapGet("/api/tournaments/{id:int}/leaderboard", (int id) => {
+    var dt = new ETMS.BUS.LeaderboardBUS().GetRanking(id);
+    var list = new List<object>();
+    foreach (System.Data.DataRow row in dt.Rows)
+    {
+        var obj = new Dictionary<string, object?>();
+        foreach (System.Data.DataColumn col in dt.Columns)
+            obj[col.ColumnName] = row[col] == DBNull.Value ? null : row[col];
+        list.Add(obj);
+    }
+    return Results.Ok(new { data = list, total = list.Count });
+});
 app.MapDelete("/api/tournaments/{id:int}",  ETMS.Api.Handlers.TournamentHandler.Delete);
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
@@ -88,6 +105,7 @@ app.MapGet("/api/teams/{id:int}",               ETMS.Api.Handlers.TeamHandler.Ge
 app.MapPost("/api/teams",                       ETMS.Api.Handlers.TeamHandler.Create);
 app.MapPatch("/api/teams/{id:int}/approve",     ETMS.Api.Handlers.TeamHandler.Approve);
 app.MapPatch("/api/teams/{id:int}/reject",      ETMS.Api.Handlers.TeamHandler.Reject);
+app.MapPatch("/api/teams/{id:int}/disqualify",  ETMS.Api.Handlers.TeamHandler.Disqualify);
 
 // ── Matches ───────────────────────────────────────────────────────────────────
 app.MapGet("/api/matches",                                  ETMS.Api.Handlers.MatchHandler.GetAll);
@@ -103,6 +121,7 @@ app.MapPatch("/api/results/{id:int}/reject",                ETMS.Api.Handlers.Re
 
 // ── Disputes ──────────────────────────────────────────────────────────────────
 app.MapGet("/api/disputes",                                 ETMS.Api.Handlers.DisputeHandler.GetAll);
+app.MapPost("/api/disputes",                                ETMS.Api.Handlers.DisputeHandler.CreateDirect);
 app.MapPost("/api/matches/{id:int}/dispute",                ETMS.Api.Handlers.DisputeHandler.Create);
 app.MapPatch("/api/disputes/{id:int}/resolve",              ETMS.Api.Handlers.DisputeHandler.Resolve);
 app.MapPatch("/api/disputes/{id:int}/dismiss",              ETMS.Api.Handlers.DisputeHandler.Dismiss);

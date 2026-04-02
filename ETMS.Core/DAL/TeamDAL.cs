@@ -10,20 +10,31 @@ namespace ETMS.DAL
             var list = new List<TeamDTO>();
             using var conn = DBConnection.GetConnection();
             conn.Open();
-            const string sql = @"
-                SELECT t.TeamID, t.TournamentID, t.Name, t.LogoURL,
-                       t.CaptainID, u.FullName AS CaptainName,
-                       t.Status, t.RejectionReason, t.CreatedAt,
-                       COUNT(p.PlayerID) AS PlayerCount
-                FROM tblTeam t
-                LEFT JOIN tblUser u   ON u.UserID = t.CaptainID
-                LEFT JOIN tblPlayer p ON p.TeamID = t.TeamID AND p.IsActive = 1
-                WHERE t.TournamentID = @tid
-                GROUP BY t.TeamID, t.TournamentID, t.Name, t.LogoURL,
-                         t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.CreatedAt
-                ORDER BY t.CreatedAt";
+            // Fix: tblTeam uses Logo (not LogoURL), SubmittedAt (not CreatedAt)
+            string sql = tournamentID == 0
+                ? @"SELECT t.TeamID, t.TournamentID, t.Name, t.Logo,
+                           t.CaptainID, u.FullName AS CaptainName,
+                           t.Status, t.RejectionReason, t.SubmittedAt,
+                           COUNT(p.PlayerID) AS PlayerCount
+                    FROM tblTeam t
+                    LEFT JOIN tblUser u   ON u.UserID = t.CaptainID
+                    LEFT JOIN tblPlayer p ON p.TeamID = t.TeamID AND p.IsActive = 1
+                    GROUP BY t.TeamID, t.TournamentID, t.Name, t.Logo,
+                             t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.SubmittedAt
+                    ORDER BY t.SubmittedAt DESC"
+                : @"SELECT t.TeamID, t.TournamentID, t.Name, t.Logo,
+                           t.CaptainID, u.FullName AS CaptainName,
+                           t.Status, t.RejectionReason, t.SubmittedAt,
+                           COUNT(p.PlayerID) AS PlayerCount
+                    FROM tblTeam t
+                    LEFT JOIN tblUser u   ON u.UserID = t.CaptainID
+                    LEFT JOIN tblPlayer p ON p.TeamID = t.TeamID AND p.IsActive = 1
+                    WHERE t.TournamentID = @tid
+                    GROUP BY t.TeamID, t.TournamentID, t.Name, t.Logo,
+                             t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.SubmittedAt
+                    ORDER BY t.SubmittedAt DESC";
             using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@tid", tournamentID);
+            if (tournamentID != 0) cmd.Parameters.AddWithValue("@tid", tournamentID);
             using var dr = cmd.ExecuteReader();
             while (dr.Read())
                 list.Add(MapTeam(dr));
@@ -36,16 +47,16 @@ namespace ETMS.DAL
             using var conn = DBConnection.GetConnection();
             conn.Open();
             const string sql = @"
-                SELECT t.TeamID, t.TournamentID, t.Name, t.LogoURL,
+                SELECT t.TeamID, t.TournamentID, t.Name, t.Logo,
                        t.CaptainID, u.FullName AS CaptainName,
-                       t.Status, t.RejectionReason, t.CreatedAt,
+                       t.Status, t.RejectionReason, t.SubmittedAt,
                        COUNT(p.PlayerID) AS PlayerCount
                 FROM tblTeam t
                 LEFT JOIN tblUser u   ON u.UserID = t.CaptainID
                 LEFT JOIN tblPlayer p ON p.TeamID = t.TeamID AND p.IsActive = 1
                 WHERE t.TournamentID = @tid AND t.Status = 'Approved'
-                GROUP BY t.TeamID, t.TournamentID, t.Name, t.LogoURL,
-                         t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.CreatedAt
+                GROUP BY t.TeamID, t.TournamentID, t.Name, t.Logo,
+                         t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.SubmittedAt
                 ORDER BY t.TeamID";
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@tid", tournamentID);
@@ -60,16 +71,16 @@ namespace ETMS.DAL
             using var conn = DBConnection.GetConnection();
             conn.Open();
             const string sql = @"
-                SELECT t.TeamID, t.TournamentID, t.Name, t.LogoURL,
+                SELECT t.TeamID, t.TournamentID, t.Name, t.Logo,
                        t.CaptainID, u.FullName AS CaptainName,
-                       t.Status, t.RejectionReason, t.CreatedAt,
+                       t.Status, t.RejectionReason, t.SubmittedAt,
                        COUNT(p.PlayerID) AS PlayerCount
                 FROM tblTeam t
                 LEFT JOIN tblUser u   ON u.UserID = t.CaptainID
                 LEFT JOIN tblPlayer p ON p.TeamID = t.TeamID AND p.IsActive = 1
                 WHERE t.TeamID = @id
-                GROUP BY t.TeamID, t.TournamentID, t.Name, t.LogoURL,
-                         t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.CreatedAt";
+                GROUP BY t.TeamID, t.TournamentID, t.Name, t.Logo,
+                         t.CaptainID, u.FullName, t.Status, t.RejectionReason, t.SubmittedAt";
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", teamID);
             using var dr = cmd.ExecuteReader();
@@ -80,9 +91,10 @@ namespace ETMS.DAL
         {
             using var conn = DBConnection.GetConnection();
             conn.Open();
+            // Fix: tblTeam uses Logo (not LogoURL), no CreatedAt (auto GETDATE)
             const string sql = @"
-                INSERT INTO tblTeam (TournamentID,Name,LogoURL,CaptainID,Status)
-                VALUES (@tid,@name,@logo,@cap,'Pending');
+                INSERT INTO tblTeam (TournamentID, Name, Logo, CaptainID, Status)
+                VALUES (@tid, @name, @logo, @cap, 'Pending');
                 SELECT SCOPE_IDENTITY();";
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@tid",  dto.TournamentID);
@@ -114,9 +126,12 @@ namespace ETMS.DAL
             var list = new List<PlayerDTO>();
             using var conn = DBConnection.GetConnection();
             conn.Open();
+            // Fix: tblPlayer does NOT have FullName column (only UserID, InGameID, IsActive)
             const string sql = @"
-                SELECT PlayerID,TeamID,UserID,FullName,InGameID,IsActive
-                FROM tblPlayer WHERE TeamID=@tid AND IsActive=1";
+                SELECT p.PlayerID, p.TeamID, p.UserID, u.FullName, p.InGameID, p.IsActive
+                FROM tblPlayer p
+                LEFT JOIN tblUser u ON u.UserID = p.UserID
+                WHERE p.TeamID = @tid AND p.IsActive = 1";
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@tid", teamID);
             using var dr = cmd.ExecuteReader();
@@ -126,7 +141,7 @@ namespace ETMS.DAL
                     PlayerID = dr.GetInt32(0),
                     TeamID   = dr.GetInt32(1),
                     UserID   = dr.IsDBNull(2) ? null : dr.GetInt32(2),
-                    FullName = dr.GetString(3),
+                    FullName = dr.IsDBNull(3) ? "" : dr.GetString(3),
                     InGameID = dr.GetString(4),
                     IsActive = dr.GetBoolean(5)
                 });

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { useToast } from '../contexts/ToastContext'
+import { useNavigate } from 'react-router'
 import { getTokens, statusColor, gameTypeColor } from '../theme'
 
 interface Tournament { TournamentID: number; Name: string; GameType: string; Format: string; Status: string; MaxTeams: number; MinPlayersPerTeam: number; StartDate: string }
@@ -16,7 +18,9 @@ const formatLabels: Record<string, string> = { singleelimination: 'Single Elim',
 export default function TournamentsPage() {
   const { token, isAdmin } = useAuth()
   const { dark } = useTheme()
+  const toast = useToast()
   const c = getTokens(dark)
+  const nav = useNavigate()
   const [list, setList] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -24,7 +28,10 @@ export default function TournamentsPage() {
   const [search, setSearch] = useState('')
   const [form, setForm] = useState({ Name: '', GameType: 'FPS', Format: 'SingleElimination', StartDate: '', MaxTeams: 16, MinPlayersPerTeam: 5 })
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [generatingId, setGeneratingId] = useState<number | null>(null)
+  const [editTarget, setEditTarget] = useState<Tournament | null>(null)
+  const [editForm, setEditForm] = useState({ Name: '', StartDate: '' })
+  const [editSubmitting, setEditSubmitting] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -40,17 +47,49 @@ export default function TournamentsPage() {
   })
 
   const handleCreate = async () => {
-    if (!form.Name.trim()) { setError('Vui lòng nhập tên giải đấu.'); return }
-    setSubmitting(true); setError('')
+    if (!form.Name.trim()) { toast.error('Vui lòng nhập tên giải đấu.'); return }
+    setSubmitting(true)
     try {
       const r = await fetch('/api/tournaments', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ ...form, StartDate: form.StartDate || new Date().toISOString() }) })
-      if (r.ok) { setShowModal(false); load() } else { const d = await r.json(); setError(d.error ?? 'Tạo thất bại.') }
-    } catch { setError('Không thể kết nối máy chủ.') } finally { setSubmitting(false) }
+      if (r.ok) { setShowModal(false); load(); toast.success('Đã tạo giải đấu thành công!') } else { const d = await r.json(); toast.error(d.error ?? 'Tạo giải thất bại.') }
+    } catch { toast.error('Không thể kết nối máy chủ.') } finally { setSubmitting(false) }
   }
 
+  const openEdit = (t: Tournament) => {
+    setEditTarget(t)
+    setEditForm({ Name: t.Name, StartDate: t.StartDate ? new Date(t.StartDate).toISOString().split('T')[0] : '' })
+  }
+
+  const handleEdit = async () => {
+    if (!editTarget || !editForm.Name.trim()) return
+    setEditSubmitting(true)
+    try {
+      const r = await fetch(`/api/tournaments/${editTarget.TournamentID}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ Name: editForm.Name, StartDate: editForm.StartDate || undefined })
+      })
+      if (r.ok) { setEditTarget(null); load(); toast.success('Đã cập nhật giải đấu.') }
+      else { const d = await r.json(); toast.error(d.error ?? 'Cập nhật thất bại.') }
+    } catch { toast.error('Không thể kết nối máy chủ.') } finally { setEditSubmitting(false) }
+  }
+
+
   const advanceStatus = async (id: number) => {
-    await fetch(`/api/tournaments/${id}/advance`, { method: 'PATCH', headers: token ? { Authorization: `Bearer ${token}` } : {} })
-    load()
+    const r = await fetch(`/api/tournaments/${id}/advance`, { method: 'PATCH', headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    if (r.ok) { toast.success('Đã chuyển trạng thái giải đấu.'); load() }
+    else { const d = await r.json(); toast.error(d.error ?? 'Không thể chuyển trạng thái.') }
+  }
+
+  const generateBracket = async (id: number) => {
+    if (!window.confirm('Xác nhận tạo bracket cho giải đấu này?')) return
+    setGeneratingId(id)
+    try {
+      const r = await fetch(`/api/tournaments/${id}/generate-bracket`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      const d = await r.json()
+      if (r.ok) { toast.success(d.message ?? 'Tạo bracket thành công!'); load() }
+      else toast.error(d.error ?? 'Không thể tạo bracket.')
+    } catch { toast.error('Không thể kết nối máy chủ.') } finally { setGeneratingId(null) }
   }
 
   const inputStyle: React.CSSProperties = { width: '100%', background: c.inputBg, border: `1px solid ${c.panelBorder}`, borderRadius: 8, padding: '10px 12px', color: c.onSurface, fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', transition: 'all 0.2s' }
@@ -74,7 +113,7 @@ export default function TournamentsPage() {
               style={{ ...inputStyle, width: 220, paddingLeft: 36 }} />
           </div>
           {isAdmin && (
-            <button onClick={() => { setShowModal(true); setError('') }} className="nexora-btn-primary"
+            <button onClick={() => setShowModal(true)} className="nexora-btn-primary"
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10, fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>
               <MS icon="add" /><span>TẠO GIẢI ĐẤU</span>
             </button>
@@ -149,14 +188,54 @@ export default function TournamentsPage() {
                     <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{t.StartDate ? new Date(t.StartDate).toLocaleDateString('vi-VN') : '—'}</td>
                     {isAdmin && (
                       <td style={{ padding: '12px' }}>
-                        {t.Status !== 'Completed' && (
-                          <button onClick={() => advanceStatus(t.TournamentID)}
-                            style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.04em', transition: 'all 0.15s' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)'; e.currentTarget.style.borderColor = 'rgba(124,58,237,0.5)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.1)'; e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)' }}>
-                            Tiến Trạng Thái →
-                          </button>
-                        )}
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {/* Edit button — Draft/Registration only */}
+                          {(t.Status?.toLowerCase() === 'draft' || t.Status?.toLowerCase() === 'registration') && (
+                            <button onClick={() => openEdit(t)}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
+                              ✏ Sửa
+                            </button>
+                          )}
+                          {/* Edit button — Draft/Registration only */}
+                          {(t.Status?.toLowerCase() === 'draft' || t.Status?.toLowerCase() === 'registration') && (
+                            <button onClick={() => openEdit(t)}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
+                              ✏ Sửa
+                            </button>
+                          )}
+                          {/* Advance Status */}
+                          {t.Status !== 'Completed' && t.Status !== 'Cancelled' && (
+                            <button onClick={() => advanceStatus(t.TournamentID)}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.04em', transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.1)' }}>
+                              Tiến →
+                            </button>
+                          )}
+                          {/* Generate Bracket */}
+                          {t.Status?.toLowerCase() === 'registration' && (
+                            <button onClick={() => generateBracket(t.TournamentID)}
+                              disabled={generatingId === t.TournamentID}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap', opacity: generatingId === t.TournamentID ? 0.6 : 1 }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(104,211,145,0.2)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(104,211,145,0.1)' }}>
+                              {generatingId === t.TournamentID ? '⏳ Đang tạo...' : '⚡ Bracket'}
+                            </button>
+                          )}
+                          {/* View Bracket */}
+                          {(t.Status?.toLowerCase() === 'active' || t.Status?.toLowerCase() === 'completed') && (
+                            <button onClick={() => nav(`/tournaments/${t.TournamentID}/bracket`)}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
+                              🏆 Bracket
+                            </button>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -197,7 +276,6 @@ export default function TournamentsPage() {
                 <div><label style={labelStyle}>Thành viên tối thiểu / đội</label><input type="number" min={1} max={10} value={form.MinPlayersPerTeam} onChange={e => setForm(f => ({ ...f, MinPlayersPerTeam: +e.target.value }))} style={inputStyle} className="nexora-input" /></div>
               </div>
               <div><label style={labelStyle}>Ngày bắt đầu</label><input type="date" value={form.StartDate} onChange={e => setForm(f => ({ ...f, StartDate: e.target.value }))} style={{ ...inputStyle, colorScheme: 'dark' }} className="nexora-input" /></div>
-              {error && <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(252,129,129,0.08)', border: '1px solid rgba(252,129,129,0.25)', color: '#FC8181', fontSize: '0.85rem' }}>{error}</div>}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
                 <button onClick={() => setShowModal(false)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}>HỦY</button>
                 <button onClick={handleCreate} disabled={submitting} className="nexora-btn-primary" style={{ padding: '10px 24px', borderRadius: 9, fontSize: '0.9rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.08em' }}>
@@ -208,6 +286,39 @@ export default function TournamentsPage() {
           </div>
         </div>
       )}
+
+      {/* Edit Tournament Modal */}
+      {editTarget && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: c.surfaceCard, border: '1px solid rgba(99,179,237,0.3)', borderRadius: 18, padding: '2rem', width: 460, maxWidth: '95vw', boxShadow: dark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 8px 32px rgba(0,0,0,0.08)', animation: 'slide-in 0.3s ease' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 3, height: 20, borderRadius: 2, background: '#63B3ED' }} />
+                <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '0.08em', color: c.onSurface }}>CHỈNH SỬA GIẢI ĐẤU</h2>
+              </div>
+              <button onClick={() => setEditTarget(null)} style={{ background: 'rgba(99,179,237,0.08)', border: '1px solid rgba(99,179,237,0.2)', borderRadius: 8, cursor: 'pointer', color: '#63B3ED', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={labelStyle}>Tên giải đấu *</label>
+                <input value={editForm.Name} onChange={e => setEditForm(f => ({ ...f, Name: e.target.value }))} style={inputStyle} className="nexora-input" />
+              </div>
+              <div>
+                <label style={labelStyle}>Ngày bắt đầu</label>
+                <input type="date" value={editForm.StartDate} onChange={e => setEditForm(f => ({ ...f, StartDate: e.target.value }))} style={{ ...inputStyle, colorScheme: 'dark' }} className="nexora-input" />
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button onClick={() => setEditTarget(null)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>HỦY</button>
+                <button onClick={handleEdit} disabled={editSubmitting || !editForm.Name.trim()}
+                  style={{ padding: '10px 24px', borderRadius: 9, background: 'rgba(99,179,237,0.15)', border: '1px solid rgba(99,179,237,0.4)', color: '#63B3ED', cursor: editSubmitting ? 'not-allowed' : 'pointer', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.08em', opacity: editSubmitting ? 0.6 : 1 }}>
+                  {editSubmitting ? 'Đang lưu...' : 'LƯU THAY ĐỔI'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

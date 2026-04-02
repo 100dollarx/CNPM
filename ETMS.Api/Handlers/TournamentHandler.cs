@@ -64,6 +64,15 @@ public static class TournamentHandler
         return ok ? Results.Ok(new { id, message = "Đã xoá giải đấu." })
                   : Results.BadRequest(new { error });
     }
+
+    public static IResult GenerateBracket(int id)
+    {
+        var bracketBUS = new BracketBUS();
+        var (ok, message) = bracketBUS.GenerateBracket(id);
+        return ok
+            ? Results.Ok(new { tournamentId = id, message })
+            : Results.BadRequest(new { error = message });
+    }
 }
 
 public record CreateTournamentRequest(

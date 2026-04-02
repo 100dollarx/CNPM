@@ -47,6 +47,24 @@ namespace ETMS.DAL
             return list;
         }
 
+        public List<DisputeDTO> GetAll()
+        {
+            var list = new List<DisputeDTO>();
+            using var conn = DBConnection.GetConnection();
+            conn.Open();
+            const string sql = @"
+                SELECT d.DisputeID, d.MatchID, d.FiledByTeamID, t.Name AS TeamName,
+                       d.Description, d.EvidenceURL, d.Status, d.AdminNote,
+                       d.CreatedAt, d.ResolvedAt
+                FROM tblDispute d
+                INNER JOIN tblTeam t ON t.TeamID = d.FiledByTeamID
+                ORDER BY d.CreatedAt DESC";
+            using var cmd = new SqlCommand(sql, conn);
+            using var dr = cmd.ExecuteReader();
+            while (dr.Read()) list.Add(MapDTO(dr));
+            return list;
+        }
+
         public DisputeDTO? GetByID(int disputeID)
         {
             using var conn = DBConnection.GetConnection();

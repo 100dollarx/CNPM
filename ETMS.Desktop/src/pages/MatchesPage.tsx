@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { useNavigate } from 'react-router'
 import { getTokens, statusColor } from '../theme'
+import { useToast } from '../contexts/ToastContext'
 
-interface Match { MatchID: number; TournamentID: number; Round: number; MatchOrder: number; Team1Name?: string; Team2Name?: string; Status: string; ScheduledTime?: string; WinnerID?: number; IsBye: boolean }
+interface Match { MatchID: number; TournamentID: number; Round: number; MatchOrder: number; Team1Name?: string; Team2Name?: string; Team1ID?: number; Team2ID?: number; Status: string; ScheduledTime?: string; WinnerID?: number; IsBye: boolean; GameType?: string; ResultID?: number; ResultStatus?: string }
+interface Tournament { TournamentID: number; Name: string; Status: string; GameType?: string }
 const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
@@ -11,20 +14,47 @@ const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
 const statusLabels: Record<string, string> = { scheduled: 'LỊCH THI', checkinopen: 'CHECK-IN', live: 'LIVE', completed: 'HOÀN THÀNH', walkover: 'WALKOVER' }
 
 export default function MatchesPage() {
-  const { token } = useAuth()
+  const { token, isAdmin, isCaptain } = useAuth()
+  const toast = useToast()
   const { dark } = useTheme()
+  const nav = useNavigate()
   const c = getTokens(dark)
   const [list, setList] = useState<Match[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(false)
   const [tournId, setTournId] = useState<string>('')
 
+  // Load tournament list for dropdown
   useEffect(() => {
+    fetch('/api/tournaments', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then(r => r.json()).then(d => {
+        const active = (d.data ?? []).filter((t: Tournament) => t.Status === 'Active' || t.Status === 'Registration')
+        setTournaments(active)
+        if (active.length > 0 && !tournId) setTournId(String(active[0].TournamentID))
+      }).catch(() => {})
+  }, [token])
+
+  useEffect(() => {
+    if (!tournId) return
     setLoading(true)
-    const url = tournId ? `/api/matches?tournamentId=${tournId}` : '/api/matches'
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    fetch(`/api/matches?tournamentId=${tournId}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then(r => r.json()).then(d => setList(d.data ?? []))
       .catch(() => {}).finally(() => setLoading(false))
   }, [token, tournId])
+
+  const verifyResult = async (matchId: number, resultId: number, approve: boolean) => {
+    const endpoint = approve ? `/api/results/${resultId}/verify` : `/api/results/${resultId}/reject`
+    try {
+      const r = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(approve ? {} : { Reason: 'Admin tu choi ket qua.' })
+      })
+      const d = await r.json()
+      if (r.ok) { toast.success(approve ? 'Da xac nhan ket qua.' : 'Da tu choi ket qua.'); setLoading(true); fetch(`/api/matches?tournamentId=${tournId}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).then(r2 => r2.json()).then(d => setList(d.data ?? [])).finally(() => setLoading(false)) }
+      else toast.error(d.error ?? 'Thao tac that bai.')
+    } catch { toast.error('Khong the ket noi.') }
+  }
 
   const grouped = list.reduce((acc, m) => {
     const r = `VÒNG ${m.Round ?? '?'}`
@@ -44,9 +74,12 @@ export default function MatchesPage() {
           {list.length > 0 && <span style={{ padding: '2px 10px', borderRadius: 999, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: '0.75rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{list.length}</span>}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <label style={{ fontSize: '0.75rem', color: c.onSurfaceVar, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Giải đấu ID:</label>
-          <input value={tournId} onChange={e => setTournId(e.target.value)} placeholder="Nhập ID..." className="nexora-input"
-            style={{ background: c.inputBg, border: `1px solid ${c.panelBorder}`, borderRadius: 8, padding: '8px 12px', color: c.onSurface, fontSize: '0.875rem', fontFamily: "'JetBrains Mono',monospace", outline: 'none', width: 120, transition: 'all 0.2s' }} />
+          <label style={{ fontSize: '0.72rem', color: c.onSurfaceVar, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Giải đấu:</label>
+          <select value={tournId} onChange={e => setTournId(e.target.value)}
+            style={{ background: c.inputBg, border: `1px solid ${c.panelBorder}`, borderRadius: 8, padding: '7px 12px', color: c.onSurface, fontSize: '0.85rem', fontFamily: 'inherit', outline: 'none', cursor: 'pointer', minWidth: 200 }}>
+            {tournaments.length === 0 && <option value=''>-- Không có giải --</option>}
+            {tournaments.map(t => <option key={t.TournamentID} value={t.TournamentID}>{t.Name}</option>)}
+          </select>
         </div>
       </div>
 
@@ -104,14 +137,64 @@ export default function MatchesPage() {
                           {m.WinnerID === undefined && <div style={{ fontSize: '0.65rem', color: c.onSurfaceVar, marginTop: 2, fontFamily: "'JetBrains Mono',monospace" }}>T2</div>}
                         </div>
 
-                        {/* Status */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, minWidth: 100 }}>
+                         {/* Actions */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, minWidth: 140 }}>
                           <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
                             {isLive && <span className="live-dot" style={{ width: 6, height: 6 }} />}
                             {isCheckIn && <span className="live-dot" style={{ width: 6, height: 6, background: '#F6AD55', animation: 'live-blink 0.8s ease-in-out infinite' }} />}
                             {statusLabels[m.Status?.toLowerCase()] ?? m.Status}
                           </span>
                           {m.ScheduledTime && <span style={{ fontSize: '0.68rem', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace" }}>{new Date(m.ScheduledTime).toLocaleString('vi-VN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>}
+                          {/* Action buttons */}
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            {/* Map Veto — FPS game, Live match */}
+                            {isLive && (isAdmin || isCaptain) && m.GameType?.toUpperCase() === 'FPS' && (
+                              <button onClick={() => nav(`/matches/${m.MatchID}/map-veto`)}
+                                style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(167,139,250,0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(167,139,250,0.1)'}>
+                                MAP VETO
+                              </button>
+                            )}
+                            {/* Side Select — MOBA game, Live match */}
+                            {isLive && (isAdmin || isCaptain) && m.GameType?.toUpperCase() === 'MOBA' && (
+                              <button onClick={() => nav(`/matches/${m.MatchID}/side-select`)}
+                                style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', color: '#38bdf8', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(56,189,248,0.1)'}>
+                                CHON PHE
+                              </button>
+                            )}
+                            {/* Admin verify/reject result — pending result */}
+                            {isAdmin && m.ResultID && m.ResultStatus?.toLowerCase() === 'pending' && (
+                              <>
+                                <button onClick={() => verifyResult(m.MatchID, m.ResultID!, true)}
+                                  style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}>
+                                  DUYET KQ
+                                </button>
+                                <button onClick={() => verifyResult(m.MatchID, m.ResultID!, false)}
+                                  style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(252,129,129,0.1)', border: '1px solid rgba(252,129,129,0.3)', color: '#FC8181', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}>
+                                  TU CHOI KQ
+                                </button>
+                              </>
+                            )}
+                            {isCheckIn && (isAdmin || isCaptain) && (
+                              <button onClick={() => nav(`/matches/${m.MatchID}/check-in`)}
+                                style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(246,173,85,0.1)', border: '1px solid rgba(246,173,85,0.3)', color: '#F6AD55', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(246,173,85,0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(246,173,85,0.1)'}>
+                                CHECK-IN
+                              </button>
+                            )}
+                            {isLive && (isAdmin || isCaptain) && (
+                              <button onClick={() => nav(`/matches/${m.MatchID}/result`)}
+                                style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(104,211,145,0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(104,211,145,0.1)'}>
+                                KẺT QUẢ
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

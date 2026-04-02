@@ -38,7 +38,7 @@ export default function NotificationsPage() {
   }
 
   const markAllRead = async () => {
-    await fetch(`/api/notifications/read-all?userId=${user?.UserID ?? 0}`, { method: 'PATCH', headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    await fetch(`/api/notifications/read-all?rawUserId=${user?.UserID ?? 0}`, { method: 'PATCH', headers: token ? { Authorization: `Bearer ${token}` } : {} })
     setList(l => l.map(n => ({ ...n, IsRead: true })))
   }
 

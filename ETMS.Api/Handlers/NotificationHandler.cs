@@ -4,10 +4,11 @@ namespace ETMS.Api.Handlers;
 
 public static class NotificationHandler
 {
-    public static IResult GetAll(int userId)
+    // Dùng string? để tránh crash khi frontend gửi userId=undefined (chuỗi, không parse được thành int)
+    public static IResult GetAll(string? rawUserId = null)
     {
-        if (userId <= 0)
-            return Results.BadRequest(new { error = "userId không hợp lệ." });
+        if (!int.TryParse(rawUserId, out int userId) || userId <= 0)
+            return Results.Ok(new { data = Array.Empty<object>(), total = 0, unreadCount = 0 });
 
         var dal   = new NotificationDAL();
         var list  = dal.GetByUser(userId);
@@ -15,9 +16,9 @@ public static class NotificationHandler
 
         return Results.Ok(new
         {
-            data         = list,
-            total        = list.Count,
-            unreadCount  = unread,
+            data        = list,
+            total       = list.Count,
+            unreadCount = unread,
             userId
         });
     }
@@ -28,9 +29,9 @@ public static class NotificationHandler
         return Results.Ok(new { notificationId = id, status = "read" });
     }
 
-    public static IResult MarkAllRead(int userId)
+    public static IResult MarkAllRead(string? rawUserId = null)
     {
-        if (userId <= 0)
+        if (!int.TryParse(rawUserId, out int userId) || userId <= 0)
             return Results.BadRequest(new { error = "userId không hợp lệ." });
 
         new NotificationDAL().MarkAllRead(userId);

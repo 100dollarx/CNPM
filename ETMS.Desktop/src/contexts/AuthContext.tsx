@@ -18,17 +18,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
+// Normalize API camelCase response (userID, role) → PascalCase (UserID, Role)
+function normalizeUser(raw: any): User | null {
+  if (!raw) return null
+  return {
+    UserID:   raw.UserID   ?? raw.userID   ?? raw.userId   ?? 0,
+    Username: raw.Username ?? raw.username ?? '',
+    FullName: raw.FullName ?? raw.fullName ?? '',
+    Role:     raw.Role     ?? raw.role     ?? 'Player',
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const s = sessionStorage.getItem('etms_user')
-    return s ? JSON.parse(s) : null
+    return s ? normalizeUser(JSON.parse(s)) : null
   })
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem('etms_token'))
 
   const login = useCallback(async (username: string, password: string) => {
     try {
       const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 8000) // 8s timeout
+      const timer = setTimeout(() => controller.abort(), 8000)
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,16 +48,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       clearTimeout(timer)
       const data = await res.json()
-      if (!res.ok) return { ok: false, error: data.error ?? 'Đăng nhập thất bại.' }
-      setUser(data.user); setToken(data.token)
-      sessionStorage.setItem('etms_user', JSON.stringify(data.user))
+      if (!res.ok) return { ok: false, error: data.error ?? 'Login failed.' }
+      const normalized = normalizeUser(data.user)
+      setUser(normalized); setToken(data.token)
+      sessionStorage.setItem('etms_user', JSON.stringify(normalized))
       sessionStorage.setItem('etms_token', data.token)
       return { ok: true }
     } catch (e: unknown) {
       console.error('[AuthContext] Login error:', e)
       if (e instanceof Error && e.name === 'AbortError')
-        return { ok: false, error: 'Hết thời gian kết nối (8s). Kiểm tra backend đang chạy trên port 5126.' }
-      return { ok: false, error: 'Không thể kết nối tới máy chủ (localhost:5126). Hãy chạy: cd ETMS.Api && dotnet run' }
+        return { ok: false, error: 'Connection timeout (8s). Check backend on port 5126.' }
+      return { ok: false, error: 'Cannot connect to server (localhost:5126).' }
     }
   }, [])
 
@@ -55,8 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.removeItem('etms_user'); sessionStorage.removeItem('etms_token')
   }, [])
 
+  const role = user?.Role?.toLowerCase() ?? ''
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAdmin: user?.Role === 'Admin', isCaptain: user?.Role === 'Captain' }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAdmin: role === 'admin', isCaptain: role === 'captain' }}>
       {children}
     </AuthContext.Provider>
   )

@@ -10,7 +10,7 @@ public static class TeamHandler
         var bus  = new TeamBUS();
         var list = tournamentId.HasValue
             ? bus.GetByTournament(tournamentId.Value)
-            : bus.GetByTournament(0); // 0 = tất cả tournaments, fallback
+            : bus.GetByTournament(0); // 0 = tat ca tournaments
         return Results.Ok(new { data = list, total = list.Count });
     }
 
@@ -18,18 +18,18 @@ public static class TeamHandler
     {
         var bus = new TeamBUS();
         var dto = bus.GetByID(id);
-        return dto == null ? Results.NotFound(new { error = "Đội không tồn tại." }) : Results.Ok(dto);
+        return dto == null ? Results.NotFound(new { error = "Doi khong ton tai." }) : Results.Ok(dto);
     }
 
     public static IResult Create(CreateTeamRequest req)
     {
         if (string.IsNullOrWhiteSpace(req.Name))
-            return Results.BadRequest(new { error = "Tên đội không được để trống." });
+            return Results.BadRequest(new { error = "Ten doi khong duoc de trong." });
 
         var bus = new TeamBUS();
         var (teamID, error) = bus.CreateTeam(req.TournamentID, req.Name, req.CaptainID);
         return teamID > 0
-            ? Results.Created($"/api/teams/{teamID}", new { teamID, message = "Đăng ký đội thành công. Chờ Admin xét duyệt." })
+            ? Results.Created($"/api/teams/{teamID}", new { teamID, message = "Dang ky doi thanh cong. Cho Admin xet duyet." })
             : Results.BadRequest(new { error });
     }
 
@@ -44,11 +44,21 @@ public static class TeamHandler
     public static IResult Reject(int id, RejectTeamRequest req)
     {
         var bus = new TeamBUS();
-        bus.RejectTeam(id, req.Reason ?? "Không đáp ứng yêu cầu.");
+        bus.RejectTeam(id, req.Reason ?? "Khong dap ung yeu cau.");
         return Results.Ok(new { teamId = id, status = "rejected" });
+    }
+
+    public static IResult Disqualify(int id, DisqualifyTeamRequest req)
+    {
+        var bus = new TeamBUS();
+        // Reuse RejectTeam with Disqualified reason prefix so status maps correctly
+        bus.RejectTeam(id, $"[LOAI DOI] {req.Reason ?? "Vi pham quy dinh."}");
+        return Results.Ok(new { teamId = id, status = "disqualified", reason = req.Reason });
     }
 }
 
 public record CreateTeamRequest(int TournamentID, string Name, int CaptainID);
 public record ApproveTeamRequest(int TournamentID, int MinPlayers);
 public record RejectTeamRequest(string? Reason);
+public record DisqualifyTeamRequest(string? Reason);
+

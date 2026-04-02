@@ -1,4 +1,5 @@
 using ETMS.BUS;
+using ETMS.DAL;
 
 namespace ETMS.Api.Handlers;
 
@@ -9,13 +10,20 @@ public static class OverviewHandler
         var tourBus  = new TournamentBUS();
         var teamBus  = new TeamBUS();
         var allTours = tourBus.GetAll();
+        var allTeams = teamBus.GetByTournament(0); // 0 = all tournaments
+        var disputeDal = new DisputeDAL();
+        var allDisputes = disputeDal.GetAll();
 
         return Results.Ok(new
         {
-            activeTournaments      = allTours.Count(t => t.Status == "Active"),
-            registrationTournaments= allTours.Count(t => t.Status == "Registration"),
-            totalTournaments       = allTours.Count,
-            timestamp              = DateTimeOffset.UtcNow
+            activeTournaments       = allTours.Count(t => t.Status == "Active"),
+            registrationTournaments = allTours.Count(t => t.Status == "Registration"),
+            completedTournaments    = allTours.Count(t => t.Status == "Completed"),
+            totalTournaments        = allTours.Count,
+            totalTeams              = allTeams.Count,
+            pendingTeams            = allTeams.Count(t => t.Status == "Pending"),
+            pendingDisputes         = allDisputes.Count(d => d.Status == "Open"),
+            timestamp               = DateTimeOffset.UtcNow
         });
     }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -29,7 +29,24 @@ export default function MainLayout() {
   const c = getTokens(dark)
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const W = collapsed ? 64 : 224
+
+  // Notification polling every 30s
+  useEffect(() => {
+    // Guard: chỉ poll nếu user.UserID là số hợp lệ (tránh gửi userId=undefined)
+    if (!user || !user.UserID || typeof user.UserID !== 'number' || user.UserID <= 0) return
+    const fetchUnread = () => {
+      fetch(`/api/notifications?rawUserId=${user.UserID}`)
+        .then(r => r.json())
+        .then(d => setUnreadCount(d.unreadCount ?? 0))
+        .catch(() => {})
+    }
+    fetchUnread()
+    pollingRef.current = setInterval(fetchUnread, 30000)
+    return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
+  }, [user])
 
   const roleInitial = user?.FullName?.charAt(0)?.toUpperCase() ?? '?'
   const L = (vi: string, en: string) => lang === 'vi' ? vi : en
@@ -115,9 +132,22 @@ export default function MainLayout() {
             )}
             {NAV_ITEMS.map(item => (
               <NavLink key={item.to} to={item.to} className={({ isActive }) => `nexora-nav-link${isActive ? ' active' : ''}`}
-                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                style={{ justifyContent: collapsed ? 'center' : 'flex-start', position: 'relative' }}>
                 <MS icon={item.icon} size={19} />
                 {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{L(item.vi, item.en)}</span>}
+                {/* Unread badge on notifications */}
+                {item.to === '/notifications' && unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: 6, right: collapsed ? 6 : 10,
+                    minWidth: 16, height: 16, borderRadius: 8,
+                    background: '#E94560', color: '#fff',
+                    fontSize: '0.6rem', fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '0 4px', lineHeight: 1,
+                    boxShadow: '0 0 6px rgba(233,69,96,0.7)',
+                    animation: 'glow-pulse 2s ease-in-out infinite',
+                  }}>{unreadCount > 99 ? '99+' : unreadCount}</span>
+                )}
               </NavLink>
             ))}
             {isAdmin && (
