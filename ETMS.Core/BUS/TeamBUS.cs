@@ -88,5 +88,17 @@ namespace ETMS.BUS
 
         public void RejectTeam(int teamID, string reason) =>
             _teamDal.UpdateStatus(teamID, "Rejected", reason);
+
+        /// <summary>Admin loại đội khỏi giải đấu (Disqualified — khác với Rejected).</summary>
+        public (bool ok, string error) DisqualifyTeam(int teamID, string reason)
+        {
+            if (!Session.IsAdmin)
+                return (false, "Chỉ Admin mới có quyền loại đội.");
+            var team = _teamDal.GetByID(teamID);
+            if (team == null) return (false, "Đội không tồn tại.");
+            if (team.Status == "Rejected") return (false, "Đội đã bị từ chối, không thể loại.");
+            _teamDal.UpdateStatus(teamID, "Disqualified", reason);
+            return (true, $"Đã loại đội '{team.Name}' khỏi giải đấu.");
+        }
     }
 }

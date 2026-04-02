@@ -14,7 +14,7 @@ const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
 const statusLabels: Record<string, string> = { pending: 'CHỜ DUYỆT', approved: 'ĐÃ DUYỆT', rejected: 'TỪ CHỐI' }
 
 export default function TeamsPage() {
-  const { token, user, isAdmin } = useAuth()
+  const { token, user, isAdmin, isCaptain } = useAuth()
   const { dark } = useTheme()
   const toast = useToast()
   const c = getTokens(dark)
@@ -147,12 +147,14 @@ export default function TeamsPage() {
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm đội tuyển..."
               className="nexora-input" style={{ ...inputStyle, width: 220, paddingLeft: 36 }} />
           </div>
-          {/* Register button — visible to all logged in users */}
-          <button onClick={() => setShowRegister(true)} className="nexora-btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10, fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-            <MS icon="group_add" size={18} />
-            <span>ĐĂNG KÝ ĐỘI</span>
-          </button>
+          {/* Register button — chỉ Captain (hoặc Admin) mới được đăng ký đội */}
+          {(isCaptain || isAdmin) && (
+            <button onClick={() => setShowRegister(true)} className="nexora-btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10, fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+              <MS icon="group_add" size={18} />
+              <span>ĐĂNG KÝ ĐỘI</span>
+            </button>
+          )}
         </div>
       </div>
 

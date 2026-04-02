@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { getTokens } from '../theme'
 import { useToast } from '../contexts/ToastContext'
+import { useLang } from '../contexts/LangContext'
 
 interface User { UserID: number; Username: string; FullName: string; Role: string; IsLocked: boolean }
 const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
@@ -19,6 +20,7 @@ export default function UsersPage() {
   const { dark } = useTheme()
   const c = getTokens(dark)
   const toast = useToast()
+  const { t } = useLang()
   const [list, setList] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -38,61 +40,61 @@ export default function UsersPage() {
   }
   useEffect(() => { load() }, [token])
 
-  const filtered = list.filter(u => !search || u.Username.toLowerCase().includes(search.toLowerCase()) || u.FullName.toLowerCase().includes(search.toLowerCase()))
+  const filtered = list.filter(u => !search || u.Username?.toLowerCase().includes(search.toLowerCase()) || u.FullName?.toLowerCase().includes(search.toLowerCase()))
 
   const toggleLock = async (u: User) => {
     await fetch(`/api/users/${u.UserID}/lock`, { method: 'PATCH', headers: headers(), body: JSON.stringify({ IsLocked: !u.IsLocked }) })
-    toast.success(u.IsLocked ? `Da mo khoa ${u.Username}` : `Da khoa ${u.Username}`)
+    toast.success(u.IsLocked ? t(`Đã mở khóa ${u.Username}`,`Unlocked ${u.Username}`) : t(`Đã khóa ${u.Username}`,`Locked ${u.Username}`))
     load()
   }
 
   const resetPwd = async (u: User) => {
     await fetch(`/api/users/${u.UserID}/reset-password`, { method: 'POST', headers: headers() })
-    toast.success(`Reset mat khau ${u.Username} ve: admin`)
+    toast.success(t(`Đã reset mật khẩu ${u.Username} về: admin`,`Reset password for ${u.Username} to: admin`))
   }
 
   const handleCreate = async () => {
-    if (!form.Username.trim() || !form.FullName.trim()) { setErr('Username va FullName khong duoc trong.'); return }
+    if (!form.Username.trim() || !form.FullName.trim()) { setErr(t('Username và Họ tên không được trống.','Username and Full Name are required.')); return }
     setSubmitting(true); setErr('')
     try {
       const r = await fetch('/api/users', { method: 'POST', headers: headers(), body: JSON.stringify(form) })
-      if (r.ok) { setShowCreate(false); setForm({ Username: '', FullName: '', Role: 'Captain', Email: '' }); load(); toast.success('Tao tai khoan thanh cong!') }
-      else { const d = await r.json(); setErr(d.error ?? 'Tao that bai.') }
-    } catch { setErr('Khong the ket noi.') } finally { setSubmitting(false) }
+      if (r.ok) { setShowCreate(false); setForm({ Username: '', FullName: '', Role: 'Captain', Email: '' }); load(); toast.success(t('Tạo tài khoản thành công!','Account created successfully!')) }
+      else { const d = await r.json(); setErr(d.error ?? t('Tạo thất bại.','Creation failed.')) }
+    } catch { setErr(t('Không thể kết nối.','Connection failed.')) } finally { setSubmitting(false) }
   }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: c.surface, color: c.onSurface }}>
       {/* Header */}
-      <div style={{ padding: '1.25rem 2rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 3, height: 24, borderRadius: 2, background: 'linear-gradient(180deg,#FC8181,#A78BFA)' }} />
-          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.4rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>QUAN LY NGUOI DUNG</h1>
+          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.3rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>{t('QUẢN LÝ NGƯỜI DÙNG','USER MANAGEMENT')}</h1>
           <span style={{ padding: '2px 10px', borderRadius: 999, background: 'rgba(252,129,129,0.12)', border: '1px solid rgba(252,129,129,0.3)', color: '#FC8181', fontSize: '0.75rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{list.length}</span>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: c.onSurfaceVar, pointerEvents: 'none' }}><MS icon="search" /></span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tim nguoi dung..." className="nexora-input"
-              style={{ ...inputStyle, width: 220, paddingLeft: 36 }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('Tìm người dùng...','Search users...')} className="nexora-input"
+              style={{ ...inputStyle, width: 200, paddingLeft: 36 }} />
           </div>
           <button onClick={() => setShowCreate(true)} className="nexora-btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10, fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>
-            <MS icon="person_add" size={18} /><span>TAO TAI KHOAN</span>
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', borderRadius: 10, fontSize: '0.85rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+            <MS icon="person_add" size={18} /><span>{t('TẠO TÀI KHOẢN','CREATE ACCOUNT')}</span>
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 2rem' }}>
+      <div style={{ flex: 1, overflow: 'auto', padding: '1rem 1.5rem' }}>
         {loading ? (
-          [1,2,3,4].map(i => <div key={i} style={{ height: 60, background: 'rgba(22,27,34,0.9)', borderRadius: 12, marginBottom: 10, animation: 'neon-pulse 2s ease-in-out infinite' }} />)
+          [1,2,3,4].map(i => <div key={i} style={{ height: 56, background: 'rgba(22,27,34,0.9)', borderRadius: 12, marginBottom: 10, animation: 'neon-pulse 2s ease-in-out infinite' }} />)
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${c.panelBorder}` }}>
-                {['#', 'Username', 'Ho Ten', 'Vai Tro', 'Trang Thai', 'Thao Tac'].map(h => (
-                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: c.onSurfaceVar, fontFamily: "'Rajdhani',sans-serif" }}>{h}</th>
+                {['#', 'Username', t('Họ Tên','Full Name'), t('Vai Trò','Role'), t('Trạng Thái','Status'), t('Thao Tác','Actions')].map(h => (
+                  <th key={h} style={{ padding: '10px 10px', textAlign: 'left', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: c.onSurfaceVar, fontFamily: "'Rajdhani',sans-serif", whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -103,27 +105,27 @@ export default function UsersPage() {
                   <tr key={u.UserID} style={{ borderBottom: `1px solid ${c.panelBorder}40`, transition: 'background 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(252,129,129,0.02)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.75rem' }}>{String(idx+1).padStart(2,'0')}</td>
-                    <td style={{ padding: '12px', fontWeight: 600, color: c.onSurface, fontFamily: "'Rajdhani',sans-serif", fontSize: '0.95rem' }}>{u.Username}</td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.85rem' }}>{u.FullName}</td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '10px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.75rem' }}>{String(idx+1).padStart(2,'0')}</td>
+                    <td style={{ padding: '10px', fontWeight: 600, color: c.onSurface, fontFamily: "'Rajdhani',sans-serif", fontSize: '0.95rem' }}>{u.Username}</td>
+                    <td style={{ padding: '10px', color: c.onSurfaceVar, fontSize: '0.85rem' }}>{u.FullName}</td>
+                    <td style={{ padding: '10px' }}>
                       <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, background: rc.bg, color: rc.color, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.06em' }}>
                         {u.Role?.toUpperCase()}
                       </span>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '10px' }}>
                       <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, background: u.IsLocked ? 'rgba(252,129,129,0.12)' : 'rgba(104,211,145,0.12)', color: u.IsLocked ? '#FC8181' : '#68D391', fontFamily: "'Rajdhani',sans-serif" }}>
-                        {u.IsLocked ? 'KHOA' : 'HOAT DONG'}
+                        {u.IsLocked ? t('KHÓA','LOCKED') : t('HOẠT ĐỘNG','ACTIVE')}
                       </span>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '10px' }}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => toggleLock(u)}
-                          style={{ padding: '5px 10px', borderRadius: 7, background: u.IsLocked ? 'rgba(104,211,145,0.1)' : 'rgba(252,129,129,0.1)', border: `1px solid ${u.IsLocked ? 'rgba(104,211,145,0.3)' : 'rgba(252,129,129,0.3)'}`, color: u.IsLocked ? '#68D391' : '#FC8181', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MS icon={u.IsLocked ? "lock_open" : "lock"} size={13} />{u.IsLocked ? 'MO KHOA' : 'KHOA'}
+                          style={{ padding: '5px 10px', borderRadius: 7, background: u.IsLocked ? 'rgba(104,211,145,0.1)' : 'rgba(252,129,129,0.1)', border: `1px solid ${u.IsLocked ? 'rgba(104,211,145,0.3)' : 'rgba(252,129,129,0.3)'}`, color: u.IsLocked ? '#68D391' : '#FC8181', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+                          <MS icon={u.IsLocked ? "lock_open" : "lock"} size={13} />{u.IsLocked ? t('MỞ KHÓA','UNLOCK') : t('KHÓA','LOCK')}
                         </button>
                         <button onClick={() => resetPwd(u)}
-                          style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                           <MS icon="key" size={13} />RESET MK
                         </button>
                       </div>
@@ -144,29 +146,29 @@ export default function UsersPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 3, height: 20, borderRadius: 2, background: '#FC8181' }} />
-                <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '0.08em', color: c.onSurface }}>TAO TAI KHOAN MOI</h2>
+                <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '0.08em', color: c.onSurface }}>{t('TẠO TÀI KHOẢN MỚI','CREATE NEW ACCOUNT')}</h2>
               </div>
-              <button onClick={() => setShowCreate(false)} style={{ background: 'rgba(252,129,129,0.08)', border: '1px solid rgba(252,129,129,0.2)', borderRadius: 8, cursor: 'pointer', color: '#FC8181', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
+              <button onClick={() => setShowCreate(false)} style={{ background: 'rgba(252,129,129,0.08)', border: '1px solid rgba(252,129,129,0.2)', borderRadius: 8, cursor: 'pointer', color: '#FC8181', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>✕</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div><label style={labelStyle}>Username *</label>
-                <input value={form.Username} onChange={e => setForm(f => ({ ...f, Username: e.target.value }))} style={inputStyle} className="nexora-input" /></div>
-              <div><label style={labelStyle}>Ho Ten *</label>
-                <input value={form.FullName} onChange={e => setForm(f => ({ ...f, FullName: e.target.value }))} style={inputStyle} className="nexora-input" /></div>
+                <input value={form.Username} onChange={e => setForm(f => ({ ...f, Username: e.target.value }))} placeholder="vd. captain02" style={inputStyle} className="nexora-input" /></div>
+              <div><label style={labelStyle}>{t('Họ Tên','Full Name')} *</label>
+                <input value={form.FullName} onChange={e => setForm(f => ({ ...f, FullName: e.target.value }))} placeholder="vd. Nguyễn Văn A" style={inputStyle} className="nexora-input" /></div>
               <div><label style={labelStyle}>Email</label>
-                <input value={form.Email} onChange={e => setForm(f => ({ ...f, Email: e.target.value }))} type="email" style={inputStyle} className="nexora-input" /></div>
-              <div><label style={labelStyle}>Vai Tro</label>
+                <input value={form.Email} onChange={e => setForm(f => ({ ...f, Email: e.target.value }))} type="email" placeholder="vd. captain@etms.vn" style={inputStyle} className="nexora-input" /></div>
+              <div><label style={labelStyle}>{t('Vai Trò','Role')}</label>
                 <select value={form.Role} onChange={e => setForm(f => ({ ...f, Role: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }} className="nexora-input">
                   <option value="Admin">Admin</option>
                   <option value="Captain">Captain</option>
                   <option value="Player">Player</option>
                 </select></div>
               {err && <p style={{ color: '#FC8181', fontSize: '0.8rem', margin: 0 }}>{err}</p>}
-              <p style={{ margin: 0, fontSize: '0.78rem', color: c.onSurfaceVar }}>Mat khau mac dinh: <code style={{ color: '#A78BFA', fontFamily: "'JetBrains Mono',monospace", background: 'rgba(124,58,237,0.1)', padding: '1px 6px', borderRadius: 4 }}>admin</code></p>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: c.onSurfaceVar }}>{t('Mật khẩu mặc định:','Default password:')} <code style={{ color: '#A78BFA', fontFamily: "'JetBrains Mono',monospace", background: 'rgba(124,58,237,0.1)', padding: '1px 6px', borderRadius: 4 }}>admin</code></p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-                <button onClick={() => setShowCreate(false)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>HUY</button>
+                <button onClick={() => setShowCreate(false)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>{t('HỦY','CANCEL')}</button>
                 <button onClick={handleCreate} disabled={submitting} className="nexora-btn-primary" style={{ padding: '10px 24px', borderRadius: 9, fontSize: '0.9rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.08em' }}>
-                  {submitting ? 'Dang tao...' : 'TAO TAI KHOAN'}
+                  {submitting ? `⏳ ${t('Đang tạo...','Creating...')}` : t('TẠO TÀI KHOẢN','CREATE ACCOUNT')}
                 </button>
               </div>
             </div>

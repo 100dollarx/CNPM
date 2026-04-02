@@ -14,9 +14,39 @@ builder.Services.AddCors(opt =>
          .AllowAnyHeader()
          .AllowAnyMethod()));
 
+// ── JSON: giữ PascalCase để khớp với frontend React ────────────────────────────
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = null; // Không đổi sang camelCase
+});
+
 var app = builder.Build();
 
 app.UseCors();
+
+// ── Auto-Migration: thêm cột mới vào DB cũ nếu chưa tồn tại ──────────────────
+try
+{
+    using var migConn = DBConnection.GetConnection();
+    migConn.Open();
+    // Chạy từng câu ALTER TABLE riêng biệt để tránh lỗi batch parsing
+    var migrations = new[]
+    {
+        "IF COL_LENGTH('tblTournament','GameName')    IS NULL ALTER TABLE tblTournament ADD GameName    NVARCHAR(100) NULL",
+        "IF COL_LENGTH('tblTournament','Description') IS NULL ALTER TABLE tblTournament ADD Description NVARCHAR(MAX) NULL",
+        "IF COL_LENGTH('tblMatch','NextMatchSlot')    IS NULL ALTER TABLE tblMatch      ADD NextMatchSlot INT NULL",
+    };
+    foreach (var sql in migrations)
+    {
+        using var cmd = new Microsoft.Data.SqlClient.SqlCommand(sql, migConn);
+        cmd.ExecuteNonQuery();
+    }
+    Console.WriteLine("[Migration] DB schema up-to-date.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[Migration] Warning: {ex.Message}");
+}
 
 // ── Health ────────────────────────────────────────────────────────────────────
 app.MapGet("/api/health", () => new
@@ -27,8 +57,10 @@ app.MapGet("/api/health", () => new
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-app.MapPost("/api/auth/login",  ETMS.Api.Handlers.AuthHandler.Login);
-app.MapPost("/api/auth/logout", ETMS.Api.Handlers.AuthHandler.Logout);
+app.MapPost("/api/auth/login",           ETMS.Api.Handlers.AuthHandler.Login);
+app.MapPost("/api/auth/logout",          ETMS.Api.Handlers.AuthHandler.Logout);
+app.MapPatch("/api/auth/change-password", ETMS.Api.Handlers.AuthHandler.ChangePassword);
+
 // DEV ONLY: Generate BCrypt hash
 app.MapGet("/api/auth/hash", (string pwd) =>
     Results.Ok(new { pwd, hash = ETMS.BUS.AuthBUS.HashPassword(pwd) }));
@@ -80,7 +112,9 @@ app.MapPost("/api/tournaments",             ETMS.Api.Handlers.TournamentHandler.
 app.MapPatch("/api/tournaments/{id:int}",     ETMS.Api.Handlers.TournamentHandler.Update);
 app.MapPut("/api/tournaments/{id:int}",       ETMS.Api.Handlers.TournamentHandler.Update);
 app.MapPatch("/api/tournaments/{id:int}/advance", ETMS.Api.Handlers.TournamentHandler.AdvanceStatus);
+app.MapPatch("/api/tournaments/{id:int}/cancel",  ETMS.Api.Handlers.TournamentHandler.Cancel);
 app.MapPost("/api/tournaments/{id:int}/generate-bracket", ETMS.Api.Handlers.TournamentHandler.GenerateBracket);
+
 app.MapGet("/api/tournaments/{id:int}/bracket", (int id) => {
     var list = new ETMS.BUS.BracketBUS().GetBracket(id);
     return Results.Ok(new { data = list, total = list.Count });
@@ -97,6 +131,28 @@ app.MapGet("/api/tournaments/{id:int}/leaderboard", (int id) => {
     }
     return Results.Ok(new { data = list, total = list.Count });
 });
+app.MapGet("/api/tournaments/{id:int}/game-config", (int id) => {
+    using var conn = DBConnection.GetConnection();
+    conn.Open();
+    const string sql = @"
+        SELECT gc.ConfigID, gc.TournamentID, gc.BestOf, gc.MapPool,
+               gc.VetoSequence, gc.KillPointPerKill, gc.PlacementPoints,
+               gc.MaxParticipants, gc.CheckInWindowMinutes
+        FROM tblGameConfig gc WHERE gc.TournamentID = @tid";
+    using var cmd = new Microsoft.Data.SqlClient.SqlCommand(sql, conn);
+    cmd.Parameters.AddWithValue("@tid", id);
+    using var dr = cmd.ExecuteReader();
+    if (!dr.Read()) return Results.NotFound(new { error = "Chưa có cấu hình game." });
+    return Results.Ok(new {
+        configId      = dr.IsDBNull(0) ? 0     : dr.GetInt32(0),
+        tournamentId  = dr.GetInt32(1),
+        bestOf        = dr.IsDBNull(2) ? 1     : dr.GetInt32(2),
+        mapPool       = dr.IsDBNull(3) ? null  : dr.GetString(3),
+        vetoSequence  = dr.IsDBNull(4) ? null  : dr.GetString(4),
+        killPointPerKill = dr.IsDBNull(5) ? 1  : dr.GetInt32(5),
+        checkInWindowMinutes = dr.IsDBNull(8) ? 15 : dr.GetInt32(8)
+    });
+});
 app.MapDelete("/api/tournaments/{id:int}",  ETMS.Api.Handlers.TournamentHandler.Delete);
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
@@ -108,36 +164,78 @@ app.MapPatch("/api/teams/{id:int}/reject",      ETMS.Api.Handlers.TeamHandler.Re
 app.MapPatch("/api/teams/{id:int}/disqualify",  ETMS.Api.Handlers.TeamHandler.Disqualify);
 
 // ── Matches ───────────────────────────────────────────────────────────────────
-app.MapGet("/api/matches",                                  ETMS.Api.Handlers.MatchHandler.GetAll);
-app.MapGet("/api/matches/{id:int}",                         ETMS.Api.Handlers.MatchHandler.GetByID);
-app.MapPost("/api/matches/{id:int}/checkin",                ETMS.Api.Handlers.MatchHandler.CheckIn);
-app.MapPost("/api/matches/{id:int}/veto",                   ETMS.Api.Handlers.MatchHandler.SubmitVeto);
-app.MapPost("/api/matches/{id:int}/side-select",            ETMS.Api.Handlers.MatchHandler.SelectSide);
+app.MapGet("/api/matches",              ETMS.Api.Handlers.MatchHandler.GetAll);
+app.MapGet("/api/matches/{id:int}",     ETMS.Api.Handlers.MatchHandler.GetByID);
+app.MapPost("/api/matches/{id:int}/checkin",     ETMS.Api.Handlers.MatchHandler.CheckIn);
+app.MapPost("/api/matches/{id:int}/veto",        ETMS.Api.Handlers.MatchHandler.SubmitVeto);
+app.MapPost("/api/matches/{id:int}/side-select", ETMS.Api.Handlers.MatchHandler.SelectSide);
+// GET veto history cho một trận
+app.MapGet("/api/matches/{id:int}/veto", (int id) => {
+    using var conn = DBConnection.GetConnection();
+    conn.Open();
+    const string sql = @"
+        SELECT mv.VetoID, mv.MatchID, mv.TeamID, t.Name AS TeamName,
+               mv.MapName, mv.Action, mv.VetoOrder
+        FROM tblMapVeto mv
+        LEFT JOIN tblTeam t ON t.TeamID = mv.TeamID
+        WHERE mv.MatchID = @mid
+        ORDER BY mv.VetoOrder";
+    using var cmd = new Microsoft.Data.SqlClient.SqlCommand(sql, conn);
+    cmd.Parameters.AddWithValue("@mid", id);
+    using var dr = cmd.ExecuteReader();
+    var list = new List<object>();
+    while (dr.Read())
+        list.Add(new {
+            vetoId   = dr.GetInt32(0),
+            matchId  = dr.GetInt32(1),
+            teamId   = dr.GetInt32(2),
+            teamName = dr.IsDBNull(3) ? "" : dr.GetString(3),
+            mapName  = dr.GetString(4),
+            action   = dr.GetString(5),
+            vetoOrder= dr.GetInt32(6)
+        });
+    return Results.Ok(new { data = list, total = list.Count });
+});
+// Lên lịch cho một trận (Admin)
+app.MapPatch("/api/matches/{id:int}/schedule", (int id, ScheduleRequest req, HttpContext ctx) => {
+    ETMS.BUS.AuthBUS.SetCurrentUserFromToken(ctx.Request.Headers.Authorization);
+    if (!ETMS.BUS.Session.IsAdmin)
+        return Results.Json(new { error = "Chỉ Admin mới có thể lên lịch trận đấu." }, statusCode: 403);
+    new ETMS.DAL.MatchDAL().SetScheduledTime(id, req.ScheduledTime);
+    return Results.Ok(new { matchId = id, scheduledTime = req.ScheduledTime });
+});
 
 // ── Results ───────────────────────────────────────────────────────────────────
-app.MapPost("/api/matches/{id:int}/result",                 ETMS.Api.Handlers.ResultHandler.Submit);
-app.MapPatch("/api/results/{id:int}/verify",                ETMS.Api.Handlers.ResultHandler.Verify);
-app.MapPatch("/api/results/{id:int}/reject",                ETMS.Api.Handlers.ResultHandler.Reject);
+app.MapPost("/api/matches/{id:int}/result", ETMS.Api.Handlers.ResultHandler.Submit);
+app.MapPatch("/api/results/{id:int}/verify", ETMS.Api.Handlers.ResultHandler.Verify);
+app.MapPatch("/api/results/{id:int}/reject", ETMS.Api.Handlers.ResultHandler.Reject);
 
 // ── Disputes ──────────────────────────────────────────────────────────────────
-app.MapGet("/api/disputes",                                 ETMS.Api.Handlers.DisputeHandler.GetAll);
-app.MapPost("/api/disputes",                                ETMS.Api.Handlers.DisputeHandler.CreateDirect);
-app.MapPost("/api/matches/{id:int}/dispute",                ETMS.Api.Handlers.DisputeHandler.Create);
-app.MapPatch("/api/disputes/{id:int}/resolve",              ETMS.Api.Handlers.DisputeHandler.Resolve);
-app.MapPatch("/api/disputes/{id:int}/dismiss",              ETMS.Api.Handlers.DisputeHandler.Dismiss);
+app.MapGet("/api/disputes",                      ETMS.Api.Handlers.DisputeHandler.GetAll);
+app.MapPost("/api/disputes",                     ETMS.Api.Handlers.DisputeHandler.CreateDirect);
+app.MapPost("/api/matches/{id:int}/dispute",     ETMS.Api.Handlers.DisputeHandler.Create);
+app.MapPatch("/api/disputes/{id:int}/resolve",   ETMS.Api.Handlers.DisputeHandler.Resolve);
+app.MapPatch("/api/disputes/{id:int}/dismiss",   ETMS.Api.Handlers.DisputeHandler.Dismiss);
 
 // ── Notifications ─────────────────────────────────────────────────────────────
-app.MapGet("/api/notifications",                            ETMS.Api.Handlers.NotificationHandler.GetAll);
-app.MapPatch("/api/notifications/{id:int}/read",            ETMS.Api.Handlers.NotificationHandler.MarkRead);
-app.MapPatch("/api/notifications/read-all",                 ETMS.Api.Handlers.NotificationHandler.MarkAllRead);
+app.MapGet("/api/notifications",                 ETMS.Api.Handlers.NotificationHandler.GetAll);
+app.MapPatch("/api/notifications/{id:int}/read", ETMS.Api.Handlers.NotificationHandler.MarkRead);
+app.MapPatch("/api/notifications/read-all",      ETMS.Api.Handlers.NotificationHandler.MarkAllRead);
 
 // ── Users (Admin) ─────────────────────────────────────────────────────────────
-app.MapGet("/api/users",                                    ETMS.Api.Handlers.UserHandler.GetUsers);
-app.MapPost("/api/users",                                   ETMS.Api.Handlers.UserHandler.CreateUser);
-app.MapPatch("/api/users/{id:int}/lock",                    ETMS.Api.Handlers.UserHandler.ToggleLock);
-app.MapPost("/api/users/{id:int}/reset-password",           ETMS.Api.Handlers.UserHandler.ResetPassword);
+app.MapGet("/api/users",                         ETMS.Api.Handlers.UserHandler.GetUsers);
+app.MapPost("/api/users",                        ETMS.Api.Handlers.UserHandler.CreateUser);
+app.MapPatch("/api/users/{id:int}/lock",         ETMS.Api.Handlers.UserHandler.ToggleLock);
+app.MapPost("/api/users/{id:int}/reset-password",ETMS.Api.Handlers.UserHandler.ResetPassword);
 
 // ── Audit ─────────────────────────────────────────────────────────────────────
-app.MapGet("/api/audit-log",                                ETMS.Api.Handlers.AuditHandler.GetLog);
+app.MapGet("/api/audit-log",                     ETMS.Api.Handlers.AuditHandler.GetLog);
+
+// ── Battle Royale ─────────────────────────────────────────────────────────────
+app.MapPost("/api/br/rounds",                    ETMS.Api.Handlers.BRHandler.CreateRound);
+app.MapPost("/api/br/scores",                    ETMS.Api.Handlers.BRHandler.SubmitScore);
+app.MapGet("/api/br/{tournamentId:int}/leaderboard", ETMS.Api.Handlers.BRHandler.GetLeaderboard);
 
 app.Run();
+
+public record ScheduleRequest(DateTime ScheduledTime);

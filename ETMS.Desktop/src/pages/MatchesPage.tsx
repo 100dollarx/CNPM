@@ -11,7 +11,7 @@ const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
 
-const statusLabels: Record<string, string> = { scheduled: 'LỊCH THI', checkinopen: 'CHECK-IN', live: 'LIVE', completed: 'HOÀN THÀNH', walkover: 'WALKOVER' }
+const statusLabels: Record<string, string> = { scheduled: 'LỊCH ĐẤU', checkinopen: 'CHECK-IN', live: 'LIVE', completed: 'HOÀN THÀNH', walkover: 'WALKOVER' }
 
 export default function MatchesPage() {
   const { token, isAdmin, isCaptain } = useAuth()
@@ -162,7 +162,7 @@ export default function MatchesPage() {
                                 style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.3)', color: '#38bdf8', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
                                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.2)'}
                                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(56,189,248,0.1)'}>
-                                CHON PHE
+                                CHỌN PHE
                               </button>
                             )}
                             {/* Admin verify/reject result — pending result */}
@@ -170,11 +170,11 @@ export default function MatchesPage() {
                               <>
                                 <button onClick={() => verifyResult(m.MatchID, m.ResultID!, true)}
                                   style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}>
-                                  DUYET KQ
+                                  DUYỆT KQ
                                 </button>
                                 <button onClick={() => verifyResult(m.MatchID, m.ResultID!, false)}
                                   style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(252,129,129,0.1)', border: '1px solid rgba(252,129,129,0.3)', color: '#FC8181', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}>
-                                  TU CHOI KQ
+                                  TỪ CHỐI KQ
                                 </button>
                               </>
                             )}

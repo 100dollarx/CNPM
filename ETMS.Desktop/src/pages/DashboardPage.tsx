@@ -131,7 +131,7 @@ export default function DashboardPage() {
           <h3 style={{ fontFamily: "'Rajdhani',sans-serif", margin: 0, color: '#A78BFA', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.05em' }}>NEXORA PLATFORM — ONLINE</h3>
         </div>
         <p style={{ margin: 0, color: c.onSurfaceVar, fontSize: '0.82rem', lineHeight: 1.7, fontFamily: "'JetBrains Mono',monospace" }}>
-          Backend API: <span style={{ color: '#68D391' }}>✓ 38 endpoints sẵn sàng</span> — Auth · Tournament · Team · Match · Result · Dispute · Notification · User · Audit
+          Backend API: <span style={{ color: '#68D391' }}>✓ 52 endpoints sẵn sàng</span> — Auth · Tournament · Team · Match · Result · Dispute · Notification · User · Audit · BattleRoyale
         </p>
       </div>
     </div>

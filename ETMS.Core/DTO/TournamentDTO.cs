@@ -13,5 +13,7 @@ namespace ETMS.DTO
         public DateTime? EndDate { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Description { get; set; }
+        public string? GameName { get; set; }  // Tên game cụ thể (Valorant, LoL, PUBG...)
     }
 }

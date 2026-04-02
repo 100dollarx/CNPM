@@ -39,6 +39,29 @@ namespace ETMS.DAL
             return new UserDTO { UserID = dr.GetInt32(0), Username = dr.GetString(1), FullName = dr.GetString(2), Role = dr.GetString(3), IsLocked = dr.GetBoolean(4) };
         }
 
+        /// <summary>Lấy user + PasswordHash theo UserID — dùng cho ChangePassword.</summary>
+        public (UserDTO? user, string passwordHash) GetByUserID(int userID)
+        {
+            using var conn = DBConnection.GetConnection();
+            conn.Open();
+            const string sql = @"
+                SELECT UserID, Username, PasswordHash, FullName, Role, IsLocked
+                FROM tblUser WHERE UserID = @id";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@id", userID);
+            using var dr = cmd.ExecuteReader();
+            if (!dr.Read()) return (null, "");
+            var dto = new UserDTO
+            {
+                UserID   = dr.GetInt32(0),
+                Username = dr.GetString(1),
+                FullName = dr.GetString(3),
+                Role     = dr.GetString(4),
+                IsLocked = dr.GetBoolean(5)
+            };
+            return (dto, dr.GetString(2));
+        }
+
         public void IncrementFailedAttempts(string username)
         {
             using var conn = DBConnection.GetConnection();

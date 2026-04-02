@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
+import { useLang } from '../contexts/LangContext'
 import { getTokens, statusColor } from '../theme'
 
 interface Dispute { DisputeID: number; MatchID: number; Description: string; Status: string; Category?: string; CreatedAt?: string }
 const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
-const statusLabels: Record<string, string> = { open: 'MO', resolved: 'DA GIAI QUYET', dismissed: 'BAC BO' }
+const statusLabels: Record<string, string> = { open: 'MỞ', resolved: 'ĐÃ GIẢI QUYẾT', dismissed: 'BÁC BỎ' }
 const categoryColors: Record<string, string> = { hackcheat: '#EF4444', wrongscore: '#F6AD55', unauthorizedplayer: '#FC8181', other: '#8B9AB5' }
 
 export default function DisputesPage() {
@@ -16,6 +17,7 @@ export default function DisputesPage() {
   const { dark } = useTheme()
   const toast = useToast()
   const c = getTokens(dark)
+  const { t } = useLang()
   const [list, setList] = useState<Dispute[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Dispute | null>(null)
@@ -37,9 +39,9 @@ export default function DisputesPage() {
   useEffect(() => { load() }, [token])
 
   const handleSubmitDispute = async () => {
-    if (!submitForm.MatchID.trim()) { toast.error('Nhap ID tran dau'); return }
-    if (!submitForm.Description.trim()) { toast.error('Mo ta khieu nai'); return }
-    if (submitForm.Description.length > 1000) { toast.error('Mo ta toi da 1000 ky tu'); return }
+    if (!submitForm.MatchID.trim()) { toast.error('Nhập ID trận đấu'); return }
+    if (!submitForm.Description.trim()) { toast.error('Mô tả khiếu nại'); return }
+    if (submitForm.Description.length > 1000) { toast.error('Mô tả tối đa 1000 ký tự'); return }
     setSubmitting(true)
     try {
       const r = await fetch('/api/disputes', {
@@ -49,12 +51,12 @@ export default function DisputesPage() {
       })
       const d = await r.json()
       if (r.ok || r.status === 201) {
-        toast.success('Da nop khieu nai! Admin xu ly trong 48 gio.')
+        toast.success('Đã nộp khiếu nại! Admin xử lý trong 48 giờ.')
         setShowSubmit(false)
         setSubmitForm({ MatchID: '', Category: 'HackCheat', Description: '', EvidenceURL: '' })
         load()
-      } else { toast.error(d.error ?? 'Nop khieu nai that bai.') }
-    } catch { toast.error('Khong the ket noi.') } finally { setSubmitting(false) }
+      } else { toast.error(d.error ?? 'Nộp khiếu nại thất bại.') }
+    } catch { toast.error('Không thể kết nối.') } finally { setSubmitting(false) }
   }
 
   const handleAction = async () => {
@@ -66,11 +68,11 @@ export default function DisputesPage() {
         body: JSON.stringify(action === 'resolve' ? { Resolution: note } : { Reason: note })
       })
       if (r.ok) {
-        toast.success(action === 'resolve' ? `Da chap nhan khieu nai #${selected.DisputeID}.` : `Da bac bo khieu nai #${selected.DisputeID}.`)
+        toast.success(action === 'resolve' ? `Đã chấp nhận khiếu nại #${selected.DisputeID}.` : `Đã bác bỏ khiếu nại #${selected.DisputeID}.`)
       } else {
-        const d = await r.json(); toast.error(d.error ?? 'Thao tac that bai.')
+        const d = await r.json(); toast.error(d.error ?? 'Thao tác thất bại.')
       }
-    } catch { toast.error('Khong the ket noi.') }
+    } catch { toast.error('Không thể kết nối.') }
     setSelected(null); setNote(''); setAction(null); load()
   }
 
@@ -79,30 +81,30 @@ export default function DisputesPage() {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: c.surface, color: c.onSurface }}>
       {/* Header */}
-      <div style={{ padding: '1.25rem 2rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 3, height: 24, borderRadius: 2, background: 'linear-gradient(180deg,#F6AD55,#FC8181)' }} />
-          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.4rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>KHIEU NAI</h1>
+          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.3rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>{t('KHIẾU NẠI','DISPUTES')}</h1>
           {openCount > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span className="live-dot" style={{ background: '#F6AD55', boxShadow: '0 0 8px rgba(246,173,85,0.6)' }} />
-              <span style={{ padding: '2px 10px', borderRadius: 999, background: 'rgba(246,173,85,0.12)', border: '1px solid rgba(246,173,85,0.3)', color: '#F6AD55', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{openCount} cho xu ly</span>
+              <span style={{ padding: '2px 10px', borderRadius: 999, background: 'rgba(246,173,85,0.12)', border: '1px solid rgba(246,173,85,0.3)', color: '#F6AD55', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{openCount} {t('chờ xử lý','pending')}</span>
             </div>
           )}
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span style={{ fontSize: '0.72rem', color: c.onSurfaceVar, background: 'rgba(45,55,72,0.4)', border: `1px solid ${c.panelBorder}`, padding: '4px 12px', borderRadius: 999, fontFamily: "'JetBrains Mono',monospace" }}>{list.length} tong</span>
+          <span style={{ fontSize: '0.72rem', color: c.onSurfaceVar, background: 'rgba(45,55,72,0.4)', border: `1px solid ${c.panelBorder}`, padding: '4px 12px', borderRadius: 999, fontFamily: "'JetBrains Mono',monospace" }}>{list.length} tổng</span>
           {!isAdmin && (
             <button onClick={() => setShowSubmit(true)}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 10, background: 'rgba(246,173,85,0.12)', border: '1px solid rgba(246,173,85,0.3)', color: '#F6AD55', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-              <MS icon="report" size={16} /><span>NOP KHIEU NAI</span>
+              <MS icon="report" size={16} /><span>{t('NỘP KHIẾU NẠI','SUBMIT DISPUTE')}</span>
             </button>
           )}
         </div>
       </div>
 
       {/* List */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {loading ? (
           [1,2,3].map(i => <div key={i} style={{ height: 100, background: 'rgba(22,27,34,0.9)', borderRadius: 14, animation: 'neon-pulse 2s ease-in-out infinite' }} />)
         ) : list.length === 0 ? (
@@ -110,10 +112,10 @@ export default function DisputesPage() {
             <div style={{ width: 72, height: 72, borderRadius: 18, background: 'rgba(246,173,85,0.08)', border: '1px solid rgba(246,173,85,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <MS icon="gavel" size={36} />
             </div>
-            <p style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1rem', letterSpacing: '0.05em' }}>Khong co khieu nai nao.</p>
+            <p style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1rem', letterSpacing: '0.05em' }}>{t('Không có khiếu nại nào.','No disputes found.')}</p>
             {!isAdmin && (
               <button onClick={() => setShowSubmit(true)} style={{ marginTop: 12, padding: '9px 20px', borderRadius: 10, border: '1px solid rgba(246,173,85,0.3)', background: 'rgba(246,173,85,0.08)', color: '#F6AD55', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', fontFamily: "'Rajdhani',sans-serif" }}>
-                + Nop khieu nai ngay
+                + {t('Nộp khiếu nại ngay','Submit a dispute now')}
               </button>
             )}
           </div>
@@ -128,8 +130,8 @@ export default function DisputesPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <div style={{ display: 'flex', flex: 1, flexDirection: 'column', gap: 6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: c.onSurface, fontFamily: "'Rajdhani',sans-serif" }}>Khieu Nai #{d.DisputeID}</span>
-                    <span style={{ fontSize: '0.72rem', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace" }}>Tran #{d.MatchID}</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: c.onSurface, fontFamily: "'Rajdhani',sans-serif" }}>{t('Khiếu Nại','Dispute')} #{d.DisputeID}</span>
+                    <span style={{ fontSize: '0.72rem', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace" }}>{t('Trận','Match')} #{d.MatchID}</span>
                     {d.Category && <span style={{ padding: '2px 9px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, background: `${catColor}15`, color: catColor, border: `1px solid ${catColor}30`, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.06em' }}>{d.Category.toUpperCase()}</span>}
                     {isOpen && <span className="live-dot" style={{ background: '#F6AD55', width: 6, height: 6 }} />}
                   </div>
@@ -146,13 +148,13 @@ export default function DisputesPage() {
                     style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(104,211,145,0.2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'rgba(104,211,145,0.1)')}>
-                    <MS icon="task_alt" size={15} />CHAP NHAN
+                    <MS icon="task_alt" size={15} />{t('CHẤP NHẬN','ACCEPT')}
                   </button>
                   <button onClick={() => { setSelected(d); setAction('dismiss'); setNote('') }}
                     style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: 'rgba(252,129,129,0.1)', border: '1px solid rgba(252,129,129,0.3)', color: '#FC8181', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em', transition: 'all 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(252,129,129,0.2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'rgba(252,129,129,0.1)')}>
-                    <MS icon="block" size={15} />BAC BO
+                    <MS icon="block" size={15} />{t('BÁC BỎ','DISMISS')}
                   </button>
                 </div>
               )}
@@ -161,7 +163,7 @@ export default function DisputesPage() {
         })}
       </div>
 
-      {/* Modal: Captain NOP KHIEU NAI */}
+      {/* Modal: Captain NỘP KHIẾU NẠI */}
       {showSubmit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
           onClick={e => { if (e.target === e.currentTarget) setShowSubmit(false) }}>
@@ -169,30 +171,30 @@ export default function DisputesPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg,#F6AD55,#FC8181)' }} />
-                <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '0.08em', color: c.onSurface }}>NOP KHIEU NAI</h2>
+                <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '0.08em', color: c.onSurface }}>{t('NỘP KHIẾU NẠI','SUBMIT DISPUTE')}</h2>
               </div>
               <button onClick={() => setShowSubmit(false)} style={{ background: 'rgba(246,173,85,0.08)', border: '1px solid rgba(246,173,85,0.2)', borderRadius: 8, cursor: 'pointer', color: '#F6AD55', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div><label style={labelSt}>Match ID *</label>
                 <input value={submitForm.MatchID} onChange={e => setSubmitForm(f => ({ ...f, MatchID: e.target.value }))} type="number" placeholder="VD: 42" className="nexora-input" style={inputSt} /></div>
-              <div><label style={labelSt}>Category *</label>
+              <div><label style={labelSt}>{t('Danh Mục','Category')} *</label>
                 <select value={submitForm.Category} onChange={e => setSubmitForm(f => ({ ...f, Category: e.target.value }))} className="nexora-input" style={{ ...inputSt, cursor: 'pointer' }}>
                   <option value="HackCheat">Hack / Cheat</option>
-                  <option value="WrongScore">Sai ty so</option>
-                  <option value="UnauthorizedPlayer">Tay nap khong hop le</option>
-                  <option value="Other">Khac</option>
+                  <option value="WrongScore">{t('Sai tỷ số','Wrong Score')}</option>
+                  <option value="UnauthorizedPlayer">{t('Tay nạp không hợp lệ','Unauthorized Player')}</option>
+                  <option value="Other">{t('Khác','Other')}</option>
                 </select></div>
-              <div><label style={labelSt}>Mo ta * (toi da 1000)</label>
+              <div><label style={labelSt}>{t('Mô tả','Description')} * ({t('tối đa','max')} 1000)</label>
                 <textarea value={submitForm.Description} onChange={e => setSubmitForm(f => ({ ...f, Description: e.target.value }))} rows={4} maxLength={1000} className="nexora-input" style={{ ...inputSt, resize: 'vertical' }} />
                 <p style={{ fontSize: '0.68rem', color: c.onSurfaceVar, margin: '4px 0 0' }}>{submitForm.Description.length}/1000</p></div>
-              <div><label style={labelSt}>Evidence URL</label>
+              <div><label style={labelSt}>{t('URL Bằng Chứng','Evidence URL')}</label>
                 <input value={submitForm.EvidenceURL} onChange={e => setSubmitForm(f => ({ ...f, EvidenceURL: e.target.value }))} placeholder="https://..." className="nexora-input" style={inputSt} /></div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
-                <button onClick={() => setShowSubmit(false)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif" }}>HUY</button>
+                <button onClick={() => setShowSubmit(false)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif" }}>{t('HỦY','CANCEL')}</button>
                 <button onClick={handleSubmitDispute} disabled={submitting || !submitForm.MatchID || !submitForm.Description.trim()}
                   style={{ padding: '10px 24px', borderRadius: 9, background: 'rgba(246,173,85,0.15)', border: '1px solid rgba(246,173,85,0.4)', color: '#F6AD55', cursor: 'pointer', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", opacity: submitting ? 0.6 : 1 }}>
-                  {submitting ? 'Dang nop...' : 'NOP KHIEU NAI'}
+                  {submitting ? `⏳ ${t('Đang nộp...','Submitting...')}` : t('NỘP KHIẾU NẠI','SUBMIT DISPUTE')}
                 </button>
               </div>
             </div>
@@ -200,26 +202,26 @@ export default function DisputesPage() {
         </div>
       )}
 
-      {/* Modal Admin giai quyet */}
+      {/* Modal Admin giải quyết */}
       {selected && action && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ background: c.surfaceCard, border: `1px solid ${action === 'resolve' ? 'rgba(104,211,145,0.3)' : 'rgba(252,129,129,0.3)'}`, borderRadius: 18, padding: '2rem', width: 460, maxWidth: '95vw', animation: 'slide-in 0.3s ease', boxShadow: dark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 8px 32px rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.5rem' }}>
               <div style={{ width: 3, height: 20, borderRadius: 2, background: action === 'resolve' ? '#68D391' : '#FC8181' }} />
               <h2 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.2rem', fontWeight: 700, color: c.onSurface, margin: 0, letterSpacing: '0.08em' }}>
-                {action === 'resolve' ? 'CHAP NHAN KHIEU NAI' : 'BAC BO KHIEU NAI'} #{selected.DisputeID}
+                {action === 'resolve' ? t('CHẤP NHẬN KHIẾU NẠI','ACCEPT DISPUTE') : t('BÁC BỎ KHIẾU NẠI','DISMISS DISPUTE')} #{selected.DisputeID}
               </h2>
             </div>
             <label style={{ fontSize: '0.7rem', fontWeight: 700, color: c.onSurfaceVar, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: 8 }}>
-              {action === 'resolve' ? 'Noi dung phan quyet *' : 'Ly do bac bo *'}
+              {action === 'resolve' ? t('Nội dung phán quyết *','Resolution *') : t('Lý do bác bỏ *','Reason for dismissal *')}
             </label>
-            <textarea value={note} onChange={e => setNote(e.target.value)} rows={4} placeholder="Nhap noi dung xu ly..." className="nexora-input"
+            <textarea value={note} onChange={e => setNote(e.target.value)} rows={4} placeholder={t('Nhập nội dung xử lý...','Enter resolution details...')} className="nexora-input"
               style={{ width: '100%', background: c.inputBg, border: `1px solid ${c.panelBorder}`, borderRadius: 10, padding: '12px', color: c.onSurface, fontSize: '0.875rem', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }} />
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button onClick={() => { setSelected(null); setAction(null) }} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif" }}>HUY</button>
+              <button onClick={() => { setSelected(null); setAction(null) }} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif" }}>{t('HỦY','CANCEL')}</button>
               <button onClick={handleAction} disabled={!note.trim()}
                 style={{ padding: '10px 24px', borderRadius: 9, background: action === 'resolve' ? 'rgba(104,211,145,0.2)' : 'rgba(252,129,129,0.2)', border: `1px solid ${action === 'resolve' ? 'rgba(104,211,145,0.4)' : 'rgba(252,129,129,0.4)'}`, color: action === 'resolve' ? '#68D391' : '#FC8181', cursor: !note.trim() ? 'not-allowed' : 'pointer', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", opacity: !note.trim() ? 0.4 : 1 }}>
-                XAC NHAN
+                {t('XÁC NHẬN','CONFIRM')}
               </button>
             </div>
           </div>

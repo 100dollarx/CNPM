@@ -2,22 +2,75 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useToast } from '../contexts/ToastContext'
+import { useLang } from '../contexts/LangContext'
 import { useNavigate } from 'react-router'
 import { getTokens, statusColor, gameTypeColor } from '../theme'
 
-interface Tournament { TournamentID: number; Name: string; GameType: string; Format: string; Status: string; MaxTeams: number; MinPlayersPerTeam: number; StartDate: string }
+interface Tournament { TournamentID: number; Name: string; GameType: string; GameName?: string; Format: string; Status: string; MaxTeams: number; MinPlayersPerTeam: number; StartDate: string }
 
 const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
 
-const statusLabels: Record<string, string> = { draft: 'BẢN NHÁP', registration: 'ĐĂNG KÝ', active: 'ĐANG DIỄN RA', completed: 'HOÀN THÀNH' }
+const statusLabelsVI: Record<string, string> = { draft: 'BẢN NHÁP', registration: 'ĐĂNG KÝ', active: 'ĐANG DIỄN RA', completed: 'HOÀN THÀNH', cancelled: 'ĐÃ HỦY' }
+const statusLabelsEN: Record<string, string> = { draft: 'DRAFT', registration: 'REGISTRATION', active: 'LIVE', completed: 'COMPLETED', cancelled: 'CANCELLED' }
 const gameTypeIcon: Record<string, string> = { fps: 'crosshair', moba: 'groups', battleroyale: 'explore', fighting: 'sports_martial_arts', rts: 'account_tree', sports: 'sports_soccer' }
-const formatLabels: Record<string, string> = { singleelimination: 'Single Elim', roundrobin: 'Round Robin', swiss: 'Swiss' }
+const formatLabels: Record<string, string> = { singleelimination: 'Single Elim', roundrobin: 'Round Robin', swiss: 'Swiss', battleroyale: 'Battle Royale' }
+
+// Danh sách game nổi tiếng nhất 2024-2025 theo thể loại
+const GAME_LIST: Record<string, { name: string; icon: string; color: string }[]> = {
+  FPS: [
+    { name: 'Valorant',      icon: '🔫', color: '#FF4655' },
+    { name: 'CS2',           icon: '💣', color: '#F0A000' },
+    { name: 'Apex Legends',  icon: '🎯', color: '#CD3333' },
+    { name: 'Overwatch 2',   icon: '⚡', color: '#F99E1A' },
+  ],
+  MOBA: [
+    { name: 'League of Legends', icon: '👑', color: '#C89B3C' },
+    { name: 'Dota 2',            icon: '📦', color: '#D70E21' },
+    { name: 'Liên Quân Mobile',   icon: '⚔️', color: '#7C3AED' },
+    { name: 'Honor of Kings',    icon: '👸', color: '#F59E0B' },
+  ],
+  BattleRoyale: [
+    { name: 'PUBG',              icon: '🌍', color: '#F6AD55' },
+    { name: 'Free Fire',         icon: '💥', color: '#EF4444' },
+    { name: 'Fortnite',          icon: '🛡️', color: '#3B82F6' },
+    { name: 'Apex Legends',      icon: '🎯', color: '#CD3333' },
+  ],
+  Fighting: [
+    { name: 'Tekken 8',          icon: '🥊', color: '#F97316' },
+    { name: 'Street Fighter 6',  icon: '🔥', color: '#EF4444' },
+    { name: 'Mortal Kombat 1',   icon: '💧', color: '#6B21A8' },
+    { name: 'Guilty Gear Strive',icon: '🎼', color: '#0EA5E9' },
+  ],
+  RTS: [
+    { name: 'StarCraft II',      icon: '🚀', color: '#3B82F6' },
+    { name: 'Age of Empires IV', icon: '🏰', color: '#A16207' },
+    { name: 'Warcraft III',      icon: '💫', color: '#7C3AED' },
+    { name: 'Total War',         icon: '⚔️', color: '#64748B' },
+  ],
+  Sports: [
+    { name: 'EA Sports FC 25',   icon: '⚽', color: '#16A34A' },
+    { name: 'Rocket League',     icon: '🚗', color: '#0EA5E9' },
+    { name: 'NBA 2K25',          icon: '🏀', color: '#F97316' },
+    { name: 'eFootball 2025',    icon: '🥅', color: '#16A34A' },
+  ],
+}
+
+// Design rules per GameType: min players, max teams, supported formats
+const GAME_RULES: Record<string, { minPlayers: number; maxTeams: number; formats: string[]; teamSizes: string }> = {
+  FPS:         { minPlayers: 5, maxTeams: 32,  formats: ['SingleElimination'], teamSizes: '5 người' },
+  MOBA:        { minPlayers: 5, maxTeams: 32,  formats: ['SingleElimination'], teamSizes: '5-6 người' },
+  BattleRoyale:{ minPlayers: 4, maxTeams: 100, formats: ['BattleRoyale'],      teamSizes: '4-8 người' },
+  Fighting:    { minPlayers: 1, maxTeams: 64,  formats: ['SingleElimination'], teamSizes: '1 người (1v1)' },
+  RTS:         { minPlayers: 1, maxTeams: 32,  formats: ['SingleElimination'], teamSizes: '1-2 người' },
+  Sports:      { minPlayers: 1, maxTeams: 64,  formats: ['SingleElimination'], teamSizes: '1-11 người' },
+}
 
 export default function TournamentsPage() {
   const { token, isAdmin } = useAuth()
   const { dark } = useTheme()
+  const { t, lang } = useLang()
   const toast = useToast()
   const c = getTokens(dark)
   const nav = useNavigate()
@@ -26,7 +79,7 @@ export default function TournamentsPage() {
   const [showModal, setShowModal] = useState(false)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ Name: '', GameType: 'FPS', Format: 'SingleElimination', StartDate: '', MaxTeams: 16, MinPlayersPerTeam: 5 })
+  const [form, setForm] = useState({ Name: '', GameType: 'FPS', GameName: 'Valorant', Format: 'SingleElimination', StartDate: '', MaxTeams: 16, MinPlayersPerTeam: 5 })
   const [submitting, setSubmitting] = useState(false)
   const [generatingId, setGeneratingId] = useState<number | null>(null)
   const [editTarget, setEditTarget] = useState<Tournament | null>(null)
@@ -48,10 +101,38 @@ export default function TournamentsPage() {
 
   const handleCreate = async () => {
     if (!form.Name.trim()) { toast.error('Vui lòng nhập tên giải đấu.'); return }
+    if (!form.GameName)    { toast.error('Vui lòng chọn game cụ thể.'); return }
+    const rules = GAME_RULES[form.GameType]
+    if (rules && form.MinPlayersPerTeam < rules.minPlayers)
+      { toast.error(`${form.GameType} cần tối thiểu ${rules.minPlayers} thành viên/đội.`); return }
+    if (rules && form.MaxTeams < 2)
+      { toast.error('Giải đấu phải có ít nhất 2 đội.'); return }
+    if (!form.StartDate)
+      { toast.error('Vui lòng chọn ngày bắt đầu.'); return }
     setSubmitting(true)
     try {
-      const r = await fetch('/api/tournaments', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ ...form, StartDate: form.StartDate || new Date().toISOString() }) })
-      if (r.ok) { setShowModal(false); load(); toast.success('Đã tạo giải đấu thành công!') } else { const d = await r.json(); toast.error(d.error ?? 'Tạo giải thất bại.') }
+      const payload = {
+        Name:              form.Name.trim(),
+        GameType:          form.GameType,
+        GameName:          form.GameName,
+        Format:            form.Format,
+        StartDate:         new Date(form.StartDate).toISOString(),
+        MaxTeams:          form.MaxTeams,
+        MinPlayersPerTeam: form.MinPlayersPerTeam,
+      }
+      const r = await fetch('/api/tournaments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(payload)
+      })
+      if (r.ok || r.status === 201) {
+        setShowModal(false)
+        setForm({ Name: '', GameType: 'FPS', GameName: 'Valorant', Format: 'SingleElimination', StartDate: '', MaxTeams: 16, MinPlayersPerTeam: 5 })
+        load()
+        toast.success('Đã tạo giải đấu thành công!')
+      } else {
+        const d = await r.json(); toast.error(d.error ?? 'Tạo giải thất bại.')
+      }
     } catch { toast.error('Không thể kết nối máy chủ.') } finally { setSubmitting(false) }
   }
 
@@ -92,37 +173,50 @@ export default function TournamentsPage() {
     } catch { toast.error('Không thể kết nối máy chủ.') } finally { setGeneratingId(null) }
   }
 
+  const cancelTournament = async (id: number) => {
+    if (!window.confirm('Bạn có chắc muốn hủy giải đấu này? Hành động không thể hoàn tác.')) return
+    try {
+      const r = await fetch(`/api/tournaments/${id}/cancel`, { method: 'PATCH', headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      if (r.ok) { toast.success('Đã hủy giải đấu.'); load() }
+      else { const d = await r.json(); toast.error(d.error ?? 'Không thể hủy giải đấu.') }
+    } catch { toast.error('Không thể kết nối máy chủ.') }
+  }
+
   const inputStyle: React.CSSProperties = { width: '100%', background: c.inputBg, border: `1px solid ${c.panelBorder}`, borderRadius: 8, padding: '10px 12px', color: c.onSurface, fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', transition: 'all 0.2s' }
   const labelStyle: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 700, color: c.onSurfaceVar, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: 6 }
-  const statuses = [['all', 'Tất Cả'], ['draft', 'Bản Nháp'], ['registration', 'Đăng Ký'], ['active', 'Live'], ['completed', 'Hoàn Thành']]
+  const statusLabels = lang === 'vi' ? statusLabelsVI : statusLabelsEN
+  const statuses: [string,string][] = [
+    ['all', t('Tất Cả','All')], ['draft', t('Bản Nháp','Draft')], ['registration', t('Đăng Ký','Registration')],
+    ['active', 'Live'], ['completed', t('Hoàn Thành','Completed')]
+  ]
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: c.surface, color: c.onSurface }}>
 
       {/* Header */}
-      <div style={{ padding: '1.25rem 2rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${c.panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 3, height: 24, borderRadius: 2, background: 'linear-gradient(180deg,#7C3AED,#06B6D4)' }} />
-          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.4rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>QUẢN LÝ GIẢI ĐẤU</h1>
+          <h1 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1.3rem', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>{t('QUẢN LÝ GIẢI ĐẤU','TOURNAMENT MANAGEMENT')}</h1>
           <span style={{ padding: '2px 10px', borderRadius: 999, background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)', color: '#A78BFA', fontSize: '0.75rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{list.length}</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: c.onSurfaceVar, pointerEvents: 'none' }}><MS icon="search" /></span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm giải đấu..." className="nexora-input"
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('Tìm giải đấu...','Search tournament...')} className="nexora-input"
               style={{ ...inputStyle, width: 220, paddingLeft: 36 }} />
           </div>
           {isAdmin && (
             <button onClick={() => setShowModal(true)} className="nexora-btn-primary"
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10, fontSize: '0.875rem', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>
-              <MS icon="add" /><span>TẠO GIẢI ĐẤU</span>
+              <MS icon="add" /><span>{t('TẠO GIẢI ĐẤU','NEW TOURNAMENT')}</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div style={{ padding: '0.75rem 2rem', display: 'flex', gap: 6, borderBottom: `1px solid ${c.panelBorder}`, overflowX: 'auto' }}>
+      <div style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: 6, borderBottom: `1px solid ${c.panelBorder}`, overflowX: 'auto' }}>
         {statuses.map(([v, l]) => {
           const sc = v !== 'all' ? statusColor(v, dark) : null
           return (
@@ -138,7 +232,7 @@ export default function TournamentsPage() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 2rem' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem' }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[1,2,3].map(i => <div key={i} style={{ height: 60, background: 'rgba(22,27,34,0.9)', borderRadius: 12, animation: 'neon-pulse 2s ease-in-out infinite' }} />)}
@@ -154,91 +248,95 @@ export default function TournamentsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${c.panelBorder}` }}>
-                {['#', 'Tên Giải Đấu', 'Thể Loại', 'Thể Thức', 'Trạng Thái', 'Đội', 'Ngày Bắt Đầu', isAdmin ? 'Thao Tác' : ''].filter(Boolean).map(h => (
+                {['#', t('Tên Giải Đấu','Tournament'), t('Thể Loại','Game'), t('Thể Thức','Format'), t('Trạng Thái','Status'), t('Đội','Teams'), t('Ngày Bắt Đầu','Start Date'), isAdmin ? t('Thao Tác','Actions') : ''].filter(Boolean).map(h => (
                   <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: c.onSurfaceVar, fontFamily: "'Rajdhani',sans-serif" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((t, idx) => {
-                const sc = statusColor(t.Status, dark)
-                const gtColor = gameTypeColor(t.GameType)
+              {filtered.map((tr, idx) => {
+                const sc = statusColor(tr.Status, dark)
+                const gtColor = gameTypeColor(tr.GameType)
                 return (
-                  <tr key={t.TournamentID} style={{ borderBottom: `1px solid ${c.panelBorder}40`, transition: 'background 0.15s' }}
+                  <tr key={tr.TournamentID} style={{ borderBottom: `1px solid ${c.panelBorder}40`, transition: 'background 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.04)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.75rem' }}>{String(idx + 1).padStart(2, '0')}</td>
-                    <td style={{ padding: '12px', fontWeight: 600, color: c.onSurface, fontFamily: "'Rajdhani',sans-serif", fontSize: '0.95rem', letterSpacing: '0.03em' }}>{t.Name}</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: c.onSurface, fontFamily: "'Rajdhani',sans-serif", fontSize: '0.95rem', letterSpacing: '0.03em' }}>{tr.Name}</td>
                     <td style={{ padding: '12px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: gtColor }}>
-                        <span style={{ fontSize: 14, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1 }}>
-                          {gameTypeIcon[t.GameType?.toLowerCase()] ?? 'sports_esports'}
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: gtColor }}>
+                          <span style={{ fontSize: 14, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1 }}>
+                            {gameTypeIcon[tr.GameType?.toLowerCase()] ?? 'sports_esports'}
+                          </span>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{tr.GameType}</span>
                         </span>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{t.GameType}</span>
+                        {tr.GameName && <span style={{ fontSize: '0.72rem', color: c.onSurfaceVar, paddingLeft: 20, fontFamily: "'JetBrains Mono',monospace" }}>{tr.GameName}</span>}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{formatLabels[t.Format?.toLowerCase()] ?? t.Format}</td>
+                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{formatLabels[tr.Format?.toLowerCase()] ?? tr.Format}</td>
                     <td style={{ padding: '12px' }}>
                       <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, fontFamily: "'Rajdhani',sans-serif" }}>
-                        {t.Status?.toLowerCase() === 'active' && <span className="live-dot" style={{ marginRight: 5 }} />}
-                        {statusLabels[t.Status?.toLowerCase()] ?? t.Status}
+                        {tr.Status?.toLowerCase() === 'active' && <span className="live-dot" style={{ marginRight: 5 }} />}
+                        {statusLabels[tr.Status?.toLowerCase()] ?? tr.Status}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.8rem' }}>{t.MaxTeams}</td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{t.StartDate ? new Date(t.StartDate).toLocaleDateString('vi-VN') : '—'}</td>
+                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.8rem' }}>{tr.MaxTeams}</td>
+                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{tr.StartDate ? new Date(tr.StartDate).toLocaleDateString('vi-VN') : '—'}</td>
                     {isAdmin && (
                       <td style={{ padding: '12px' }}>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                          {/* Edit button — Draft/Registration only */}
-                          {(t.Status?.toLowerCase() === 'draft' || t.Status?.toLowerCase() === 'registration') && (
-                            <button onClick={() => openEdit(t)}
+
+                          {(tr.Status?.toLowerCase() === 'draft' || tr.Status?.toLowerCase() === 'registration') && (
+                            <button onClick={() => openEdit(tr)}
                               style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
-                              ✏ Sửa
-                            </button>
-                          )}
-                          {/* Edit button — Draft/Registration only */}
-                          {(t.Status?.toLowerCase() === 'draft' || t.Status?.toLowerCase() === 'registration') && (
-                            <button onClick={() => openEdit(t)}
-                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
-                              ✏ Sửa
+                              ✒ {t('Chỉnh sửa','Edit')}
                             </button>
                           )}
                           {/* Advance Status */}
-                          {t.Status !== 'Completed' && t.Status !== 'Cancelled' && (
-                            <button onClick={() => advanceStatus(t.TournamentID)}
+                          {tr.Status !== 'Completed' && tr.Status !== 'Cancelled' && (
+                            <button onClick={() => advanceStatus(tr.TournamentID)}
                               style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.04em', transition: 'all 0.15s', whiteSpace: 'nowrap' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.1)' }}>
-                              Tiến →
+                              {t('Chuyển giai đoạn','Advance')} →
+                            </button>
+                          )}
+                          {/* Cancel Tournament */}
+                          {tr.Status !== 'Completed' && tr.Status !== 'Cancelled' && (
+                            <button onClick={() => cancelTournament(tr.TournamentID)}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#FC8181', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.16)' }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)' }}>
+                              {t('Hủy giải','Cancel')}
                             </button>
                           )}
                           {/* Generate Bracket */}
-                          {t.Status?.toLowerCase() === 'registration' && (
-                            <button onClick={() => generateBracket(t.TournamentID)}
-                              disabled={generatingId === t.TournamentID}
-                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap', opacity: generatingId === t.TournamentID ? 0.6 : 1 }}
+                          {tr.Status?.toLowerCase() === 'registration' && (
+                            <button onClick={() => generateBracket(tr.TournamentID)}
+                              disabled={generatingId === tr.TournamentID}
+                              style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(104,211,145,0.1)', border: '1px solid rgba(104,211,145,0.3)', color: '#68D391', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap', opacity: generatingId === tr.TournamentID ? 0.6 : 1 }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(104,211,145,0.2)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(104,211,145,0.1)' }}>
-                              {generatingId === t.TournamentID ? '⏳ Đang tạo...' : '⚡ Bracket'}
+                              {generatingId === tr.TournamentID ? `⏳ ${t('Đang tạo...','Generating...')}` : `⚡ ${t('Tạo nhánh','Gen Bracket')}`}
                             </button>
                           )}
                           {/* View Bracket */}
-                          {(t.Status?.toLowerCase() === 'active' || t.Status?.toLowerCase() === 'completed') && (
-                            <button onClick={() => nav(`/tournaments/${t.TournamentID}/bracket`)}
+                          {(tr.Status?.toLowerCase() === 'active' || tr.Status?.toLowerCase() === 'completed') && (
+                            <button onClick={() => nav(`/tournaments/${tr.TournamentID}/bracket`)}
                               style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(99,179,237,0.1)', border: '1px solid rgba(99,179,237,0.3)', color: '#63B3ED', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', whiteSpace: 'nowrap' }}
                               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.2)' }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,179,237,0.1)' }}>
-                              🏆 Bracket
+                              🏆 {t('Xem nhánh','Bracket')}
                             </button>
                           )}
                         </div>
                       </td>
                     )}
                   </tr>
+
                 )
               })}
             </tbody>
@@ -261,14 +359,69 @@ export default function TournamentsPage() {
               <div><label style={labelStyle}>Tên giải đấu *</label><input value={form.Name} onChange={e => setForm(f => ({ ...f, Name: e.target.value }))} placeholder="VD: NEXORA Open Cup 2025" style={inputStyle} className="nexora-input" /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>Thể loại</label>
-                  <select value={form.GameType} onChange={e => setForm(f => ({ ...f, GameType: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
+                  <select value={form.GameType} onChange={e => {
+                    const gt = e.target.value
+                    const first = GAME_LIST[gt]?.[0]?.name ?? ''
+                    const rules = GAME_RULES[gt]
+                    const defaultFormat = gt === 'BattleRoyale' ? 'BattleRoyale' : 'SingleElimination'
+                    setForm(f => ({
+                      ...f,
+                      GameType: gt,
+                      GameName: first,
+                      MinPlayersPerTeam: rules?.minPlayers ?? 5,
+                      Format: defaultFormat
+                    }))
+                  }} style={{ ...inputStyle, cursor: 'pointer' }}>
                     {['FPS', 'MOBA', 'BattleRoyale', 'Fighting', 'RTS', 'Sports'].map(g => <option key={g}>{g}</option>)}
                   </select>
                 </div>
                 <div><label style={labelStyle}>Thể thức</label>
                   <select value={form.Format} onChange={e => setForm(f => ({ ...f, Format: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
-                    {['SingleElimination', 'RoundRobin', 'Swiss'].map(f => <option key={f}>{f}</option>)}
+                    {(form.GameType === 'BattleRoyale'
+                      ? ['BattleRoyale']
+                      : ['SingleElimination', 'RoundRobin', 'Swiss']
+                    ).map(f => <option key={f}>{f}</option>)}
                   </select>
+                </div>
+              </div>
+              {/* Game type rule info */}
+              {GAME_RULES[form.GameType] && (
+                <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.18)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", color: '#06B6D4', lineHeight: 1 }}>info</span>
+                  <span style={{ fontSize: '0.75rem', color: '#06B6D4', lineHeight: 1.5 }}>
+                    <strong>{form.GameType}</strong>: {GAME_RULES[form.GameType].teamSizes}/đội · Tối đa {GAME_RULES[form.GameType].maxTeams} đội
+                  </span>
+                </div>
+              )}
+              {/* Game selection */}
+              <div>
+                <label style={labelStyle}>Chọn Game *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {(GAME_LIST[form.GameType] ?? []).map(g => {
+                    const selected = form.GameName === g.name
+                    return (
+                      <button key={g.name} type="button"
+                        onClick={() => setForm(f => ({ ...f, GameName: g.name }))}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
+                          borderRadius: 10, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                          border: selected ? `2px solid ${g.color}` : `1px solid ${c.panelBorder}`,
+                          background: selected ? `${g.color}1a` : c.surfaceContainer,
+                          color: selected ? g.color : c.onSurface,
+                          fontWeight: selected ? 700 : 400,
+                          fontSize: '0.82rem',
+                          transition: 'all 0.15s',
+                          boxShadow: selected ? `0 0 12px ${g.color}30` : 'none'
+                        }}
+                        onMouseEnter={e => { if (!selected) e.currentTarget.style.borderColor = `${g.color}50` }}
+                        onMouseLeave={e => { if (!selected) e.currentTarget.style.borderColor = c.panelBorder }}
+                      >
+                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{g.icon}</span>
+                        <span style={{ fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.02em' }}>{g.name}</span>
+                        {selected && <span style={{ marginLeft: 'auto', fontSize: 14, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 1,'wght' 400", color: g.color }}>check_circle</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

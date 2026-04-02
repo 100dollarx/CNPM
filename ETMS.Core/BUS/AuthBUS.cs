@@ -10,6 +10,31 @@ namespace ETMS.BUS
         public static bool IsAdmin    => CurrentUser?.Role == "Admin";
         public static bool IsCaptain  => CurrentUser?.Role == "Captain";
         public static void Logout() => CurrentUser = null;
+
+        /// <summary>
+        /// Tạo token dạng Base64("userId|role|timestamp") để frontend lưu và gửi lại.
+        /// đối với academic project, này đủ để identify user per-request.
+        /// </summary>
+        public static string BuildToken(int userID, string role)
+        {
+            var payload = $"{userID}|{role}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(payload));
+        }
+
+        /// <summary>Giải mã token và trả về (userID, role) hoặc null nếu không hợp lệ.</summary>
+        public static (int userID, string role)? ParseToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            try
+            {
+                var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
+                var parts   = decoded.Split('|');
+                if (parts.Length < 2) return null;
+                if (!int.TryParse(parts[0], out int uid)) return null;
+                return (uid, parts[1]);
+            }
+            catch { return null; }
+        }
     }
 
     /// <summary>
@@ -52,6 +77,51 @@ namespace ETMS.BUS
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Tên đăng nhập không được trống.");
             if (password.Length < 8) throw new ArgumentException("Mật khẩu phải có ít nhất 8 ký tự.");
             return _dal.InsertUser(username.Trim(), HashPassword(password), fullName, role);
+        }
+
+        /// <summary>
+        /// Cập nhật mật khẩu sau khi xác thực mật khẩu cũ. SRS FR-1.
+        /// </summary>
+        public (bool ok, string error) ChangePassword(int userID, string oldPassword, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8)
+                return (false, "Mật khẩu mới phải có ít nhất 8 ký tự.");
+            if (oldPassword == newPassword)
+                return (false, "Mật khẩu mới không được trùng với mật khẩu cũ.");
+
+            var (user, storedHash) = _dal.GetByUserID(userID);
+            if (user == null) return (false, "Không tìm thấy tài khoản.");
+            if (!VerifyPassword(oldPassword, storedHash))
+                return (false, "Mật khẩu cũ không chính xác.");
+
+            string newHash = HashPassword(newPassword);
+            _dal.UpdatePassword(userID, newHash);
+            return (true, "Mật khẩu đã được cập nhật thành công.");
+        }
+
+        /// <summary>
+        /// Parse Authorization token và set Session.CurrentUser per-request (stateless workaround).
+        /// Gọi mỗi handler cần RBAC để identify user từ token.
+        /// </summary>
+        public static bool SetCurrentUserFromToken(string? authHeader, UserDAL? dal = null)
+        {
+            if (string.IsNullOrWhiteSpace(authHeader)) return false;
+            var token = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                ? authHeader[7..] : authHeader;
+
+            var parsed = Session.ParseToken(token);
+            if (parsed == null) return false;
+
+            var (userID, role) = parsed.Value;
+            // Set a lightweight session object without DB hit (trust token for role)
+            Session.CurrentUser = new UserDTO
+            {
+                UserID   = userID,
+                Username = string.Empty,
+                FullName = string.Empty,
+                Role     = role
+            };
+            return true;
         }
     }
 }
