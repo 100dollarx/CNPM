@@ -4,21 +4,21 @@ using ETMS.DTO;
 namespace ETMS.BUS
 {
     /// <summary>
-    /// DisputeBUS — FR-8: He thong Khieu nai.
+    /// DisputeBUS — FR-9: Hệ thống Khiếu nại.
     /// </summary>
     public class DisputeBUS
     {
         private readonly DisputeDAL _dal = new();
 
-        /// <summary>Captain gui khieu nai.</summary>
+        /// <summary>Captain gửi khiếu nại.</summary>
         public (bool success, string message) FileDispute(int matchID, int teamID,
             string description, string? evidenceURL)
         {
             if (string.IsNullOrWhiteSpace(description))
-                return (false, "Ly do khieu nai khong duoc de trong.");
+                return (false, "Lý do khiếu nại không được để trống.");
 
             if (description.Length > 1000)
-                return (false, "Noi dung khieu nai khong duoc qua 1000 ky tu.");
+                return (false, "Nội dung khiếu nại không được quá 1000 ký tự.");
 
             // Allow URLs (not just file extensions) for web-based evidence
             var dto = new DisputeDTO
@@ -31,37 +31,36 @@ namespace ETMS.BUS
 
             int id = _dal.Insert(dto);
             return id > 0
-                ? (true, $"Tiep nhan thanh cong don khieu nai #{id}.")
-                : (false, "Loi he thong khi luu khieu nai.");
+                ? (true, $"Tiếp nhận thành công đơn khiếu nại #{id}.")
+                : (false, "Lỗi hệ thống khi lưu khiếu nại.");
         }
 
-        /// <summary>Lay tat ca khieu nai theo giai dau.</summary>
+        /// <summary>Lấy tất cả khiếu nại theo giải đấu.</summary>
         public List<DisputeDTO> GetByTournament(int tournamentID) =>
             _dal.GetByTournament(tournamentID);
 
-        /// <summary>Lay tat ca khieu nai (khong filter).</summary>
+        /// <summary>Lấy tất cả khiếu nại (không filter).</summary>
         public List<DisputeDTO> GetAll() =>
             _dal.GetAll();
 
-        /// <summary>Admin giai quyet khieu nai — chap nhan.</summary>
+        /// <summary>Admin giải quyết khiếu nại — chấp nhận.</summary>
         public (bool ok, string message) ResolveDispute(int disputeID, string adminNote)
         {
             if (string.IsNullOrWhiteSpace(adminNote))
-                return (false, "Vui long nhap ghi chu phan quyet.");
+                return (false, "Vui lòng nhập ghi chú phân quyết.");
 
             _dal.Resolve(disputeID, adminNote.Trim());
-            return (true, "Da giai quyet khieu nai thanh cong.");
+            return (true, "Đã giải quyết khiếu nại thành công.");
         }
 
-        /// <summary>Admin bac bo khieu nai.</summary>
+        /// <summary>Admin bác bỏ khiếu nại.</summary>
         public (bool ok, string message) DismissDispute(int disputeID, string adminNote)
         {
             if (string.IsNullOrWhiteSpace(adminNote))
-                return (false, "Vui long nhap ly do bac bo.");
+                return (false, "Vui lòng nhập lý do bác bỏ.");
 
             _dal.Dismiss(disputeID, adminNote.Trim());
-            return (true, "Da bac bo khieu nai.");
+            return (true, "Đã bác bỏ khiếu nại.");
         }
     }
 }
-

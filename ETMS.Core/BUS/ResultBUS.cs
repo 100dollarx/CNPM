@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using ETMS.DAL;
 using ETMS.DTO;
 
@@ -12,10 +9,9 @@ namespace ETMS.BUS
         private readonly MatchDAL _matchDAL = new();
 
         /// <summary>
-        /// NFR-2: File Validation (.jpg/.png, < 5MB).
-        /// Fix B-10: Validate score (không âm, không bằng nhau trong Single Elimination).
+        /// NFR: Validate score hợp lệ. Evidence là URL (SRS NFR-1.5 — không upload file lên server).
         /// </summary>
-        public (bool success, string message) SubmitResult(int matchID, int score1, int score2, string filePath)
+        public (bool success, string message) SubmitResult(int matchID, int score1, int score2, string evidenceURL)
         {
             if (score1 < 0 || score2 < 0)
                 return (false, "Điểm số không được âm.");
@@ -23,23 +19,12 @@ namespace ETMS.BUS
             if (score1 == score2)
                 return (false, "Điểm số không được bằng nhau — cần có đội thắng rõ ràng (Single Elimination).");
 
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                var ext = Path.GetExtension(filePath).ToLower();
-                if (ext != ".jpg" && ext != ".png")
-                    return (false, "Chỉ chấp nhận upload file ảnh định dạng .jpg hoặc .png.");
-
-                var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Exists && fileInfo.Length > 5 * 1024 * 1024)
-                    return (false, "Kích thước file ảnh không được vượt quá 5MB.");
-            }
-
             var dto = new MatchResultDTO
             {
-                MatchID = matchID,
-                Score1 = score1,
-                Score2 = score2,
-                EvidenceURL = filePath,
+                MatchID     = matchID,
+                Score1      = score1,
+                Score2      = score2,
+                EvidenceURL = evidenceURL,
                 SubmittedBy = Session.CurrentUser?.UserID ?? 0
             };
 
@@ -81,14 +66,6 @@ namespace ETMS.BUS
             return (ok, ok ? "Duyệt kết quả thành công. Nhánh đấu đã tự động cập nhật." : "Lỗi DAL khi cập nhật.");
         }
 
-        /// <summary>Overload cho backward compatibility (GUI truyền WinnerID/LoserID).</summary>
-        public (bool success, string message) ApproveResult(int resultID, int matchID, int winnerID, int loserID)
-        {
-            if (!Session.IsAdmin) return (false, "Chỉ Admin mới có quyền duyệt kết quả thi đấu.");
-            _resultDAL.UpdateStatus(resultID, "Verified", Session.CurrentUser!.UserID);
-            bool ok = _matchDAL.SetWinnerAndAdvance(matchID, winnerID, loserID, "Completed");
-            return (ok, ok ? "Duyệt kết quả thành công." : "Lỗi DAL khi cập nhật.");
-        }
         
         public (bool success, string message) RejectResult(int resultID, string reason)
         {

@@ -17,7 +17,7 @@ namespace ETMS.DTO
 
         // Status
         public string Status { get; set; } = "Scheduled";
-        // Scheduled | CheckInOpen | Live | Completed | Walkover | Bye
+        // Scheduled | CheckInOpen | Live | Completed | Walkover | WalkoverPending | Disputed | Postponed | Cancelled
 
         public DateTime? ScheduledTime { get; set; }
         public DateTime? ActualStartTime { get; set; }

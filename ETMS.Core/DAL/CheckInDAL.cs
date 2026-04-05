@@ -123,14 +123,27 @@ namespace ETMS.DAL
                 // Xác định đội thắng: đội nào đã check-in thì thắng
                 int? winnerID = null;
                 int? loserID  = null;
-                if (ci1 && !ci2) { winnerID = t1; loserID = t2; }
-                else if (!ci1 && ci2) { winnerID = t2; loserID = t1; }
-                else { winnerID = t1; loserID = t2; } // cả 2 đều không check-in → Team1 mặc định
+                string finalStatus;
 
-                if (winnerID.HasValue)
+                if (ci1 && !ci2)       { winnerID = t1; loserID = t2; finalStatus = "Walkover"; }
+                else if (!ci1 && ci2)  { winnerID = t2; loserID = t1; finalStatus = "Walkover"; }
+                else
+                {
+                    // Cả 2 đều không check-in → đặt WalkoverPending, chờ Admin xử lý thủ công
+                    using var uc = DBConnection.GetConnection();
+                    uc.Open();
+                    using var us = new SqlCommand(
+                        "UPDATE tblMatch SET Status='WalkoverPending' WHERE MatchID=@id", uc);
+                    us.Parameters.AddWithValue("@id", matchID);
+                    us.ExecuteNonQuery();
+                    affected.Add(matchID);
+                    continue;
+                }
+
+                if (winnerID.HasValue && loserID.HasValue)
                 {
                     var matchDal = new MatchDAL();
-                    matchDal.SetWinnerAndAdvance(matchID, winnerID.Value, loserID ?? 0, "Walkover");
+                    matchDal.SetWinnerAndAdvance(matchID, winnerID.Value, loserID.Value, finalStatus);
                     affected.Add(matchID);
                 }
             }

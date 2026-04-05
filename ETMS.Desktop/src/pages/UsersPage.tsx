@@ -5,7 +5,7 @@ import { getTokens } from '../theme'
 import { useToast } from '../contexts/ToastContext'
 import { useLang } from '../contexts/LangContext'
 
-interface User { UserID: number; Username: string; FullName: string; Role: string; IsLocked: boolean }
+interface User { UserID: number; Username: string; FullName: string; Role: string; IsLocked: boolean; Email?: string; IsActivated?: boolean }
 const MS = ({ icon, size = 18 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0,'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
@@ -53,6 +53,26 @@ export default function UsersPage() {
     toast.success(t(`Đã reset mật khẩu ${u.Username} về: admin`,`Reset password for ${u.Username} to: admin`))
   }
 
+  const resendActivation = async (u: User) => {
+    try {
+      const r = await fetch(`/api/users/${u.UserID}/resend-activation`, { method: 'POST', headers: headers() })
+      const d = await r.json()
+      if (r.ok) toast.success(d.message ?? t('Gửi thành công!','Sent successfully!'))
+      else toast.error(d.error ?? t('Gửi thất bại','Send failed'))
+    } catch { toast.error(t('Không thể kết nối.','Connection failed.')) }
+  }
+
+  const deleteUser = async (u: User) => {
+    if (!confirm(t(`Bạn có chắc muốn XÓA VĨNH VIỄN tài khoản "${u.Username}"?\n\nHành động này không thể hoàn tác!`,
+                    `Are you sure you want to PERMANENTLY DELETE "${u.Username}"?\n\nThis action cannot be undone!`))) return
+    try {
+      const r = await fetch(`/api/users/${u.UserID}`, { method: 'DELETE', headers: headers() })
+      const d = await r.json()
+      if (r.ok) { toast.success(d.message ?? t('Đã xóa!','Deleted!')); load() }
+      else toast.error(d.error ?? t('Xóa thất bại','Delete failed'))
+    } catch { toast.error(t('Không thể kết nối.','Connection failed.')) }
+  }
+
   const handleCreate = async () => {
     if (!form.Username.trim() || !form.FullName.trim()) { setErr(t('Username và Họ tên không được trống.','Username and Full Name are required.')); return }
     setSubmitting(true); setErr('')
@@ -93,7 +113,7 @@ export default function UsersPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${c.panelBorder}` }}>
-                {['#', 'Username', t('Họ Tên','Full Name'), t('Vai Trò','Role'), t('Trạng Thái','Status'), t('Thao Tác','Actions')].map(h => (
+                {['#', 'Username', t('Họ Tên','Full Name'), t('Vai Trò','Role'), t('Trạng Thái','Status'), t('Kích Hoạt','Activated'), t('Thao Tác','Actions')].map(h => (
                   <th key={h} style={{ padding: '10px 10px', textAlign: 'left', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: c.onSurfaceVar, fontFamily: "'Rajdhani',sans-serif", whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -119,7 +139,15 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td style={{ padding: '10px' }}>
-                      <div style={{ display: 'flex', gap: 6 }}>
+                      <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700,
+                        background: u.IsActivated !== false ? 'rgba(104,211,145,0.12)' : 'rgba(246,173,85,0.12)',
+                        color: u.IsActivated !== false ? '#68D391' : '#F6AD55',
+                        fontFamily: "'Rajdhani',sans-serif" }}>
+                        {u.IsActivated !== false ? t('ĐÃ KÍCH HOẠT','ACTIVATED') : t('CHỮA','PENDING')}
+                      </span>
+                    </td>
+                    <td style={{ padding: '10px' }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         <button onClick={() => toggleLock(u)}
                           style={{ padding: '5px 10px', borderRadius: 7, background: u.IsLocked ? 'rgba(104,211,145,0.1)' : 'rgba(252,129,129,0.1)', border: `1px solid ${u.IsLocked ? 'rgba(104,211,145,0.3)' : 'rgba(252,129,129,0.3)'}`, color: u.IsLocked ? '#68D391' : '#FC8181', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                           <MS icon={u.IsLocked ? "lock_open" : "lock"} size={13} />{u.IsLocked ? t('MỞ KHÓA','UNLOCK') : t('KHÓA','LOCK')}
@@ -128,6 +156,18 @@ export default function UsersPage() {
                           style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                           <MS icon="key" size={13} />RESET MK
                         </button>
+                        {u.IsActivated === false && u.Email && (
+                          <button onClick={() => resendActivation(u)}
+                            style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', color: '#22D3EE', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+                            <MS icon="send" size={13} />{t('GỬI LẠI LINK','RESEND LINK')}
+                          </button>
+                        )}
+                        {u.Role?.toLowerCase() !== 'admin' && (
+                          <button onClick={() => deleteUser(u)}
+                            style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Rajdhani',sans-serif", transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+                            <MS icon="delete" size={13} />{t('XÓA','DELETE')}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

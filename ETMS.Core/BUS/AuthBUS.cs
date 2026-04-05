@@ -175,7 +175,7 @@ namespace ETMS.BUS
         public int RegisterUser(string username, string password, string fullName, string role)
         {
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Tên đăng nhập không được trống.");
-            if (password.Length < 8) throw new ArgumentException("Mật khẩu phải có ít nhất 8 ký tự.");
+            if (password.Length < 6) throw new ArgumentException("Mật khẩu phải có ít nhất 6 ký tự.");
             return _dal.InsertUser(username.Trim(), HashPassword(password), fullName, role);
         }
 
@@ -212,7 +212,11 @@ namespace ETMS.BUS
             if (parsed == null) return false;
 
             var (userID, role) = parsed.Value;
-            Session.CurrentUser = new UserDTO
+
+            // Load user đầy đủ từ DB (nếu có DAL), fallback sang minimal DTO nếu không có
+            dal ??= new UserDAL();
+            var dbUser = dal.GetByID(userID);
+            Session.CurrentUser = dbUser ?? new UserDTO
             {
                 UserID   = userID,
                 Username = string.Empty,

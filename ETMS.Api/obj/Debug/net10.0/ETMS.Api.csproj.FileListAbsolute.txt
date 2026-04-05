@@ -150,3 +150,6 @@ C:\Users\Admin\Desktop\Đồ Án CNPM\Design\CNPM\ETMS.Api\obj\Debug\net10.0\ref
 C:\Users\Admin\Desktop\Đồ Án CNPM\Design\CNPM\ETMS.Api\obj\Debug\net10.0\ETMS.Api.pdb
 C:\Users\Admin\Desktop\Đồ Án CNPM\Design\CNPM\ETMS.Api\obj\Debug\net10.0\ETMS.Api.genruntimeconfig.cache
 C:\Users\Admin\Desktop\Đồ Án CNPM\Design\CNPM\ETMS.Api\obj\Debug\net10.0\ref\ETMS.Api.dll
+e:\Công nghệ phần mềm\Final\ETMS.Api\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
+e:\Công nghệ phần mềm\Final\ETMS.Api\bin\Debug\net10.0\MailKit.dll
+e:\Công nghệ phần mềm\Final\ETMS.Api\bin\Debug\net10.0\MimeKit.dll

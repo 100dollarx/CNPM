@@ -5,6 +5,7 @@ import { LangProvider } from './contexts/LangContext'
 import { ToastProvider } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import MainLayout from './layouts/MainLayout'
 import DashboardPage from './pages/DashboardPage'
 import TournamentsPage from './pages/TournamentsPage'
@@ -22,6 +23,9 @@ import MapVetoPage from './pages/MapVetoPage'
 import ResultSubmitPage from './pages/ResultSubmitPage'
 import SideSelectPage from './pages/SideSelectPage'
 import BRScoringPage from './pages/BRScoringPage'
+import RegisterPage from './pages/RegisterPage'
+import ActivatePage from './pages/ActivatePage'
+import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
@@ -31,7 +35,10 @@ export default function App() {
           <AuthProvider>
             <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login"    element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/activate" element={<ActivatePage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route element={<MainLayout />}>
@@ -41,6 +48,7 @@ export default function App() {
                   <Route path="/teams"         element={<TeamsPage />} />
                   <Route path="/matches"       element={<MatchesPage />} />
                   <Route path="/disputes"      element={<DisputesPage />} />
+                  <Route path="/profile"       element={<ProfilePage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
 
                   {/* Admin pages */}

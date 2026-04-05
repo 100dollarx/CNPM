@@ -1,4 +1,5 @@
 using ETMS.DAL;
+using ETMS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,18 @@ ETMS.BUS.Session.JwtExpireMinutes = int.TryParse(jwtSection["ExpiresMinutes"], o
 ETMS.BUS.Session.JwtIssuer        = jwtSection["Issuer"]        ?? ETMS.BUS.Session.JwtIssuer;
 ETMS.BUS.Session.JwtAudience      = jwtSection["Audience"]      ?? ETMS.BUS.Session.JwtAudience;
 Console.WriteLine($"[JWT] Configured — Issuer={ETMS.BUS.Session.JwtIssuer}, Expire={ETMS.BUS.Session.JwtExpireMinutes}min");
+
+// ── Email Service Configuration ──────────────────────────────────────────
+var emailSection = builder.Configuration.GetSection("EmailSettings");
+EmailService.SmtpHost   = emailSection["SmtpHost"]   ?? "smtp.gmail.com";
+EmailService.SmtpPort   = int.TryParse(emailSection["SmtpPort"], out var port) ? port : 587;
+EmailService.Username   = emailSection["Username"]   ?? "";
+EmailService.Password   = emailSection["Password"]   ?? "";
+EmailService.FromEmail  = emailSection["FromEmail"]  ?? "";
+EmailService.FromName   = emailSection["FromName"]   ?? "Nexora";
+EmailService.TokenHours = int.TryParse(emailSection["TokenHours"], out var th) ? th : 24;
+EmailService.BaseUrl    = emailSection["BaseUrl"]    ?? "http://localhost:5000";
+Console.WriteLine($"[Email] Configured — Host={EmailService.SmtpHost}, From={EmailService.FromEmail}");
 
 // ── Services ───────────────────────────────────────────────────────────────────
 builder.Services.AddCors(opt =>
@@ -38,12 +51,18 @@ try
 {
     using var migConn = DBConnection.GetConnection();
     migConn.Open();
-    // Chạy từng câu ALTER TABLE riêng biệt để tránh lỗi batch parsing
     var migrations = new[]
     {
-        "IF COL_LENGTH('tblTournament','GameName')    IS NULL ALTER TABLE tblTournament ADD GameName    NVARCHAR(100) NULL",
-        "IF COL_LENGTH('tblTournament','Description') IS NULL ALTER TABLE tblTournament ADD Description NVARCHAR(MAX) NULL",
-        "IF COL_LENGTH('tblMatch','NextMatchSlot')    IS NULL ALTER TABLE tblMatch      ADD NextMatchSlot INT NULL",
+        "IF COL_LENGTH('tblTournament','GameName')       IS NULL ALTER TABLE tblTournament ADD GameName       NVARCHAR(100) NULL",
+        "IF COL_LENGTH('tblTournament','Description')    IS NULL ALTER TABLE tblTournament ADD Description    NVARCHAR(MAX) NULL",
+        "IF COL_LENGTH('tblMatch','NextMatchSlot')       IS NULL ALTER TABLE tblMatch      ADD NextMatchSlot  INT NULL",
+        // ── Email Activation columns (thêm vào DB cũ nếu chưa có) ───────────────
+        "IF COL_LENGTH('tblUser','Email')             IS NULL ALTER TABLE tblUser ADD Email             NVARCHAR(150) NULL",
+        "IF COL_LENGTH('tblUser','ActivationToken')   IS NULL ALTER TABLE tblUser ADD ActivationToken   VARCHAR(128)  NULL",
+        "IF COL_LENGTH('tblUser','ActivationExpires') IS NULL ALTER TABLE tblUser ADD ActivationExpires DATETIME      NULL",
+        "IF COL_LENGTH('tblUser','IsActivated')       IS NULL ALTER TABLE tblUser ADD IsActivated       BIT NOT NULL DEFAULT 1",
+        "IF COL_LENGTH('tblUser','MustChangePassword')IS NULL ALTER TABLE tblUser ADD MustChangePassword BIT NOT NULL DEFAULT 0",
+        "IF COL_LENGTH('tblUser','Phone')             IS NULL ALTER TABLE tblUser ADD Phone              NVARCHAR(20)  NULL",
     };
     foreach (var sql in migrations)
     {
@@ -69,6 +88,14 @@ app.MapGet("/api/health", () => new
 app.MapPost("/api/auth/login",           ETMS.Api.Handlers.AuthHandler.Login);
 app.MapPost("/api/auth/logout",          ETMS.Api.Handlers.AuthHandler.Logout);
 app.MapPatch("/api/auth/change-password", ETMS.Api.Handlers.AuthHandler.ChangePassword);
+// ── Register + Email Activation + Forgot Password ──────────────────────
+app.MapPost("/api/auth/register",        ETMS.Api.Handlers.RegisterHandler.Register);
+app.MapGet("/api/auth/activate",         ETMS.Api.Handlers.RegisterHandler.Activate);
+app.MapPost("/api/auth/forgot-password", ETMS.Api.Handlers.UserHandler.ForgotPassword);
+app.MapPost("/api/auth/reset-password",  ETMS.Api.Handlers.UserHandler.ResetPasswordByToken);
+// ── Profile ─────────────────────────────────────────────────────────────
+app.MapGet("/api/auth/profile",  ETMS.Api.Handlers.UserHandler.GetProfile);
+app.MapPatch("/api/auth/profile", ETMS.Api.Handlers.UserHandler.UpdateProfile);
 
 // DEV ONLY: Generate BCrypt hash
 app.MapGet("/api/auth/hash", (string pwd) =>
@@ -271,6 +298,10 @@ app.MapGet("/api/users",                         ETMS.Api.Handlers.UserHandler.G
 app.MapPost("/api/users",                        ETMS.Api.Handlers.UserHandler.CreateUser);
 app.MapPatch("/api/users/{id:int}/lock",         ETMS.Api.Handlers.UserHandler.ToggleLock);
 app.MapPost("/api/users/{id:int}/reset-password",ETMS.Api.Handlers.UserHandler.ResetPassword);
+app.MapPost("/api/users/{id:int}/resend-activation", ETMS.Api.Handlers.UserHandler.ResendActivation);
+app.MapDelete("/api/users/{id:int}",     ETMS.Api.Handlers.UserHandler.DeleteUser);
+// ── User self-delete ──────────────────────────────────────────────────────
+app.MapPost("/api/auth/delete-account", ETMS.Api.Handlers.UserHandler.SelfDelete);
 
 // ── Audit ─────────────────────────────────────────────────────────────────────
 app.MapGet("/api/audit-log",                     ETMS.Api.Handlers.AuditHandler.GetLog);

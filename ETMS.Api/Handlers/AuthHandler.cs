@@ -17,8 +17,16 @@ public static class AuthHandler
         if (!success)
             return Results.Json(new { error = message }, statusCode: 401);
 
+        // Kiểm tra tài khoản đã kích hoạt chưa (email activation)
+        var dal = new UserDAL();
+        if (!dal.IsActivated(req.Username))
+            return Results.Json(new
+            {
+                error = "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để nhấn link kích hoạt.",
+                hint  = "Kiểm tra cả hộp thư Spam/Junk. Nếu hết hạn, liên hệ Admin."
+            }, statusCode: 403);
+
         var user  = Session.CurrentUser!;
-        // Token mới encode userId|role để API parse per-request (stateless session workaround)
         var token = Session.BuildToken(user.UserID, user.Role);
 
         return Results.Ok(new

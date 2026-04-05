@@ -91,8 +91,81 @@ Tài liệu này đặc tả đầy đủ yêu cầu chức năng và phi chức
 - **Actor:** Admin
 - **Chức năng:** Tạo/xóa tài khoản; Khóa/mở khóa; Reset mật khẩu; Phân vai (Admin/Captain/Player/Guest)
 - **Ràng buộc:** Không thể xóa tài khoản Admin duy nhất của hệ thống
-- **API:** `GET /api/users` | `POST /api/users` | `PATCH /api/users/{id}/lock` | `PATCH /api/users/{id}/reset-password`
-- **Page:** `UserManagementPage.tsx`
+- **API:** `GET /api/users` | `POST /api/users` | `PATCH /api/users/{id}/lock` | `POST /api/users/{id}/reset-password` | `DELETE /api/users/{id}`
+- **Page:** `UsersPage.tsx`
+
+#### UC-1.5: Đăng ký tài khoản qua Email
+- **Actor:** Guest (chưa có tài khoản)
+- **Precondition:** Ứng dụng đang chạy, tab Đăng Ký hiển thị
+- **Luồng chính:**
+  1. Người dùng nhập Username, Họ tên, Email, Mật khẩu, Xác nhận mật khẩu
+  2. Frontend validate: username ≥ 3 ký tự, email hợp lệ, mật khẩu ≥ 8 ký tự (có chữ hoa, số, ký tự đặc biệt), mật khẩu xác nhận khớp
+  3. Gọi `POST /api/auth/register`
+  4. Backend kiểm tra: username/email chưa tồn tại, tạo `ActivationToken` (64 hex chars), lưu user với `IsActivated=0`
+  5. Gửi email kích hoạt qua SMTP (HTML template branding NEXORA)
+  6. Hiển thị thông báo: "Vui lòng kiểm tra email để kích hoạt tài khoản"
+- **Luồng ngoại lệ:**
+  - Username/Email đã tồn tại → thông báo lỗi cụ thể
+  - Gửi email thất bại → xóa user chưa kích hoạt, thông báo lỗi
+- **Postcondition:** User tồn tại trong DB với `IsActivated=0`, email kích hoạt đã gửi
+- **API:** `POST /api/auth/register` → `{ message: "Đăng ký thành công..." }`
+- **Page:** `LoginPage.tsx` (tab Đăng Ký) + `RegisterPage.tsx`
+
+#### UC-1.6: Kích hoạt tài khoản
+- **Actor:** Guest (vừa đăng ký)
+- **Precondition:** Email kích hoạt đã nhận, link chưa hết hạn (24h)
+- **Luồng chính:**
+  1. Người dùng bấm link trong email → mở `ActivatePage.tsx?token=xxx`
+  2. Frontend gọi `GET /api/auth/activate?token=xxx`
+  3. Backend tìm user theo `ActivationToken`, kiểm tra chưa hết hạn
+  4. Set `IsActivated=1` → trả thành công
+  5. Hiển thị trang xác nhận kích hoạt thành công
+- **Luồng ngoại lệ:**
+  - Token không tồn tại hoặc hết hạn → thông báo lỗi, hướng dẫn đăng ký lại
+  - Token đã kích hoạt (idempotent) → thông báo "Tài khoản đã kích hoạt trước đó"
+- **Ràng buộc:** Xử lý idempotent (React 18 Strict Mode double-fire safe), token giữ lại sau kích hoạt
+- **API:** `GET /api/auth/activate?token=xxx`
+- **Page:** `ActivatePage.tsx`
+
+#### UC-1.7: Quên mật khẩu (khôi phục qua Email)
+- **Actor:** Tất cả (đã có tài khoản + email)
+- **Precondition:** Người dùng quên mật khẩu, có email đã đăng ký
+- **Luồng chính:**
+  1. Tại trang đăng nhập, bấm "Quên mật khẩu?"
+  2. Nhập email → gọi `POST /api/auth/forgot-password`
+  3. Backend tìm user theo email, tạo `ResetToken` (64 hex, hết hạn 1h)
+  4. Gửi email chứa link đặt lại mật khẩu (HTML template NEXORA)
+  5. Luôn trả "Thành công" — không tiết lộ email có tồn tại hay không (bảo mật)
+  6. Người dùng bấm link → mở `ResetPasswordPage.tsx?token=xxx`
+  7. Nhập mật khẩu mới + xác nhận → gọi `POST /api/auth/reset-password`
+  8. Backend validate token, hash mật khẩu mới, xóa token
+- **Ràng buộc:** Response luôn 200 (chống enumeration attack)
+- **API:** `POST /api/auth/forgot-password` | `POST /api/auth/reset-password`
+- **Page:** `LoginPage.tsx` (popup) + `ResetPasswordPage.tsx`
+
+#### UC-1.8: Xem & Cập nhật thông tin cá nhân
+- **Actor:** Admin, Captain, Player
+- **Precondition:** Đã đăng nhập
+- **Luồng chính:**
+  1. Bấm menu "Thông Tin" trên sidebar
+  2. Hiển thị: Avatar, Username (readonly), Role, Trạng thái kích hoạt
+  3. Form chỉnh sửa: Họ tên (*), Email, Số điện thoại
+  4. Bấm "Lưu thay đổi" → gọi `PATCH /api/auth/profile`
+  5. Backend validate: Họ tên không trống, email hợp lệ, SĐT format `[0-9+\-\s]{7,20}`
+- **API:** `GET /api/auth/profile` | `PATCH /api/auth/profile`
+- **Page:** `ProfilePage.tsx`
+
+#### UC-1.9: Xóa tài khoản
+- **Sub-case A – Admin xóa user:**
+  - Admin chọn user trong `UsersPage` → nút "XÓA" → confirm dialog
+  - `DELETE /api/users/{id}` — xóa toàn bộ bản ghi liên quan (notifications, players, teams, audit SET NULL) + xóa user
+  - Không cho xóa tài khoản admin hoặc chính mình
+- **Sub-case B – User tự xóa:**
+  - User gọi `POST /api/auth/delete-account` với `{ Password: "..." }`
+  - Backend xác minh mật khẩu trước khi xóa
+  - Cùng logic cleanup transactional như admin delete
+- **Ràng buộc:** Tất cả FK dependencies được xử lý trong transaction
+- **API:** `DELETE /api/users/{id}` (Admin) | `POST /api/auth/delete-account` (Self)
 
 ---
 

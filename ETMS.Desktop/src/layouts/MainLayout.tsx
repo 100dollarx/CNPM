@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/teams',         icon: 'groups',          vi: 'Đội Tuyển',    en: 'Teams'        },
   { to: '/matches',       icon: 'sports_esports',  vi: 'Trận Đấu',     en: 'Matches'      },
   { to: '/disputes',      icon: 'gavel',           vi: 'Khiếu Nại',   en: 'Disputes'     },
+  { to: '/profile',       icon: 'person',          vi: 'Thông Tin',    en: 'Profile'      },
   { to: '/notifications', icon: 'notifications',   vi: 'Thông Báo',    en: 'Notifications'},
 ]
 const ADMIN_NAV = [

@@ -12,7 +12,7 @@ public static class TeamHandler
             var bus  = new TeamBUS();
             var list = tournamentId.HasValue
                 ? bus.GetByTournament(tournamentId.Value)
-                : bus.GetByTournament(0);
+                : bus.GetAllTeams();
             return Results.Ok(new { data = list, total = list.Count });
         }
         catch (Exception ex)
@@ -37,10 +37,11 @@ public static class TeamHandler
         }
     }
 
-    public static IResult Create(CreateTeamRequest req)
+    public static IResult Create(CreateTeamRequest req, HttpContext ctx)
     {
         try
         {
+            AuthBUS.SetCurrentUserFromToken(ctx.Request.Headers.Authorization);
             if (string.IsNullOrWhiteSpace(req.Name))
                 return Results.BadRequest(new { error = "Tên đội không được để trống." });
 

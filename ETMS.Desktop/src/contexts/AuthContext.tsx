@@ -10,7 +10,7 @@ interface User {
 interface AuthContextType {
   user: User | null
   token: string | null
-  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string; status?: number }>
   logout: () => void
   isAdmin: boolean
   isCaptain: boolean
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       clearTimeout(timer)
       const data = await res.json()
-      if (!res.ok) return { ok: false, error: data.error ?? 'Login failed.' }
+      if (!res.ok) return { ok: false, error: data.error ?? 'Login failed.', status: res.status }
       const normalized = normalizeUser(data.user)
       setUser(normalized); setToken(data.token)
       sessionStorage.setItem('etms_user', JSON.stringify(normalized))

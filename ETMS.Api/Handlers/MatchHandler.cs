@@ -39,8 +39,9 @@ public static class MatchHandler
             return Results.BadRequest(new { error = "Action phải là 'ban' hoặc 'pick'." });
 
         var dal = new ETMS.DAL.MatchDAL();
-        dal.SaveMapVeto(id, req.TeamID, req.Map, req.Action.ToLower());
-        return Results.Ok(new { matchId = id, teamId = req.TeamID, map = req.Map, action = req.Action, status = "recorded" });
+        string action = char.ToUpper(req.Action[0]) + req.Action[1..].ToLower(); // "ban"→"Ban", "pick"→"Pick"
+        dal.SaveMapVeto(id, req.TeamID, req.Map, action);
+        return Results.Ok(new { matchId = id, teamId = req.TeamID, map = req.Map, action, status = "recorded" });
     }
 
     public static IResult SelectSide(int id, SideRequest req)
@@ -51,8 +52,9 @@ public static class MatchHandler
             return Results.BadRequest(new { error = "Side phải là 'blue' hoặc 'red'." });
 
         var dal = new ETMS.DAL.MatchDAL();
-        dal.SaveSideSelection(id, req.TeamID, req.Side.ToLower());
-        return Results.Ok(new { matchId = id, teamId = req.TeamID, side = req.Side, status = "recorded" });
+        string side = char.ToUpper(req.Side[0]) + req.Side[1..].ToLower(); // "blue"→"Blue", "red"→"Red"
+        dal.SaveSideSelection(id, req.TeamID, side);
+        return Results.Ok(new { matchId = id, teamId = req.TeamID, side, status = "recorded" });
     }
 }
 
