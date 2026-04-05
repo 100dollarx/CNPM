@@ -5,6 +5,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useLang } from '../contexts/LangContext'
 import { getTokens, NEXORA_GLOBAL_CSS } from '../theme'
 
+
 const MS = ({ icon, size = 20 }: { icon: string; size?: number }) => (
   <span style={{ fontSize: size, fontFamily: 'Material Symbols Outlined', fontVariationSettings: "'FILL' 0, 'wght' 400", lineHeight: 1, userSelect: 'none', display: 'inline-block' }}>{icon}</span>
 )
@@ -18,12 +19,13 @@ const NAV_ITEMS = [
   { to: '/notifications', icon: 'notifications',   vi: 'Thông Báo',    en: 'Notifications'},
 ]
 const ADMIN_NAV = [
-  { to: '/users',     icon: 'manage_accounts', vi: 'Quản Lý User', en: 'Users'     },
-  { to: '/audit-log', icon: 'history',         vi: 'Audit Log',    en: 'Audit Log' },
+  { to: '/users',      icon: 'manage_accounts', vi: 'Quản Lý User', en: 'Users'      },
+  { to: '/audit-log',  icon: 'history',         vi: 'Audit Log',    en: 'Audit Log'  },
+  { to: '/br-scoring', icon: 'military_tech',   vi: 'BR Scoring',   en: 'BR Scoring' },
 ]
 
 export default function MainLayout() {
-  const { user, logout, isAdmin } = useAuth()
+  const { user, logout, isAdmin, token } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
   const { lang, toggle: toggleLang } = useLang()
   const c = getTokens(dark)
@@ -32,6 +34,53 @@ export default function MainLayout() {
   const [unreadCount, setUnreadCount] = useState(0)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const W = collapsed ? 64 : 224
+
+  // ── Change Password Modal state ───────────────────────────────────────────
+  const [showCPModal, setShowCPModal] = useState(false)
+  const [cpOld, setCpOld]       = useState('')
+  const [cpNew, setCpNew]       = useState('')
+  const [cpConfirm, setCpConfirm] = useState('')
+  const [cpLoading, setCpLoading] = useState(false)
+  const [cpMsg, setCpMsg]       = useState<{ text: string; ok: boolean } | null>(null)
+
+  const openCPModal = () => {
+    setCpOld(''); setCpNew(''); setCpConfirm(''); setCpMsg(null)
+    setShowCPModal(true)
+  }
+  const closeCPModal = () => setShowCPModal(false)
+
+  const handleChangePassword = async () => {
+    setCpMsg(null)
+    if (!cpOld || !cpNew || !cpConfirm)
+      return setCpMsg({ text: 'Vui lòng nhập đầy đủ các trường.', ok: false })
+    if (cpNew.length < 8)
+      return setCpMsg({ text: 'Mật khẩu mới phải có ít nhất 8 ký tự.', ok: false })
+    if (cpNew !== cpConfirm)
+      return setCpMsg({ text: 'Xác nhận mật khẩu không khớp.', ok: false })
+    if (cpOld === cpNew)
+      return setCpMsg({ text: 'Mật khẩu mới không được trùng mật khẩu cũ.', ok: false })
+
+    setCpLoading(true)
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ OldPassword: cpOld, NewPassword: cpNew }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setCpMsg({ text: '✅ Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', ok: true })
+        setTimeout(() => { closeCPModal(); logout(); navigate('/login') }, 2000)
+      } else {
+        setCpMsg({ text: data.error ?? 'Đổi mật khẩu thất bại.', ok: false })
+      }
+    } catch {
+      setCpMsg({ text: 'Không kết nối được server.', ok: false })
+    } finally {
+      setCpLoading(false)
+    }
+  }
+
 
   // Notification polling every 30s
   useEffect(() => {
@@ -220,6 +269,16 @@ export default function MainLayout() {
               {!collapsed && <span>{dark ? L('Sáng', 'Light') : L('Tối', 'Dark')}</span>}
             </button>
 
+            {/* Change Password button */}
+            <button onClick={openCPModal}
+              title={L('Đổi mật khẩu', 'Change Password')}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', background: 'transparent', border: `1px solid ${c.panelBorder}`, borderRadius: 8, cursor: 'pointer', color: c.onSurfaceVar, fontSize: '0.82rem', transition: 'all 0.15s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(233,69,96,0.08)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(233,69,96,0.4)'; (e.currentTarget as HTMLButtonElement).style.color = '#E94560' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.borderColor = c.panelBorder; (e.currentTarget as HTMLButtonElement).style.color = c.onSurfaceVar }}>
+              <MS icon="key" size={18} />
+              {!collapsed && <span>{L('Đổi MK', 'Password')}</span>}
+            </button>
+
             {/* Logout */}
             <button onClick={() => { logout(); navigate('/login') }}
               title={L('Đăng xuất', 'Logout')}
@@ -231,12 +290,104 @@ export default function MainLayout() {
             </button>
           </header>
 
+
           {/* Page content */}
           <main style={{ flex: 1, overflow: 'hidden', background: c.surface }}>
             <Outlet />
           </main>
         </div>
       </div>
+
+      {/* ── Change Password Modal ───────────────────────────────────────────── */}
+      {showCPModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} onClick={closeCPModal}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: dark ? '#1A1F2E' : '#fff',
+            border: `1px solid ${dark ? 'rgba(233,69,96,0.3)' : 'rgba(201,33,64,0.2)'}`,
+            borderRadius: 16,
+            padding: '2rem',
+            width: 420, maxWidth: '95vw',
+            boxShadow: dark ? '0 24px 64px rgba(0,0,0,0.6)' : '0 12px 40px rgba(0,0,0,0.15)',
+            fontFamily: "'Inter',system-ui,sans-serif",
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.5rem' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg,#E94560,#7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MS icon="key" size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: c.onSurface }}>
+                  {L('Đổi Mật Khẩu', 'Change Password')}
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: c.outline }}>{user?.Username}</p>
+              </div>
+              <button onClick={closeCPModal} style={{ marginLeft: 'auto', background: 'transparent', border: 'none', cursor: 'pointer', color: c.outline, padding: 4 }}>
+                <MS icon="close" size={20} />
+              </button>
+            </div>
+
+            {/* Fields */}
+            {[
+              { label: L('Mật khẩu hiện tại', 'Current Password'), val: cpOld, set: setCpOld },
+              { label: L('Mật khẩu mới (≥8 ký tự)', 'New Password (≥8 chars)'), val: cpNew, set: setCpNew },
+              { label: L('Xác nhận mật khẩu mới', 'Confirm New Password'), val: cpConfirm, set: setCpConfirm },
+            ].map(({ label, val, set }) => (
+              <div key={label} style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: c.onSurfaceVar, marginBottom: 6 }}>{label}</label>
+                <input
+                  type="password"
+                  value={val}
+                  onChange={e => set(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
+                  disabled={cpLoading}
+                  style={{
+                    width: '100%', padding: '0.55rem 0.75rem',
+                    background: dark ? 'rgba(255,255,255,0.05)' : '#f8f9fa',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : '#dee2e6'}`,
+                    borderRadius: 8, color: c.onSurface, fontSize: '0.9rem',
+                    outline: 'none', boxSizing: 'border-box',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onFocus={e => (e.target.style.borderColor = '#E94560')}
+                  onBlur={e => (e.target.style.borderColor = dark ? 'rgba(255,255,255,0.12)' : '#dee2e6')}
+                />
+              </div>
+            ))}
+
+            {/* Message */}
+            {cpMsg && (
+              <div style={{
+                padding: '0.6rem 0.9rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.83rem',
+                background: cpMsg.ok ? 'rgba(52,211,153,0.1)' : 'rgba(233,69,96,0.1)',
+                border: `1px solid ${cpMsg.ok ? 'rgba(52,211,153,0.3)' : 'rgba(233,69,96,0.3)'}`,
+                color: cpMsg.ok ? '#34D399' : '#E94560',
+              }}>{cpMsg.text}</div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button onClick={closeCPModal} disabled={cpLoading} style={{
+                padding: '0.55rem 1.2rem', borderRadius: 8, border: `1px solid ${c.panelBorder}`,
+                background: 'transparent', color: c.onSurfaceVar, cursor: 'pointer', fontSize: '0.88rem',
+              }}>{L('Hủy', 'Cancel')}</button>
+              <button onClick={handleChangePassword} disabled={cpLoading} style={{
+                padding: '0.55rem 1.4rem', borderRadius: 8, border: 'none',
+                background: cpLoading ? '#6B7280' : 'linear-gradient(135deg,#E94560,#7C3AED)',
+                color: '#fff', cursor: cpLoading ? 'not-allowed' : 'pointer',
+                fontSize: '0.88rem', fontWeight: 600,
+                boxShadow: cpLoading ? 'none' : '0 0 12px rgba(233,69,96,0.4)',
+                transition: 'all 0.2s',
+              }}>
+                {cpLoading ? L('Đang xử lý...', 'Processing...') : L('Xác Nhận', 'Confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

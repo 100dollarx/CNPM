@@ -126,9 +126,11 @@ namespace ETMS.DAL
             var list = new List<PlayerDTO>();
             using var conn = DBConnection.GetConnection();
             conn.Open();
-            // Fix: tblPlayer does NOT have FullName column (only UserID, InGameID, IsActive)
+            // COALESCE: ưu tiên FullName tự nhập (p.FullName), fallback sang tài khoản (u.FullName)
             const string sql = @"
-                SELECT p.PlayerID, p.TeamID, p.UserID, u.FullName, p.InGameID, p.IsActive
+                SELECT p.PlayerID, p.TeamID, p.UserID,
+                       COALESCE(p.FullName, u.FullName, '') AS FullName,
+                       p.InGameID, p.IsActive
                 FROM tblPlayer p
                 LEFT JOIN tblUser u ON u.UserID = p.UserID
                 WHERE p.TeamID = @tid AND p.IsActive = 1";
@@ -141,7 +143,7 @@ namespace ETMS.DAL
                     PlayerID = dr.GetInt32(0),
                     TeamID   = dr.GetInt32(1),
                     UserID   = dr.IsDBNull(2) ? null : dr.GetInt32(2),
-                    FullName = dr.IsDBNull(3) ? "" : dr.GetString(3),
+                    FullName = dr.GetString(3),
                     InGameID = dr.GetString(4),
                     IsActive = dr.GetBoolean(5)
                 });
@@ -176,17 +178,20 @@ namespace ETMS.DAL
         {
             using var conn = DBConnection.GetConnection();
             conn.Open();
+            // Giờ lưu cả FullName (tự nhập) và UserID (nullable)
             const string sql = @"
-                INSERT INTO tblPlayer (TeamID,UserID,FullName,InGameID)
-                VALUES (@tid,@uid,@fn,@ign);
+                INSERT INTO tblPlayer (TeamID, UserID, FullName, InGameID)
+                VALUES (@tid, @uid, @fn, @ign);
                 SELECT SCOPE_IDENTITY();";
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@tid", dto.TeamID);
             cmd.Parameters.AddWithValue("@uid", (object?)dto.UserID ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@fn",  dto.FullName);
+            cmd.Parameters.AddWithValue("@fn",  string.IsNullOrWhiteSpace(dto.FullName)
+                                                    ? DBNull.Value : (object)dto.FullName.Trim());
             cmd.Parameters.AddWithValue("@ign", dto.InGameID);
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
+
 
         public void RemovePlayer(int playerID)
         {

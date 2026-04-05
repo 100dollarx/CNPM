@@ -7,6 +7,15 @@ var connStr = builder.Configuration.GetConnectionString("ETMSConnection")
     ?? throw new InvalidOperationException("Connection string 'ETMSConnection' not found.");
 DBConnection.Configure(connStr);
 
+// ── JWT Configuration → Session (SRS NFR-1.1) ─────────────────────────────
+// Đọc từ appsettings.json để tránh hardcode secret trong source code
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+ETMS.BUS.Session.JwtSecret        = jwtSection["Secret"]        ?? ETMS.BUS.Session.JwtSecret;
+ETMS.BUS.Session.JwtExpireMinutes = int.TryParse(jwtSection["ExpiresMinutes"], out var exp) ? exp : 30;
+ETMS.BUS.Session.JwtIssuer        = jwtSection["Issuer"]        ?? ETMS.BUS.Session.JwtIssuer;
+ETMS.BUS.Session.JwtAudience      = jwtSection["Audience"]      ?? ETMS.BUS.Session.JwtAudience;
+Console.WriteLine($"[JWT] Configured — Issuer={ETMS.BUS.Session.JwtIssuer}, Expire={ETMS.BUS.Session.JwtExpireMinutes}min");
+
 // ── Services ───────────────────────────────────────────────────────────────────
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(p =>
@@ -163,6 +172,41 @@ app.MapPatch("/api/teams/{id:int}/approve",     ETMS.Api.Handlers.TeamHandler.Ap
 app.MapPatch("/api/teams/{id:int}/reject",      ETMS.Api.Handlers.TeamHandler.Reject);
 app.MapPatch("/api/teams/{id:int}/disqualify",  ETMS.Api.Handlers.TeamHandler.Disqualify);
 
+// SRS UC-3.1: Captain thêm / xóa thành viên đội ─────────────────────────────
+app.MapGet("/api/teams/{id:int}/players", (int id) =>
+{
+    var players = new ETMS.BUS.TeamBUS().GetPlayers(id);
+    return Results.Ok(new { data = players, total = players.Count });
+});
+
+app.MapPost("/api/teams/{id:int}/players", (int id, AddPlayerRequest req, HttpContext ctx) =>
+{
+    ETMS.BUS.AuthBUS.SetCurrentUserFromToken(ctx.Request.Headers.Authorization);
+
+    if (string.IsNullOrWhiteSpace(req.FullName))
+        return Results.BadRequest(new { error = "Tên thật không được để trống." });
+    if (string.IsNullOrWhiteSpace(req.InGameID))
+        return Results.BadRequest(new { error = "InGameID không được để trống." });
+
+    var team = new ETMS.BUS.TeamBUS().GetByID(id);
+    if (team == null)
+        return Results.NotFound(new { error = "Đội không tồn tại." });
+
+    var (ok, error) = new ETMS.BUS.TeamBUS().AddPlayer(id, team.TournamentID, req.FullName, req.InGameID);
+    return ok
+        ? Results.Ok(new { teamId = id, fullName = req.FullName, inGameID = req.InGameID, message = "Thêm thành viên thành công." })
+        : Results.BadRequest(new { error });
+});
+
+
+app.MapDelete("/api/teams/{id:int}/players/{playerId:int}", (int id, int playerId, HttpContext ctx) =>
+{
+    ETMS.BUS.AuthBUS.SetCurrentUserFromToken(ctx.Request.Headers.Authorization);
+    new ETMS.BUS.TeamBUS().RemovePlayer(playerId);
+    return Results.Ok(new { teamId = id, playerId, message = "Đã xóa thành viên khỏi đội." });
+});
+
+
 // ── Matches ───────────────────────────────────────────────────────────────────
 app.MapGet("/api/matches",              ETMS.Api.Handlers.MatchHandler.GetAll);
 app.MapGet("/api/matches/{id:int}",     ETMS.Api.Handlers.MatchHandler.GetByID);
@@ -232,10 +276,22 @@ app.MapPost("/api/users/{id:int}/reset-password",ETMS.Api.Handlers.UserHandler.R
 app.MapGet("/api/audit-log",                     ETMS.Api.Handlers.AuditHandler.GetLog);
 
 // ── Battle Royale ─────────────────────────────────────────────────────────────
-app.MapPost("/api/br/rounds",                    ETMS.Api.Handlers.BRHandler.CreateRound);
-app.MapPost("/api/br/scores",                    ETMS.Api.Handlers.BRHandler.SubmitScore);
-app.MapGet("/api/br/{tournamentId:int}/leaderboard", ETMS.Api.Handlers.BRHandler.GetLeaderboard);
+app.MapPost("/api/br/rounds",                        ETMS.Api.Handlers.BRHandler.CreateRound);
+app.MapGet("/api/br/{tournamentId:int}/rounds",       ETMS.Api.Handlers.BRHandler.GetRounds);
+app.MapPost("/api/br/scores",                         ETMS.Api.Handlers.BRHandler.SubmitScore);
+app.MapGet("/api/br/{tournamentId:int}/leaderboard",  ETMS.Api.Handlers.BRHandler.GetLeaderboard);
+// ── Mới: load điểm đã nhập của 1 vòng cụ thể ──────────────────────────────
+app.MapGet("/api/br/{tournamentId:int}/rounds/{roundId:int}/scores",
+    ETMS.Api.Handlers.BRHandler.GetRoundScores);
+
 
 app.Run();
 
 public record ScheduleRequest(DateTime ScheduledTime);
+/// <summary>
+/// AddPlayerRequest: InGameID tự do + FullName tự nhập — không cần UserID (SRS UC-3.1)
+/// </summary>
+public record AddPlayerRequest(string FullName, string InGameID);
+
+
+

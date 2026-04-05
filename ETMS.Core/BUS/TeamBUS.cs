@@ -31,8 +31,22 @@ namespace ETMS.BUS
             var tourn = _tournDal.GetByID(tournamentID);
             if (tourn == null)
                 return (0, "Giải đấu không tồn tại.");
-            if (tourn.Status != "Registration")
+
+            // Captain: chỉ được đăng ký khi giải đang ở trạng thái Registration (SRS FR-2.1)
+            // Admin: có thể tạo đội cho mọi trạng thái trừ Completed/Cancelled
+            bool isAdmin = Session.CurrentUser?.Role == "Admin";
+            if (!isAdmin && tourn.Status != "Registration")
                 return (0, "Giải đấu không còn nhận đơn đăng ký.");
+            if (tourn.Status is "Completed" or "Cancelled")
+                return (0, "Không thể tạo đội cho giải đấu đã kết thúc hoặc bị hủy.");
+
+            // Check: 1 Captain chỉ được 1 đội/giải đang hoạt động
+            var existingTeams = _teamDal.GetByTournament(tournamentID);
+            bool alreadyHasTeam = existingTeams.Any(t =>
+                t.CaptainID == captainID &&
+                t.Status != "Rejected" && t.Status != "Disqualified");
+            if (alreadyHasTeam && !isAdmin)
+                return (0, "Bạn đã đăng ký 1 đội trong giải đấu này rồi. Mỗi Captain chỉ được quản lý 1 đội/giải.");
 
             var dto = new TeamDTO
             {
@@ -41,25 +55,37 @@ namespace ETMS.BUS
                 CaptainID    = captainID,
                 LogoURL      = logoURL
             };
-            int id = _teamDal.InsertTeam(dto);
-            return (id, "");
+            try
+            {
+                int id = _teamDal.InsertTeam(dto);
+                return (id, "");
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message + (ex.InnerException?.Message ?? "");
+                if (msg.Contains("UQ_Captain_Per_Tournament") || msg.Contains("UNIQUE KEY"))
+                    return (0, "Bạn đã có 1 đội trong giải đấu này rồi. Mỗi Captain chỉ được đăng ký 1 đội/giải.");
+                throw;
+            }
         }
 
         /// <summary>
-        /// Thêm thành viên vào đội — kiểm tra ràng buộc SRS FR-1.
+        /// Thêm thành viên đội bằng InGameID tự do — không cần tài khoản hệ thống.
         /// NFR: 1 thành viên không được thuộc 2 đội cùng tournament.
         /// </summary>
         public (bool success, string error) AddPlayer(
             int teamID, int tournamentID, string fullName, string inGameID)
         {
+            if (string.IsNullOrWhiteSpace(fullName))
+                return (false, "Tên thật không được để trống.");
             if (string.IsNullOrWhiteSpace(inGameID))
                 return (false, "InGameID không được để trống.");
 
-            // Validation: không thuộc 2 đội
+            // Validation: không thuộc 2 đội cùng giải theo InGameID
             if (_teamDal.IsPlayerInOtherTeam(inGameID, tournamentID, teamID))
                 return (false, $"InGameID '{inGameID}' đã đăng ký trong đội khác của giải đấu này.");
 
-            // Kiểm tra số thành viên tối thiểu / tối đa
+            // Kiểm tra số thành viên tối đa
             var players = _teamDal.GetPlayers(teamID);
             if (players.Count >= 10)
                 return (false, "Đội đã đạt số lượng thành viên tối đa (10 người).");
@@ -67,6 +93,7 @@ namespace ETMS.BUS
             _teamDal.AddPlayer(new PlayerDTO
             {
                 TeamID   = teamID,
+                UserID   = null,          // Không yêu cầu tài khoản
                 FullName = fullName.Trim(),
                 InGameID = inGameID.Trim()
             });

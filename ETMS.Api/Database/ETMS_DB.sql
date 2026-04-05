@@ -136,10 +136,13 @@ GO
 
 -- ── 6. tblPlayer ──────────────────────────────────────────────
 -- Tuyển thủ (thành viên đội)
+-- UserID nullable: Captain có thể thêm thành viên bằng InGameID tự do (SRS UC-3.1)
+-- FullName: tên tự nhập khi không có tài khoản hệ thống
 CREATE TABLE [tblPlayer] (
     [PlayerID]            INT           IDENTITY(1,1) PRIMARY KEY,
     [TeamID]              INT           NOT NULL,
-    [UserID]              INT           NOT NULL,
+    [UserID]              INT           NULL,
+    [FullName]            NVARCHAR(100) NULL,
     [InGameID]            NVARCHAR(100) NOT NULL,
     [IsActive]            BIT           NOT NULL DEFAULT 1,
     [JoinedAt]            DATETIME      NOT NULL DEFAULT GETDATE(),
@@ -591,21 +594,21 @@ GO
 -- BƯỚC 9: TUYỂN THỦ MẪU
 -- ═════════════════════════════════════════════════════════════════
 
-INSERT INTO [tblPlayer] ([TeamID],[UserID],[InGameID])
+INSERT INTO [tblPlayer] ([TeamID],[UserID],[FullName],[InGameID])
 VALUES
     -- GAM Esports (TeamID=1): VCS
-    (1, 2,  N'MinhCapt_GAM'),
-    (1, 6,  N'Lam_GAM'),
-    (1, 7,  N'Man_GAM'),
-    (1, 8,  N'Nam_GAM'),
-    (1, 9,  N'Oanh_GAM'),
+    (1, 2,  N'Lê Văn Minh',         N'MinhCapt_GAM'),
+    (1, 6,  N'Lý Thanh Lâm',        N'Lam_GAM'),
+    (1, 7,  N'Ngô Huy Mẫn',         N'Man_GAM'),
+    (1, 8,  N'Trương Văn Nam',       N'Nam_GAM'),
+    (1, 9,  N'Đỗ Quang Oanh',        N'Oanh_GAM'),
 
     -- Team Whales (TeamID=2): VCS
-    (2, 3,  N'AnhCapt_WHL'),
-    (2, 10, N'Phuc_WHL'),
-    (2, 11, N'Guest01_WHL'),
-    (2, 12, N'P01_WHL'),
-    (2, 13, N'P02_WHL');
+    (2, 3,  N'Trần Hoàng Anh',       N'AnhCapt_WHL'),
+    (2, 10, N'Phan Minh Phúc',       N'Phuc_WHL'),
+    (2, NULL, N'Khán giả Demo',       N'Guest01_WHL'),
+    (2, NULL, N'Tuyển thủ Tự Do 1',  N'P01_WHL'),
+    (2, NULL, N'Tuyển thủ Tự Do 2',  N'P02_WHL');
 GO
 
 PRINT N'✓ Seed 10 tuyển thủ mẫu';

@@ -49,8 +49,9 @@ namespace ETMS.BUS
             if (existing == null)
                 return (false, "Giải đấu không tồn tại.");
 
-            if (existing.Status == "Active" || existing.Status == "Completed")
-                return (false, "Không thể chỉnh sửa giải đấu đang diễn ra hoặc đã kết thúc.");
+            // Chỉ khóa khi Completed/Cancelled — cho phép sửa GameType/Format kể cả Active
+            if (existing.Status == "Completed" || existing.Status == "Cancelled")
+                return (false, "Không thể chỉnh sửa giải đấu đã hoàn thành hoặc bị hủy.");
 
             _dal.Update(dto);
             return (true, "");

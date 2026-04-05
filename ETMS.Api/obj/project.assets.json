@@ -1033,23 +1033,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Quoc Thai\\.nuget\\packages\\": {},
+    "C:\\Users\\Admin\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Công nghệ phần mềm\\Final\\ETMS.Api\\ETMS.Api.csproj",
+      "projectUniqueName": "C:\\Users\\Admin\\Desktop\\Đồ Án CNPM\\Design\\CNPM\\ETMS.Api\\ETMS.Api.csproj",
       "projectName": "ETMS.Api",
-      "projectPath": "E:\\Công nghệ phần mềm\\Final\\ETMS.Api\\ETMS.Api.csproj",
-      "packagesPath": "C:\\Users\\Quoc Thai\\.nuget\\packages\\",
-      "outputPath": "E:\\Công nghệ phần mềm\\Final\\ETMS.Api\\obj\\",
+      "projectPath": "C:\\Users\\Admin\\Desktop\\Đồ Án CNPM\\Design\\CNPM\\ETMS.Api\\ETMS.Api.csproj",
+      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Admin\\Desktop\\Đồ Án CNPM\\Design\\CNPM\\ETMS.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Quoc Thai\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1058,15 +1058,14 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "E:\\Công nghệ phần mềm\\Final\\ETMS.Core\\ETMS.Core.csproj": {
-              "projectPath": "E:\\Công nghệ phần mềm\\Final\\ETMS.Core\\ETMS.Core.csproj"
+            "C:\\Users\\Admin\\Desktop\\Đồ Án CNPM\\Design\\CNPM\\ETMS.Core\\ETMS.Core.csproj": {
+              "projectPath": "C:\\Users\\Admin\\Desktop\\Đồ Án CNPM\\Design\\CNPM\\ETMS.Core\\ETMS.Core.csproj"
             }
           }
         }
@@ -1081,7 +1080,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net10.0": {
@@ -1115,7 +1114,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

@@ -21,6 +21,7 @@ import CheckInPage from './pages/CheckInPage'
 import MapVetoPage from './pages/MapVetoPage'
 import ResultSubmitPage from './pages/ResultSubmitPage'
 import SideSelectPage from './pages/SideSelectPage'
+import BRScoringPage from './pages/BRScoringPage'
 
 export default function App() {
   return (
@@ -55,6 +56,9 @@ export default function App() {
                   <Route path="/matches/:id/map-veto"        element={<MapVetoPage />} />
                   <Route path="/matches/:id/result"          element={<ResultSubmitPage />} />
                   <Route path="/matches/:id/side-select"     element={<SideSelectPage />} />
+
+                  {/* BR Scoring */}
+                  <Route path="/br-scoring"                  element={<BRScoringPage />} />
                 </Route>
               </Route>
 

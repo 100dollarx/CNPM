@@ -83,7 +83,7 @@ export default function TournamentsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [generatingId, setGeneratingId] = useState<number | null>(null)
   const [editTarget, setEditTarget] = useState<Tournament | null>(null)
-  const [editForm, setEditForm] = useState({ Name: '', StartDate: '' })
+  const [editForm, setEditForm]     = useState({ Name: '', GameType: 'FPS', Format: 'SingleElimination', StartDate: '' })
   const [editSubmitting, setEditSubmitting] = useState(false)
 
   const load = () => {
@@ -138,7 +138,12 @@ export default function TournamentsPage() {
 
   const openEdit = (t: Tournament) => {
     setEditTarget(t)
-    setEditForm({ Name: t.Name, StartDate: t.StartDate ? new Date(t.StartDate).toISOString().split('T')[0] : '' })
+    setEditForm({
+      Name:      t.Name,
+      GameType:  t.GameType ?? 'FPS',
+      Format:    t.Format   ?? 'SingleElimination',
+      StartDate: t.StartDate ? new Date(t.StartDate).toISOString().split('T')[0] : '',
+    })
   }
 
   const handleEdit = async () => {
@@ -148,7 +153,12 @@ export default function TournamentsPage() {
       const r = await fetch(`/api/tournaments/${editTarget.TournamentID}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ Name: editForm.Name, StartDate: editForm.StartDate || undefined })
+        body: JSON.stringify({
+          Name:      editForm.Name,
+          GameType:  editForm.GameType,
+          Format:    editForm.Format,
+          StartDate: editForm.StartDate || undefined,
+        })
       })
       if (r.ok) { setEditTarget(null); load(); toast.success('Đã cập nhật giải đấu.') }
       else { const d = await r.json(); toast.error(d.error ?? 'Cập nhật thất bại.') }
@@ -245,7 +255,17 @@ export default function TournamentsPage() {
             <p style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: '1rem', letterSpacing: '0.05em' }}>Không có giải đấu nào.</p>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: 40 }} />
+              <col />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: 130 }} />
+              <col style={{ width: 50 }} />
+              <col style={{ width: '9%' }} />
+              {isAdmin && <col style={{ width: '22%' }} />}
+            </colgroup>
             <thead>
               <tr style={{ borderBottom: `1px solid ${c.panelBorder}` }}>
                 {['#', t('Tên Giải Đấu','Tournament'), t('Thể Loại','Game'), t('Thể Thức','Format'), t('Trạng Thái','Status'), t('Đội','Teams'), t('Ngày Bắt Đầu','Start Date'), isAdmin ? t('Thao Tác','Actions') : ''].filter(Boolean).map(h => (
@@ -262,7 +282,7 @@ export default function TournamentsPage() {
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.04)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.75rem' }}>{String(idx + 1).padStart(2, '0')}</td>
-                    <td style={{ padding: '12px', fontWeight: 600, color: c.onSurface, fontFamily: "'Rajdhani',sans-serif", fontSize: '0.95rem', letterSpacing: '0.03em' }}>{tr.Name}</td>
+                    <td style={{ padding: '12px', fontWeight: 600, color: c.onSurface, fontFamily: "'Exo 2',sans-serif", fontSize: '0.9rem', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tr.Name}</td>
                     <td style={{ padding: '12px' }}>
                       <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: gtColor }}>
@@ -276,16 +296,31 @@ export default function TournamentsPage() {
                     </td>
                     <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{formatLabels[tr.Format?.toLowerCase()] ?? tr.Format}</td>
                     <td style={{ padding: '12px' }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, fontFamily: "'Rajdhani',sans-serif" }}>
-                        {tr.Status?.toLowerCase() === 'active' && <span className="live-dot" style={{ marginRight: 5 }} />}
+                      {/* ── STATUS BADGE ─ inline-flex prevents live-dot from jumping row height ── */}
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        padding: '3px 10px', borderRadius: 999,
+                        fontSize: '0.67rem', fontWeight: 700, letterSpacing: '0.07em',
+                        background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`,
+                        fontFamily: "'Exo 2',sans-serif",
+                        lineHeight: 1, whiteSpace: 'nowrap',
+                      }}>
+                        {tr.Status?.toLowerCase() === 'active' && (
+                          <span style={{
+                            display: 'block', width: 6, height: 6, borderRadius: '50%',
+                            background: 'currentColor', flexShrink: 0,
+                            animation: 'live-blink 1s ease-in-out infinite',
+                            boxShadow: '0 0 5px currentColor',
+                          }} />
+                        )}
                         {statusLabels[tr.Status?.toLowerCase()] ?? tr.Status}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.8rem' }}>{tr.MaxTeams}</td>
-                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.8rem' }}>{tr.StartDate ? new Date(tr.StartDate).toLocaleDateString('vi-VN') : '—'}</td>
+                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontFamily: "'JetBrains Mono',monospace", fontSize: '0.8rem', textAlign: 'center' }}>{tr.MaxTeams}</td>
+                    <td style={{ padding: '12px', color: c.onSurfaceVar, fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{tr.StartDate ? new Date(tr.StartDate).toLocaleDateString('vi-VN') : '—'}</td>
                     {isAdmin && (
                       <td style={{ padding: '12px' }}>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
 
                           {(tr.Status?.toLowerCase() === 'draft' || tr.Status?.toLowerCase() === 'registration') && (
                             <button onClick={() => openEdit(tr)}
@@ -456,10 +491,44 @@ export default function TournamentsPage() {
                 <label style={labelStyle}>Tên giải đấu *</label>
                 <input value={editForm.Name} onChange={e => setEditForm(f => ({ ...f, Name: e.target.value }))} style={inputStyle} className="nexora-input" />
               </div>
+
+              {/* ── Thể loại + Thể thức ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>Thể Loại Game</label>
+                  <select value={editForm.GameType} onChange={e => {
+                    const gt = e.target.value
+                    const defaultFormat = gt === 'BattleRoyale' ? 'BattleRoyale' : 'SingleElimination'
+                    setEditForm(f => ({ ...f, GameType: gt, Format: defaultFormat }))
+                  }} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    {['FPS', 'MOBA', 'BattleRoyale', 'Fighting', 'RTS', 'Sports'].map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Thể Thức</label>
+                  <select value={editForm.Format} onChange={e => setEditForm(f => ({ ...f, Format: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    {(editForm.GameType === 'BattleRoyale'
+                      ? ['BattleRoyale']
+                      : ['SingleElimination', 'RoundRobin', 'Swiss']
+                    ).map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {editForm.GameType === 'BattleRoyale' && (
+                <div style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', fontSize: '0.75rem', color: '#F59E0B', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontFamily: 'Material Symbols Outlined', fontSize: 16, lineHeight: 1 }}>star</span>
+                  Sau khi lưu, giải này sẽ xuất hiện trong trang <strong>BR Scoring</strong>.
+                </div>
+              )}
+
               <div>
                 <label style={labelStyle}>Ngày bắt đầu</label>
                 <input type="date" value={editForm.StartDate} onChange={e => setEditForm(f => ({ ...f, StartDate: e.target.value }))} style={{ ...inputStyle, colorScheme: 'dark' }} className="nexora-input" />
               </div>
+
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
                 <button onClick={() => setEditTarget(null)} style={{ padding: '10px 20px', borderRadius: 9, background: 'transparent', border: `1px solid ${c.panelBorder}`, color: c.onSurfaceVar, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif", letterSpacing: '0.05em' }}>HỦY</button>
                 <button onClick={handleEdit} disabled={editSubmitting || !editForm.Name.trim()}

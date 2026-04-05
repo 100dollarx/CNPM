@@ -81,6 +81,9 @@ public static class TournamentHandler
             if (req.StartDate.HasValue)                      existing.StartDate   = req.StartDate.Value;
             if (!string.IsNullOrWhiteSpace(req.Description)) existing.Description = req.Description;
             if (req.MaxTeams.HasValue)                       existing.MaxTeams    = req.MaxTeams.Value;
+            if (!string.IsNullOrWhiteSpace(req.GameType))    existing.GameType    = req.GameType;
+            if (!string.IsNullOrWhiteSpace(req.Format))      existing.Format      = req.Format;
+            if (!string.IsNullOrWhiteSpace(req.GameName))    existing.GameName    = req.GameName;
 
             var (ok, error) = new TournamentBUS().UpdateTournament(existing);
             return ok ? Results.Ok(new { id, message = "Cập nhật thành công." })
@@ -175,4 +178,4 @@ public record CreateTournamentRequest(
     DateTime StartDate, int MaxTeams,
     int MinPlayersPerTeam = 5, string? Description = null, string? GameName = null);
 
-public record UpdateTournamentRequest(string? Name, DateTime? StartDate, string? Description, int? MaxTeams, string? GameName);
+public record UpdateTournamentRequest(string? Name, DateTime? StartDate, string? Description, int? MaxTeams, string? GameName, string? GameType, string? Format);

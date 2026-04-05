@@ -5,40 +5,140 @@ namespace ETMS.BUS
 {
     public static class Session
     {
-        public static UserDTO? CurrentUser { get; set; }
-        public static bool IsLoggedIn => CurrentUser != null;
-        public static bool IsAdmin    => CurrentUser?.Role == "Admin";
-        public static bool IsCaptain  => CurrentUser?.Role == "Captain";
-        public static void Logout() => CurrentUser = null;
+    [ThreadStatic] private static UserDTO? _currentUser;
+    public static UserDTO? CurrentUser
+    {
+        get => _currentUser;
+        set => _currentUser = value;
+    }
+    public static bool IsLoggedIn => CurrentUser != null;
+    public static bool IsAdmin    => CurrentUser?.Role == "Admin";
+    public static bool IsCaptain  => CurrentUser?.Role == "Captain";
+    public static void Logout() => CurrentUser = null;
 
+        // ── JWT Configuration ─────────────────────────────────────────────────────
         /// <summary>
-        /// Tạo token dạng Base64("userId|role|timestamp") để frontend lưu và gửi lại.
-        /// đối với academic project, này đủ để identify user per-request.
+        /// Secret key dùng để ký JWT — được set từ Program.cs (đọc từ appsettings.json).
+        /// Phải >= 32 ký tự để đảm bảo độ an toàn HMAC-SHA256.
+        /// </summary>
+        public static string JwtSecret { get; set; } =
+            "ETMS_JWT_Secret_Key_256bit_minimum_32chars_here!!";
+
+        public static int    JwtExpireMinutes { get; set; } = 480;  // 8 giờ — đủ dùng 1 buổi làm việc
+        public static string JwtIssuer        { get; set; } = "ETMS.Api";
+        public static string JwtAudience      { get; set; } = "ETMS.Desktop";
+
+        // ── JWT Builder (HMAC-SHA256) ─────────────────────────────────────────────
+        /// <summary>
+        /// Tạo JWT chuẩn RFC 7519 với chữ ký HMAC-SHA256.
+        /// Format: Base64Url(Header).Base64Url(Payload).Base64Url(HMAC-SHA256 Signature)
+        /// Token này có thể verify trên https://jwt.io — không thể giả mạo nếu không có secret.
         /// </summary>
         public static string BuildToken(int userID, string role)
         {
-            var payload = $"{userID}|{role}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-            return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(payload));
+            // Header
+            var header = Base64UrlEncode("{\"alg\":\"HS256\",\"typ\":\"JWT\"}");
+
+            // Payload
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long exp = now + (JwtExpireMinutes * 60L);
+            var payloadJson =
+                $"{{\"uid\":{userID}," +
+                $"\"role\":\"{EscapeJson(role)}\"," +
+                $"\"iat\":{now}," +
+                $"\"exp\":{exp}," +
+                $"\"iss\":\"{EscapeJson(JwtIssuer)}\"," +
+                $"\"aud\":\"{EscapeJson(JwtAudience)}\"}}";
+            var payload = Base64UrlEncode(payloadJson);
+
+            // Signature = HMAC-SHA256(header + "." + payload, secret)
+            var signingInput = $"{header}.{payload}";
+            var signature    = ComputeHmacSha256(signingInput, JwtSecret);
+
+            return $"{signingInput}.{signature}";
         }
 
-        /// <summary>Giải mã token và trả về (userID, role) hoặc null nếu không hợp lệ.</summary>
+        // ── JWT Validator ─────────────────────────────────────────────────────────
+        /// <summary>
+        /// Xác minh chữ ký JWT và trả về (userID, role) nếu hợp lệ.
+        /// Trả về null nếu: chữ ký sai (token giả mạo), hết hạn, hoặc sai format.
+        /// </summary>
         public static (int userID, string role)? ParseToken(string? token)
         {
             if (string.IsNullOrWhiteSpace(token)) return null;
             try
             {
-                var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
-                var parts   = decoded.Split('|');
-                if (parts.Length < 2) return null;
-                if (!int.TryParse(parts[0], out int uid)) return null;
-                return (uid, parts[1]);
+                var parts = token.Split('.');
+                if (parts.Length != 3) return null;
+
+                // Bước 1: Xác minh chữ ký — quan trọng nhất!
+                var signingInput = $"{parts[0]}.{parts[1]}";
+                var expectedSig  = ComputeHmacSha256(signingInput, JwtSecret);
+                if (expectedSig != parts[2])
+                    return null; // Chữ ký không khớp => token bị giả mạo hoặc sai secret
+
+                // Bước 2: Decode payload
+                var payloadJson = System.Text.Encoding.UTF8.GetString(Base64UrlDecode(parts[1]));
+                using var doc   = System.Text.Json.JsonDocument.Parse(payloadJson);
+                var root        = doc.RootElement;
+
+                // Bước 3: Kiểm tra thời hạn (exp)
+                if (root.TryGetProperty("exp", out var expProp))
+                {
+                    long expTime = expProp.GetInt64();
+                    if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() > expTime)
+                        return null; // Token đã hết hạn
+                }
+
+                // Bước 4: Đọc claims
+                if (!root.TryGetProperty("uid",  out var uidProp))  return null;
+                if (!root.TryGetProperty("role", out var roleProp)) return null;
+
+                return (uidProp.GetInt32(), roleProp.GetString()!);
             }
             catch { return null; }
         }
+
+        // ── Crypto & Encoding Helpers ─────────────────────────────────────────────
+
+        private static string ComputeHmacSha256(string data, string key)
+        {
+            var keyBytes  = System.Text.Encoding.UTF8.GetBytes(key);
+            var dataBytes = System.Text.Encoding.UTF8.GetBytes(data);
+            using var hmac = new System.Security.Cryptography.HMACSHA256(keyBytes);
+            var hash = hmac.ComputeHash(dataBytes);
+            return Convert.ToBase64String(hash)
+                          .TrimEnd('=')
+                          .Replace('+', '-')
+                          .Replace('/', '_');
+        }
+
+        private static string Base64UrlEncode(string input)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+            return Convert.ToBase64String(bytes)
+                          .TrimEnd('=')
+                          .Replace('+', '-')
+                          .Replace('/', '_');
+        }
+
+        private static byte[] Base64UrlDecode(string input)
+        {
+            var padded = input.Replace('-', '+').Replace('_', '/');
+            switch (padded.Length % 4)
+            {
+                case 2: padded += "=="; break;
+                case 3: padded += "=";  break;
+            }
+            return Convert.FromBase64String(padded);
+        }
+
+        private static string EscapeJson(string s)
+            => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
     }
 
     /// <summary>
-    /// AuthBUS — BCrypt.Verify (cost=12). SRS NFR-1.
+    /// AuthBUS — BCrypt hash/verify (cost=12) + ChangePassword. SRS NFR-1.
     /// </summary>
     public class AuthBUS
     {
@@ -80,7 +180,7 @@ namespace ETMS.BUS
         }
 
         /// <summary>
-        /// Cập nhật mật khẩu sau khi xác thực mật khẩu cũ. SRS FR-1.
+        /// UC-1.3: Đổi mật khẩu — xác minh mật khẩu cũ, validate, hash BCrypt, lưu DB.
         /// </summary>
         public (bool ok, string error) ChangePassword(int userID, string oldPassword, string newPassword)
         {
@@ -94,14 +194,13 @@ namespace ETMS.BUS
             if (!VerifyPassword(oldPassword, storedHash))
                 return (false, "Mật khẩu cũ không chính xác.");
 
-            string newHash = HashPassword(newPassword);
-            _dal.UpdatePassword(userID, newHash);
+            _dal.UpdatePassword(userID, HashPassword(newPassword));
             return (true, "Mật khẩu đã được cập nhật thành công.");
         }
 
         /// <summary>
-        /// Parse Authorization token và set Session.CurrentUser per-request (stateless workaround).
-        /// Gọi mỗi handler cần RBAC để identify user từ token.
+        /// Parse Authorization header, xác minh chữ ký JWT HMAC-SHA256, set Session.CurrentUser.
+        /// Gọi ở đầu mỗi handler cần RBAC.
         /// </summary>
         public static bool SetCurrentUserFromToken(string? authHeader, UserDAL? dal = null)
         {
@@ -113,7 +212,6 @@ namespace ETMS.BUS
             if (parsed == null) return false;
 
             var (userID, role) = parsed.Value;
-            // Set a lightweight session object without DB hit (trust token for role)
             Session.CurrentUser = new UserDTO
             {
                 UserID   = userID,
